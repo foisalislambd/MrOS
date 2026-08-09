@@ -23,7 +23,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${outfit.variable} ${jetbrains.variable} h-full antialiased`}
+      className={`dark ${outfit.variable} ${jetbrains.variable} h-full antialiased`}
     >
       <body className="min-h-full font-sans">{children}</body>
     </html>

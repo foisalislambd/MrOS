@@ -317,7 +317,7 @@ export function EditorWorkspace() {
             >
               Publish
             </button>
-            <div className="ml-1 flex h-8 w-8 items-center justify-center rounded-full bg-fg text-[11px] font-semibold text-bg-elevated">
+            <div className="ml-1 flex h-8 w-8 items-center justify-center rounded-full bg-accent text-[11px] font-semibold text-white">
               IF
             </div>
           </div>

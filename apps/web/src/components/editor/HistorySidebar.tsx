@@ -59,7 +59,7 @@ export function HistorySidebar({
 
   return (
     <aside
-      className={`flex h-full shrink-0 flex-col border-r border-border bg-[#ece9e4] transition-[width] duration-300 ease-out ${
+      className={`flex h-full shrink-0 flex-col border-r border-border bg-bg-sidebar transition-[width] duration-300 ease-out ${
         open ? "w-[260px]" : "w-0 overflow-hidden border-r-0"
       }`}
       aria-hidden={!open}
@@ -68,7 +68,7 @@ export function HistorySidebar({
         <button
           type="button"
           onClick={onToggle}
-          className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-fg-muted transition hover:bg-black/5 hover:text-fg"
+          className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-fg-muted transition hover:bg-white/[0.06] hover:text-fg"
           aria-label="Close sidebar"
           title="Close sidebar"
         >
@@ -81,7 +81,7 @@ export function HistorySidebar({
         <button
           type="button"
           onClick={onNewChat}
-          className="ml-auto inline-flex h-8 w-8 items-center justify-center rounded-lg text-fg-muted transition hover:bg-black/5 hover:text-fg"
+          className="ml-auto inline-flex h-8 w-8 items-center justify-center rounded-lg text-fg-muted transition hover:bg-white/[0.06] hover:text-fg"
           aria-label="New chat"
           title="New chat"
         >
@@ -93,7 +93,7 @@ export function HistorySidebar({
         <button
           type="button"
           onClick={onNewChat}
-          className="flex w-full items-center gap-2.5 rounded-xl bg-bg-elevated px-3 py-2.5 text-sm font-medium text-fg shadow-[var(--shadow-soft)] ring-1 ring-border transition hover:bg-white"
+          className="flex w-full items-center gap-2.5 rounded-xl bg-bg-elevated px-3 py-2.5 text-sm font-medium text-fg ring-1 ring-border transition hover:bg-bg-muted"
         >
           <IconPenNew className="h-4 w-4 text-accent" />
           New chat
@@ -101,7 +101,7 @@ export function HistorySidebar({
       </div>
 
       <div className="px-2.5 pb-2">
-        <label className="flex items-center gap-2 rounded-xl bg-black/[0.04] px-2.5 py-2 ring-1 ring-transparent transition focus-within:bg-bg-elevated focus-within:ring-border">
+        <label className="flex items-center gap-2 rounded-xl bg-white/[0.04] px-2.5 py-2 ring-1 ring-transparent transition focus-within:bg-bg-elevated focus-within:ring-border">
           <IconSearch className="h-3.5 w-3.5 shrink-0 text-fg-subtle" />
           <input
             value={search}
@@ -115,14 +115,14 @@ export function HistorySidebar({
       <nav className="px-2.5 pb-2">
         <button
           type="button"
-          className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-fg-muted transition hover:bg-black/5 hover:text-fg"
+          className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-fg-muted transition hover:bg-white/[0.06] hover:text-fg"
         >
           <IconLibrary className="h-4 w-4" />
           Library
         </button>
         <button
           type="button"
-          className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-fg-muted transition hover:bg-black/5 hover:text-fg"
+          className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-fg-muted transition hover:bg-white/[0.06] hover:text-fg"
         >
           <IconProjects className="h-4 w-4" />
           Projects
@@ -148,15 +148,15 @@ export function HistorySidebar({
                         onClick={() => onSelect(thread.id)}
                         className={`flex w-full items-center rounded-lg px-2.5 py-2 text-left text-[13px] leading-snug transition ${
                           active
-                            ? "bg-bg-elevated font-medium text-fg shadow-sm ring-1 ring-border"
-                            : "text-fg-muted hover:bg-black/5 hover:text-fg"
+                            ? "bg-bg-elevated font-medium text-fg ring-1 ring-border"
+                            : "text-fg-muted hover:bg-white/[0.06] hover:text-fg"
                         }`}
                       >
                         <span className="truncate pr-6">{thread.title}</span>
                       </button>
                       <button
                         type="button"
-                        className="absolute top-1/2 right-1.5 hidden h-6 w-6 -translate-y-1/2 items-center justify-center rounded-md text-fg-subtle opacity-0 transition group-hover:flex group-hover:opacity-100 hover:bg-black/5 hover:text-fg"
+                        className="absolute top-1/2 right-1.5 hidden h-6 w-6 -translate-y-1/2 items-center justify-center rounded-md text-fg-subtle opacity-0 transition group-hover:flex group-hover:opacity-100 hover:bg-white/8 hover:text-fg"
                         aria-label="Chat options"
                       >
                         <IconDots className="h-3.5 w-3.5" />
@@ -173,9 +173,9 @@ export function HistorySidebar({
       <div className="shrink-0 border-t border-border/80 p-2.5">
         <button
           type="button"
-          className="flex w-full items-center gap-2.5 rounded-xl px-2 py-2 text-left transition hover:bg-black/5"
+          className="flex w-full items-center gap-2.5 rounded-xl px-2 py-2 text-left transition hover:bg-white/[0.06]"
         >
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-fg text-[11px] font-semibold text-bg-elevated">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent text-[11px] font-semibold text-white">
             IF
           </div>
           <div className="min-w-0 flex-1">
