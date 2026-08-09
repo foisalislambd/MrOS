@@ -471,42 +471,33 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
                   : "w-full flex-1 border-r border-border lg:w-[380px] lg:flex-none xl:w-[420px]",
               )}
             >
-              <div
-                className={cn(
-                  "flex h-11 shrink-0 items-center justify-between border-b border-border px-3 sm:px-4",
-                  chatOnly && "border-b-0",
-                )}
-              >
-                <div
-                  className={cn(
-                    "flex w-full items-center justify-between",
-                    chatOnly && "mx-auto max-w-3xl px-4 sm:px-6",
-                  )}
-                >
-                  <span className="text-[12px] font-medium tracking-[0.04em] text-white/70 uppercase">
-                    Chat
-                  </span>
-                  <div className="flex items-center gap-1.5">
-                    {previewReady ? (
-                      <Badge variant={panelOpen ? "success" : "soft"}>
-                        {panelOpen ? "Preview open" : "Preview ready"}
-                      </Badge>
-                    ) : (
-                      <Badge variant="soft">Chat only</Badge>
-                    )}
-                    {previewReady && isDesktop === false && (
-                      <IconButton
-                        label={previewOpen ? "Close preview" : "Open preview"}
-                        tooltip={previewOpen ? "Close preview" : "Open preview"}
-                        size="icon-sm"
-                        onClick={togglePreview}
-                      >
-                        {previewOpen ? <PanelRightClose /> : <PanelRight />}
-                      </IconButton>
-                    )}
+              {!chatOnly && (
+                <div className="flex h-11 shrink-0 items-center justify-between border-b border-border px-3 sm:px-4">
+                  <div className="flex w-full items-center justify-between">
+                    <span className="text-[12px] font-medium tracking-[0.04em] text-white/70 uppercase">
+                      Chat
+                    </span>
+                    <div className="flex items-center gap-1.5">
+                      {previewReady ? (
+                        <Badge variant={panelOpen ? "success" : "soft"}>
+                          {panelOpen ? "Preview open" : "Preview ready"}
+                        </Badge>
+                      ) : (
+                        <Badge variant="soft">Chat only</Badge>
+                      )}
+                      {previewReady && isDesktop === false && (
+                        <IconButton
+                          label={previewOpen ? "Close preview" : "Open preview"}
+                          size="icon-sm"
+                          onClick={togglePreview}
+                        >
+                          {previewOpen ? <PanelRightClose /> : <PanelRight />}
+                        </IconButton>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
 
               <div className="scrollbar-thin min-h-0 flex-1 overflow-y-auto overscroll-contain">
                 <div
