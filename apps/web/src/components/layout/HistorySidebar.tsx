@@ -162,9 +162,9 @@ export function HistorySidebar({
           type="button"
           variant="ghost"
           onClick={onNewChat}
-          className="h-10 w-full justify-start gap-2.5 rounded-[var(--radius-control)] px-2.5 text-[14px] font-medium text-white hover:bg-icon-hover hover:text-white"
+          className="h-8 w-full justify-start gap-2 rounded-[var(--radius-control)] px-2.5 text-[12px] font-medium text-white hover:bg-icon-hover hover:text-white"
         >
-          <SquarePen className="size-[1.15rem] text-white" strokeWidth={1.85} />
+          <SquarePen className="size-3.5 text-white" strokeWidth={1.85} />
           New chat
         </Button>
 
@@ -172,9 +172,9 @@ export function HistorySidebar({
           type="button"
           variant="ghost"
           onClick={() => comingSoon("Library")}
-          className="h-10 w-full justify-start gap-2.5 rounded-[var(--radius-control)] px-2.5 text-[14px] font-normal text-white/90 hover:bg-icon-hover hover:text-white"
+          className="h-8 w-full justify-start gap-2 rounded-[var(--radius-control)] px-2.5 text-[12px] font-normal text-white/90 hover:bg-icon-hover hover:text-white"
         >
-          <Library className="size-[1.15rem] text-white" strokeWidth={1.85} />
+          <Library className="size-3.5 text-white" strokeWidth={1.85} />
           Library
         </Button>
 
@@ -182,9 +182,9 @@ export function HistorySidebar({
           type="button"
           variant="ghost"
           onClick={() => comingSoon("Projects")}
-          className="h-10 w-full justify-start gap-2.5 rounded-[var(--radius-control)] px-2.5 text-[14px] font-normal text-white/90 hover:bg-icon-hover hover:text-white"
+          className="h-8 w-full justify-start gap-2 rounded-[var(--radius-control)] px-2.5 text-[12px] font-normal text-white/90 hover:bg-icon-hover hover:text-white"
         >
-          <Folder className="size-[1.15rem] text-white" strokeWidth={1.85} />
+          <Folder className="size-3.5 text-white" strokeWidth={1.85} />
           Projects
         </Button>
       </div>
@@ -228,7 +228,7 @@ export function HistorySidebar({
                             onClick={() => onSelect(thread.id)}
                             aria-current={active ? "page" : undefined}
                             className={cn(
-                              "flex w-full items-center rounded-[var(--radius-control)] px-2.5 py-2.5 text-left text-[14px] leading-snug transition-colors",
+                              "flex w-full items-center rounded-[var(--radius-control)] px-2.5 py-1.5 text-left text-[12px] leading-snug transition-colors",
                               active
                                 ? "bg-bg-muted font-medium text-white"
                                 : "text-white/85 hover:bg-icon-hover hover:text-white",
