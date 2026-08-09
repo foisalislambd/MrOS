@@ -8,7 +8,6 @@ import {
   MoreHorizontal,
   Search,
   SquarePen,
-  PanelLeft,
 } from "lucide-react";
 
 import { IconButton } from "./IconButton";
@@ -54,7 +53,7 @@ export function HistorySidebar({
 
   const panel = (
     <div className="flex h-full w-[min(100vw,280px)] flex-col bg-black lg:w-[260px]">
-      {/* Header: logo left, search + toggle right */}
+      {/* Header: logo left, search right */}
       <div className="flex h-12 shrink-0 items-center gap-1 px-2">
         <div className="flex h-8 w-8 items-center justify-center">
           <IconLogo className="h-6 w-6 text-accent" />
@@ -66,13 +65,6 @@ export function HistorySidebar({
             onClick={() => setSearchOpen((v) => !v)}
           >
             <Search />
-          </IconButton>
-          <IconButton
-            label="Close sidebar"
-            tooltip="Close sidebar"
-            onClick={onToggle}
-          >
-            <PanelLeft />
           </IconButton>
         </div>
       </div>

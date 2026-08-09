@@ -154,7 +154,6 @@ function useIsDesktop() {
 export function EditorWorkspace() {
   const isDesktop = useIsDesktop();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [chatOpen, setChatOpen] = useState(true);
   const [mobilePane, setMobilePane] = useState<MobilePane>("chat");
   const [threads, setThreads] = useState<ChatThread[]>(INITIAL_THREADS);
   const [chatMap, setChatMap] = useState<Record<string, Message[]>>(THREAD_MESSAGES);
@@ -195,7 +194,7 @@ export function EditorWorkspace() {
     function onKey(e: KeyboardEvent) {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "b") {
         e.preventDefault();
-        if (isDesktop) setChatOpen((v) => !v);
+        if (isDesktop) setSidebarOpen((v) => !v);
         else setMobilePane((v) => (v === "chat" ? "preview" : "chat"));
       }
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "\\") {
@@ -224,7 +223,6 @@ export function EditorWorkspace() {
     setActiveId(id);
     setDraft("");
     setBuilding(false);
-    setChatOpen(true);
     setMobilePane("chat");
     if (!isDesktop) setSidebarOpen(false);
     window.setTimeout(() => inputRef.current?.focus(), 50);
@@ -234,7 +232,6 @@ export function EditorWorkspace() {
     setActiveId(id);
     setDraft("");
     setBuilding(false);
-    setChatOpen(true);
     setMobilePane("chat");
     if (!isDesktop) setSidebarOpen(false);
   }
@@ -295,7 +292,7 @@ export function EditorWorkspace() {
   const deviceWidth =
     device === "desktop" ? "100%" : device === "tablet" ? "768px" : "390px";
 
-  const showChat = isDesktop ? chatOpen : mobilePane === "chat";
+  const showChat = isDesktop ? true : mobilePane === "chat";
   const showPreview = isDesktop ? true : mobilePane === "preview";
 
   return (
@@ -315,10 +312,9 @@ export function EditorWorkspace() {
         <div className="flex min-w-0 flex-1 flex-col">
           <header className="flex h-12 shrink-0 items-center gap-1.5 border-b border-border bg-bg-elevated px-2 sm:gap-2 sm:px-3">
             <IconButton
-              label="Open sidebar"
-              tooltip="Open sidebar"
-              onClick={() => setSidebarOpen(true)}
-              className={cn(sidebarOpen && isDesktop && "lg:hidden")}
+              label={sidebarOpen ? "Close sidebar" : "Open sidebar"}
+              tooltip={sidebarOpen ? "Close sidebar" : "Open sidebar"}
+              onClick={() => setSidebarOpen((v) => !v)}
             >
               <PanelLeft />
             </IconButton>
@@ -341,15 +337,6 @@ export function EditorWorkspace() {
                 <SquarePen />
               </IconButton>
             )}
-
-            <IconButton
-              label={chatOpen ? "Collapse chat" : "Expand chat"}
-              tooltip="Toggle chat (Ctrl+B)"
-              onClick={() => setChatOpen((v) => !v)}
-              className="hidden lg:inline-flex"
-            >
-              <PanelLeft className="rotate-180" />
-            </IconButton>
 
             <Separator orientation="vertical" className="mx-0.5 hidden sm:block lg:mx-1" />
 
@@ -404,11 +391,10 @@ export function EditorWorkspace() {
           <div className="flex min-h-0 flex-1">
             <aside
               className={cn(
-                "min-h-0 flex-col border-r border-border bg-bg-chat transition-[width] duration-200 ease-out",
+                "min-h-0 flex-col border-r border-border bg-bg-chat",
                 showChat
                   ? "flex w-full flex-1 lg:w-[360px] lg:flex-none xl:w-[400px]"
                   : "hidden w-0 overflow-hidden border-r-0 lg:flex",
-                !chatOpen && isDesktop && "!hidden !w-0 !flex-none !border-r-0",
               )}
             >
               <div className="flex h-11 shrink-0 items-center justify-between border-b border-border px-3 sm:px-4">
