@@ -116,7 +116,7 @@ export function HistorySidebar({
   const panel = (
     <div
       ref={panelRef}
-      className="flex h-full w-[min(100vw,280px)] flex-col bg-bg-sidebar lg:w-[260px]"
+      className="flex h-full w-[min(100vw,280px)] flex-col bg-bg-elevated lg:w-[260px]"
     >
       <div className="flex h-12 shrink-0 items-center gap-1 px-2">
         <div className="flex h-8 w-8 items-center justify-center">
