@@ -35,7 +35,7 @@
     "./protocols/openai-responses": "./src/protocols/openai-responses.ts"
   },
   "devDependencies": {
-    "@clack/prompts": "1.0.0-alpha.1",
+    "@clack/prompts": "1.7.0",
     "@effect/platform-node": "catalog:",
     "@opencode-ai/http-recorder": "workspace:*",
     "@tsconfig/bun": "catalog:",
