@@ -32,7 +32,6 @@ export function registerHandlers(bot: Bot<Context>) {
     const payload = ctx.match?.trim();
     const sessionId = payload ? fromStartPayload(payload) : null;
     if (sessionId) {
-      await showHome(ctx);
       await openSession(ctx, sessionId);
       return;
     }
@@ -102,6 +101,14 @@ export function registerHandlers(bot: Bot<Context>) {
     }
     if (data === "demo:agent") {
       await runDemo(ctx);
+      return;
+    }
+    if (data === "status") {
+      await showStatus(ctx);
+      return;
+    }
+    if (data === "help") {
+      await showHelp(ctx);
       return;
     }
 

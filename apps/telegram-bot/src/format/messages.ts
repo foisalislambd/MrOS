@@ -7,23 +7,49 @@ export function welcomeMarkdown(opts: {
   name?: string;
   sessionCount: number;
   projectCount: number;
+  sessions?: Record<DemoSession["group"], DemoSession[]>;
 }) {
   const greet = opts.name
     ? `Hey **${escapeRichInline(opts.name)}**`
     : "Hey";
-  return `# ${config.appName}
 
-${greet} — your vibe coding control channel is live.
+  const parts = [
+    `# ${config.appName}`,
+    ``,
+    `${greet} — your vibe coding control channel is live.`,
+    ``,
+    `| | |`,
+    `|:--|--:|`,
+    `| Sessions | **${opts.sessionCount}** |`,
+    `| Projects | **${opts.projectCount}** |`,
+    ``,
+    `Pick a session below, create a project, or just type what you want to build.`,
+  ];
 
-| | |
-|:--|--:|
-| Sessions | **${opts.sessionCount}** |
-| Projects | **${opts.projectCount}** |
+  if (opts.sessions) {
+    const order: DemoSession["group"][] = ["today", "yesterday", "week", "older"];
+    let any = false;
+    for (const g of order) {
+      const list = opts.sessions[g];
+      if (!list.length) continue;
+      any = true;
+      parts.push(``, `## ${groupHeading(g)}`, ``);
+      for (const s of list) {
+        const tag = s.projectId ? "`project`" : "`chat`";
+        parts.push(`- ${tag} **${escapeRichInline(s.title)}**`);
+      }
+    }
+    if (!any) {
+      parts.push(``, `_No sessions yet. Create a project or send a prompt._`);
+    }
+  }
 
-Pick a session below, create a project, or just type what you want to build.
+  parts.push(
+    ``,
+    `*Demo UI — backend wiring comes next; this Telegram surface stays.*`,
+  );
 
-*Demo UI — backend wiring comes next; this Telegram surface stays.*
-`;
+  return parts.join("\n");
 }
 
 export function sessionsListMarkdown(

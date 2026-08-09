@@ -29,7 +29,7 @@ import {
   sessionActionsKeyboard,
   sessionsInlineKeyboard,
 } from "../keyboards/inline";
-import { BTN, mainReplyKeyboard } from "../keyboards/reply";
+import { BTN } from "../keyboards/reply";
 import { runDemoAgentReply } from "../rich/agent-demo";
 import { sendRichMarkdown } from "../rich/send";
 
@@ -56,14 +56,12 @@ export async function showHome(ctx: Context) {
       name,
       sessionCount: user.sessions.length,
       projectCount: user.projects.length,
+      sessions: listSessionsGrouped(uid(ctx)),
     }),
     {
-      reply_markup: mainReplyKeyboard(),
+      reply_markup: sessionsInlineKeyboard(user.sessions, { page: 0 }),
     },
   );
-  await sendRichMarkdown(ctx, sessionsListMarkdown(listSessionsGrouped(uid(ctx))), {
-    reply_markup: sessionsInlineKeyboard(user.sessions, { page: 0 }),
-  });
 }
 
 export async function showSessions(ctx: Context, page = 0, edit = false) {

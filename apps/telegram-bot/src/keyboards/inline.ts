@@ -50,6 +50,8 @@ export function sessionsInlineKeyboard(
     { text: "🆕 New Project", data: "project:create" },
     { text: "✨ Demo AI", data: "demo:agent" },
     { text: "📁 Projects", data: "projects:list" },
+    { text: "⚡ Status", data: "status" },
+    { text: "❓ Help", data: "help" },
     { text: "🏠 Home", data: "home" },
   ]);
 
