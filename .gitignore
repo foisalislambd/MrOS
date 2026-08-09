@@ -39,3 +39,4 @@ coverage
 *.local
 /nextjs
 /tufily
+/opencode
