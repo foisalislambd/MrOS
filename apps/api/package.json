@@ -12,7 +12,7 @@
     "clean": "bun -e \"import { rmSync } from 'fs'; for (const p of ['dist','.turbo']) rmSync(p,{recursive:true,force:true})\""
   },
   "dependencies": {
-    "@mros/db": "workspace:*",
+    "@mros/database": "workspace:*",
     "@mros/shared": "workspace:*",
     "hono": "^4.7.11"
   },

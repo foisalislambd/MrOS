@@ -13,6 +13,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `apps/web` Next.js demo UI
 - `apps/api` Hono API stub on Bun
 - `apps/telegram-bot` grammY bot stub
-- `packages/db` Drizzle + PostgreSQL package
+- `packages/database` Drizzle + PostgreSQL package
 - `packages/shared` shared types and constants
 - Open source project docs (license, contributing, security, GitHub templates)

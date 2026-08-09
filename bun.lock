@@ -13,7 +13,7 @@
       "name": "@mros/api",
       "version": "0.0.0",
       "dependencies": {
-        "@mros/db": "workspace:*",
+        "@mros/database": "workspace:*",
         "@mros/shared": "workspace:*",
         "hono": "^4.7.11",
       },
@@ -69,8 +69,8 @@
         "typescript": "^5",
       },
     },
-    "packages/db": {
-      "name": "@mros/db",
+    "packages/database": {
+      "name": "@mros/database",
       "version": "0.0.0",
       "dependencies": {
         "drizzle-orm": "^0.44.2",
@@ -299,7 +299,7 @@
 
     "@mros/api": ["@mros/api@workspace:apps/api"],
 
-    "@mros/db": ["@mros/db@workspace:packages/db"],
+    "@mros/database": ["@mros/database@workspace:packages/database"],
 
     "@mros/shared": ["@mros/shared@workspace:packages/shared"],
 

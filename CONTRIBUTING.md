@@ -34,7 +34,7 @@ bun run build
 | `apps/web` | Next.js demo UI |
 | `apps/api` | Hono API on Bun |
 | `apps/telegram-bot` | Telegram control channel |
-| `packages/db` | Drizzle + PostgreSQL |
+| `packages/database` | Drizzle + PostgreSQL |
 | `packages/shared` | Shared types/constants |
 | `packages/typescript-config` | Shared TS configs |
 
@@ -44,7 +44,7 @@ bun run build
 - Match existing TypeScript style and file structure.
 - Do not commit secrets, `.env`, or personal tokens.
 - Keep shared types in `packages/shared` when more than one app needs them.
-- Database schema changes belong in `packages/db` with a clear migration path.
+- Database schema changes belong in `packages/database` with a clear migration path.
 
 ## Commit messages
 

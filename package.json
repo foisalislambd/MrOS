@@ -12,9 +12,9 @@
     "build": "turbo run build",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
-    "db:generate": "turbo run db:generate --filter=@mros/db",
-    "db:migrate": "turbo run db:migrate --filter=@mros/db",
-    "db:studio": "turbo run db:studio --filter=@mros/db",
+    "db:generate": "turbo run db:generate --filter=@mros/database",
+    "db:migrate": "turbo run db:migrate --filter=@mros/database",
+    "db:studio": "turbo run db:studio --filter=@mros/database",
     "clean": "turbo run clean"
   },
   "devDependencies": {

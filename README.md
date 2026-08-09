@@ -9,7 +9,7 @@ Open-source vibe coding platform — TypeScript monorepo with PostgreSQL, web UI
 
 - **Runtime / monorepo:** Bun workspaces + Turborepo
 - **Language:** TypeScript (strict)
-- **Database:** PostgreSQL + Drizzle ORM
+- **Database:** PostgreSQL + Drizzle ORM (`@mros/database`)
 - **Web:** Next.js (`apps/web`)
 - **API:** Hono on Bun (`apps/api`)
 - **Telegram:** grammY (`apps/telegram-bot`)
@@ -22,7 +22,7 @@ apps/
   api/            # Backend API (Bun + Hono)
   telegram-bot/   # Telegram control channel
 packages/
-  db/             # Drizzle schema + DB client
+  database/       # Drizzle schema + DB client
   shared/         # Shared types & constants
   typescript-config/
 ```
