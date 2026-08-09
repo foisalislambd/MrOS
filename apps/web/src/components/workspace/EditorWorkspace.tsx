@@ -290,6 +290,7 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
     }
 
     setBuilding(true);
+    const alreadyHadPreview = previewReady;
 
     window.setTimeout(() => {
       setChatMap((prev) => ({
@@ -299,7 +300,7 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
           {
             id: crypto.randomUUID(),
             role: "assistant",
-            content: previewReady
+            content: alreadyHadPreview
               ? "Applied your change and refreshed the preview. Tweak anything else and I’ll keep iterating."
               : "Scaffolded a first pass. Preview is open — keep chatting to iterate.",
             files: ["src/App.tsx"],
@@ -308,9 +309,12 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
       }));
       setBuilding(false);
       setPreviewReady(true);
-      setPreviewOpen(true);
+      // Only auto-open the first time preview appears — respect manual close after that.
+      if (!alreadyHadPreview) {
+        setPreviewOpen(true);
+        if (isDesktop === false) setMobilePane("preview");
+      }
       setRefreshKey((k) => k + 1);
-      if (isDesktop === false) setMobilePane("preview");
     }, 1600);
   }
 
