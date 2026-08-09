@@ -1,3 +1,5 @@
+import { Button } from "@/components/ui/button";
+
 const TRANSACTIONS = [
   { name: "Blue Bottle", cat: "Coffee", amount: "-$6.40", time: "9:14 AM" },
   { name: "Metro Transit", cat: "Travel", amount: "-$2.75", time: "8:02 AM" },
@@ -10,8 +12,8 @@ const DAYS = ["M", "T", "W", "T", "F", "S", "S"];
 
 export function MockPreviewApp() {
   return (
-    <div className="flex h-full w-full flex-col overflow-auto bg-[#121214] text-[#ededec]">
-      <div className="relative overflow-hidden border-b border-[#2a2a2e] px-4 pb-6 pt-5 sm:px-6 sm:pb-7 sm:pt-6">
+    <div className="flex h-full w-full flex-col overflow-auto bg-[#121214] text-foreground">
+      <div className="relative overflow-hidden border-b border-border px-4 pt-5 pb-6 sm:px-6 sm:pt-6 sm:pb-7">
         <div
           className="pointer-events-none absolute inset-0 opacity-90"
           style={{
@@ -22,20 +24,17 @@ export function MockPreviewApp() {
         <div className="relative">
           <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-[11px] font-semibold tracking-[0.18em] text-[#ff6b4a] uppercase">
+              <p className="text-[11px] font-semibold tracking-[0.18em] text-accent uppercase">
                 Flux
               </p>
               <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">
                 $12,480.00
               </h1>
-              <p className="mt-1 text-sm text-[#9b9b98]">Available balance · Aug 2026</p>
+              <p className="mt-1 text-sm text-muted-foreground">Available balance · Aug 2026</p>
             </div>
-            <button
-              type="button"
-              className="w-fit rounded-xl bg-[#ff6b4a] px-3.5 py-2 text-xs font-semibold text-white transition hover:bg-[#ff8266]"
-            >
+            <Button type="button" size="sm" className="w-fit rounded-xl px-3.5">
               + Expense
-            </button>
+            </Button>
           </div>
 
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3">
@@ -46,11 +45,11 @@ export function MockPreviewApp() {
             ].map((stat, i) => (
               <div
                 key={stat.label}
-                className={`rounded-xl bg-white/[0.04] px-3 py-3 ring-1 ring-[#2a2a2e] sm:px-3.5 ${
+                className={`rounded-xl bg-white/[0.04] px-3 py-3 ring-1 ring-border sm:px-3.5 ${
                   i === 2 ? "col-span-2 sm:col-span-1" : ""
                 }`}
               >
-                <p className="text-[11px] text-[#9b9b98]">{stat.label}</p>
+                <p className="text-[11px] text-muted-foreground">{stat.label}</p>
                 <p className="mt-0.5 text-base font-semibold tracking-tight">{stat.value}</p>
               </div>
             ))}
@@ -62,16 +61,16 @@ export function MockPreviewApp() {
         <section>
           <div className="mb-3 flex items-end justify-between gap-2">
             <h2 className="text-sm font-semibold">Weekly spend</h2>
-            <span className="shrink-0 text-[11px] text-[#9b9b98]">vs last week −8%</span>
+            <span className="shrink-0 text-[11px] text-muted-foreground">vs last week −8%</span>
           </div>
-          <div className="flex h-28 items-end gap-1.5 rounded-2xl bg-[#161618] p-3 ring-1 ring-[#2a2a2e] sm:h-36 sm:gap-2 sm:p-4">
+          <div className="flex h-28 items-end gap-1.5 rounded-2xl bg-bg-elevated p-3 ring-1 ring-border sm:h-36 sm:gap-2 sm:p-4">
             {BARS.map((h, i) => (
               <div key={DAYS[i] + i} className="flex flex-1 flex-col items-center gap-2">
                 <div
-                  className="w-full rounded-md bg-gradient-to-t from-[#ff6b4a] to-[#ff9a7a] transition-all"
+                  className="w-full rounded-md bg-gradient-to-t from-accent to-[#ff9a7a] transition-all"
                   style={{ height: `${h}%` }}
                 />
-                <span className="text-[10px] font-medium text-[#6a6a67]">{DAYS[i]}</span>
+                <span className="text-[10px] font-medium text-fg-subtle">{DAYS[i]}</span>
               </div>
             ))}
           </div>
@@ -79,21 +78,21 @@ export function MockPreviewApp() {
 
         <section>
           <h2 className="mb-3 text-sm font-semibold">Recent</h2>
-          <ul className="divide-y divide-[#2a2a2e] overflow-hidden rounded-2xl bg-[#161618] ring-1 ring-[#2a2a2e]">
+          <ul className="divide-y divide-border overflow-hidden rounded-2xl bg-bg-elevated ring-1 ring-border">
             {TRANSACTIONS.map((tx) => (
               <li key={tx.name + tx.time} className="flex items-center gap-3 px-3 py-3 sm:px-4 sm:py-3.5">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[rgba(255,107,74,0.14)] text-xs font-semibold text-[#ff6b4a]">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent-soft text-xs font-semibold text-accent">
                   {tx.name.slice(0, 1)}
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium">{tx.name}</p>
-                  <p className="truncate text-[11px] text-[#9b9b98]">
+                  <p className="truncate text-[11px] text-muted-foreground">
                     {tx.cat} · {tx.time}
                   </p>
                 </div>
                 <span
                   className={`shrink-0 text-sm font-semibold tabular-nums ${
-                    tx.amount.startsWith("+") ? "text-[#3ecf8e]" : "text-[#ededec]"
+                    tx.amount.startsWith("+") ? "text-success" : "text-foreground"
                   }`}
                 >
                   {tx.amount}

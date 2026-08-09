@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 
 :root {
   --bg: #0c0c0d;
@@ -20,6 +21,30 @@
   --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.35), 0 12px 32px rgba(0, 0, 0, 0.28);
   --radius-panel: 14px;
   --radius-control: 10px;
+
+  /* Smoother icon palette */
+  --icon: #8a8a87;
+  --icon-active: #d4d4d1;
+  --icon-hover-bg: rgba(255, 255, 255, 0.055);
+
+  /* shadcn semantic tokens mapped to MrOS theme */
+  --background: var(--bg);
+  --foreground: var(--fg);
+  --card: var(--bg-elevated);
+  --card-foreground: var(--fg);
+  --popover: var(--bg-elevated);
+  --popover-foreground: var(--fg);
+  --primary: var(--accent);
+  --primary-foreground: #ffffff;
+  --secondary: var(--bg-muted);
+  --secondary-foreground: var(--fg);
+  --muted: var(--bg-muted);
+  --muted-foreground: var(--fg-muted);
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --input: var(--border);
+  --ring: var(--accent-ring);
+  --radius: var(--radius-control);
 }
 
 @theme inline {
@@ -38,8 +63,33 @@
   --color-accent-soft: var(--accent-soft);
   --color-success: var(--success);
   --color-preview-chrome: var(--preview-chrome);
+  --color-icon: var(--icon);
+  --color-icon-active: var(--icon-active);
+  --color-icon-hover: var(--icon-hover-bg);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
   --font-sans: var(--font-outfit);
   --font-mono: var(--font-jetbrains);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: var(--radius-panel);
 }
 
 * {
@@ -57,8 +107,8 @@ body {
 
 body {
   margin: 0;
-  background: var(--bg);
-  color: var(--fg);
+  background: var(--background);
+  color: var(--foreground);
   font-family: var(--font-outfit), sans-serif;
   overflow: hidden;
   -webkit-tap-highlight-color: transparent;

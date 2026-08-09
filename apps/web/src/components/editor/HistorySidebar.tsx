@@ -1,15 +1,21 @@
 "use client";
 
 import {
-  IconDots,
-  IconLibrary,
-  IconLogo,
-  IconPenNew,
-  IconProjects,
-  IconSearch,
-  IconSettings,
-  IconSidebar,
-} from "./icons";
+  Folder,
+  Library,
+  MoreHorizontal,
+  Search,
+  Settings,
+  SquarePen,
+  PanelLeft,
+} from "lucide-react";
+
+import { IconButton } from "./IconButton";
+import { IconLogo } from "./icons";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
 
 export type ChatThread = {
   id: string;
@@ -60,68 +66,69 @@ export function HistorySidebar({
   const panel = (
     <div className="flex h-full w-[min(100vw,280px)] flex-col bg-bg-sidebar lg:w-[260px]">
       <div className="flex h-12 shrink-0 items-center gap-1 px-2.5">
-        <button
-          type="button"
+        <IconButton
+          label="Close sidebar"
+          tooltip="Close sidebar"
           onClick={onToggle}
-          className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-fg-muted transition hover:bg-white/[0.06] hover:text-fg"
-          aria-label="Close sidebar"
-          title="Close sidebar"
+          className="hover:bg-icon-hover"
         >
-          <IconSidebar className="h-4 w-4" />
-        </button>
+          <PanelLeft />
+        </IconButton>
         <div className="ml-0.5 flex min-w-0 items-center gap-2">
           <IconLogo className="h-5 w-5 shrink-0 text-accent" />
           <span className="truncate text-sm font-semibold tracking-tight">MrOS</span>
         </div>
-        <button
-          type="button"
+        <IconButton
+          label="New chat"
+          tooltip="New chat"
           onClick={onNewChat}
-          className="ml-auto inline-flex h-8 w-8 items-center justify-center rounded-lg text-fg-muted transition hover:bg-white/[0.06] hover:text-fg"
-          aria-label="New chat"
-          title="New chat"
+          className="ml-auto hover:bg-icon-hover"
         >
-          <IconPenNew className="h-4 w-4" />
-        </button>
+          <SquarePen />
+        </IconButton>
       </div>
 
       <div className="px-2.5 pb-2">
-        <button
+        <Button
           type="button"
+          variant="soft"
           onClick={onNewChat}
-          className="flex w-full items-center gap-2.5 rounded-xl bg-bg-elevated px-3 py-2.5 text-sm font-medium text-fg ring-1 ring-border transition hover:bg-bg-muted"
+          className="h-auto w-full justify-start gap-2.5 rounded-xl px-3 py-2.5 text-sm font-medium"
         >
-          <IconPenNew className="h-4 w-4 text-accent" />
+          <SquarePen className="size-4 text-accent" strokeWidth={1.6} />
           New chat
-        </button>
+        </Button>
       </div>
 
       <div className="px-2.5 pb-2">
-        <label className="flex items-center gap-2 rounded-xl bg-white/[0.04] px-2.5 py-2 ring-1 ring-transparent transition focus-within:bg-bg-elevated focus-within:ring-border">
-          <IconSearch className="h-3.5 w-3.5 shrink-0 text-fg-subtle" />
-          <input
+        <label className="flex items-center gap-2 rounded-xl bg-white/[0.04] px-2.5 py-1.5 ring-1 ring-transparent transition focus-within:bg-bg-elevated focus-within:ring-border">
+          <Search className="size-3.5 shrink-0 text-icon" strokeWidth={1.6} />
+          <Input
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Search chats"
-            className="w-full bg-transparent text-sm text-fg outline-none placeholder:text-fg-subtle"
+            className="h-7 px-0"
           />
         </label>
       </div>
 
       <nav className="px-2.5 pb-2">
-        <button
+        <Button
           type="button"
-          className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-fg-muted transition hover:bg-white/[0.06] hover:text-fg"
+          variant="ghost"
+          className="h-auto w-full justify-start gap-2.5 rounded-lg px-2.5 py-2 text-sm text-icon hover:bg-icon-hover hover:text-icon-active"
         >
-          <IconLibrary className="h-4 w-4" />
+          <Library className="size-4" strokeWidth={1.6} />
           Library
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
-          className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-fg-muted transition hover:bg-white/[0.06] hover:text-fg"
+          variant="ghost"
+          className="h-auto w-full justify-start gap-2.5 rounded-lg px-2.5 py-2 text-sm text-icon hover:bg-icon-hover hover:text-icon-active"
         >
-          <IconProjects className="h-4 w-4" />
+          <Folder className="size-4" strokeWidth={1.6} />
           Projects
-        </button>
+        </Button>
       </nav>
 
       <div className="scrollbar-thin min-h-0 flex-1 overflow-y-auto px-2 pb-3">
@@ -141,21 +148,22 @@ export function HistorySidebar({
                       <button
                         type="button"
                         onClick={() => onSelect(thread.id)}
-                        className={`flex w-full items-center rounded-lg px-2.5 py-2 text-left text-[13px] leading-snug transition ${
+                        className={cn(
+                          "flex w-full items-center rounded-lg px-2.5 py-2 text-left text-[13px] leading-snug transition-colors duration-200",
                           active
                             ? "bg-bg-elevated font-medium text-fg ring-1 ring-border"
-                            : "text-fg-muted hover:bg-white/[0.06] hover:text-fg"
-                        }`}
+                            : "text-icon hover:bg-icon-hover hover:text-icon-active",
+                        )}
                       >
                         <span className="truncate pr-6">{thread.title}</span>
                       </button>
-                      <button
-                        type="button"
-                        className="absolute top-1/2 right-1.5 hidden h-6 w-6 -translate-y-1/2 items-center justify-center rounded-md text-fg-subtle opacity-0 transition group-hover:flex group-hover:opacity-100 hover:bg-white/[0.08] hover:text-fg"
-                        aria-label="Chat options"
+                      <IconButton
+                        label="Chat options"
+                        size="icon-xs"
+                        className="absolute top-1/2 right-1.5 hidden -translate-y-1/2 opacity-0 transition group-hover:inline-flex group-hover:opacity-100 hover:bg-icon-hover"
                       >
-                        <IconDots className="h-3.5 w-3.5" />
-                      </button>
+                        <MoreHorizontal />
+                      </IconButton>
                     </li>
                   );
                 })}
@@ -165,53 +173,59 @@ export function HistorySidebar({
         )}
       </div>
 
-      <div className="shrink-0 border-t border-border/80 p-2.5">
-        <button
+      <Separator className="opacity-80" />
+      <div className="shrink-0 p-2.5">
+        <Button
           type="button"
-          className="flex w-full items-center gap-2.5 rounded-xl px-2 py-2 text-left transition hover:bg-white/[0.06]"
+          variant="ghost"
+          className="h-auto w-full justify-start gap-2.5 rounded-xl px-2 py-2 text-left hover:bg-icon-hover"
         >
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent text-[11px] font-semibold text-white">
             IF
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium">Ifois</p>
+            <p className="truncate text-sm font-medium text-fg">Ifois</p>
             <p className="truncate text-[11px] text-fg-subtle">Free plan</p>
           </div>
-          <IconSettings className="h-4 w-4 shrink-0 text-fg-subtle" />
-        </button>
+          <Settings className="size-4 shrink-0 text-icon" strokeWidth={1.6} />
+        </Button>
       </div>
     </div>
   );
 
   return (
     <>
-      {/* Mobile / tablet: overlay drawer */}
       <div
-        className={`fixed inset-0 z-40 lg:hidden ${open ? "pointer-events-auto" : "pointer-events-none"}`}
+        className={cn(
+          "fixed inset-0 z-40 lg:hidden",
+          open ? "pointer-events-auto" : "pointer-events-none",
+        )}
         aria-hidden={!open}
       >
         <button
           type="button"
-          className={`absolute inset-0 bg-black/60 transition-opacity duration-300 ${
-            open ? "opacity-100" : "opacity-0"
-          }`}
+          className={cn(
+            "absolute inset-0 bg-black/60 transition-opacity duration-300",
+            open ? "opacity-100" : "opacity-0",
+          )}
           aria-label="Close sidebar overlay"
           onClick={onToggle}
         />
         <aside
-          className={`absolute inset-y-0 left-0 border-r border-border shadow-[var(--shadow-soft)] transition-transform duration-300 ease-out ${
-            open ? "translate-x-0" : "-translate-x-full"
-          }`}
+          className={cn(
+            "absolute inset-y-0 left-0 border-r border-border shadow-[var(--shadow-soft)] transition-transform duration-300 ease-out",
+            open ? "translate-x-0" : "-translate-x-full",
+          )}
         >
           {panel}
         </aside>
       </div>
 
-      {/* Desktop: inline sidebar */}
       <aside
-        className={`hidden h-full shrink-0 overflow-hidden border-r border-border transition-[width] duration-300 ease-out lg:block ${
-          open ? "w-[260px]" : "w-0 border-r-0"
-        }`}
+        className={cn(
+          "hidden h-full shrink-0 overflow-hidden border-r border-border transition-[width] duration-300 ease-out lg:block",
+          open ? "w-[260px]" : "w-0 border-r-0",
+        )}
         aria-hidden={!open}
       >
         {open ? panel : null}

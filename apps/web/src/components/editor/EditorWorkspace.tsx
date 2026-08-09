@@ -1,24 +1,33 @@
 "use client";
 
 import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
-import { HistorySidebar, type ChatThread } from "./HistorySidebar";
 import {
-  IconChevron,
-  IconCode,
-  IconDesktop,
-  IconExternal,
-  IconLogo,
-  IconPanel,
-  IconPenNew,
-  IconPhone,
-  IconPlus,
-  IconRefresh,
-  IconSelect,
-  IconSend,
-  IconSidebar,
-  IconTablet,
-} from "./icons";
+  ChevronRight,
+  Code2,
+  ExternalLink,
+  Frame,
+  Monitor,
+  PanelLeft,
+  Plus,
+  RefreshCw,
+  SendHorizontal,
+  Smartphone,
+  SquarePen,
+  Tablet,
+} from "lucide-react";
+
+import { HistorySidebar, type ChatThread } from "./HistorySidebar";
+import { IconButton } from "./IconButton";
+import { IconLogo } from "./icons";
 import { MockPreviewApp } from "./MockPreviewApp";
+import { toast } from "./Toast";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 
 type Device = "desktop" | "tablet" | "mobile";
 type Role = "user" | "assistant";
@@ -233,6 +242,7 @@ export function EditorWorkspace() {
     const text = draft.trim();
     if (!text || building) return;
 
+    const threadId = activeId;
     const userMsg: Message = {
       id: crypto.randomUUID(),
       role: "user",
@@ -241,12 +251,12 @@ export function EditorWorkspace() {
 
     setChatMap((prev) => ({
       ...prev,
-      [activeId]: [...(prev[activeId] ?? []), userMsg],
+      [threadId]: [...(prev[threadId] ?? []), userMsg],
     }));
 
     setThreads((prev) =>
       prev.map((t) =>
-        t.id === activeId && t.title === "New chat"
+        t.id === threadId && t.title === "New chat"
           ? { ...t, title: text.slice(0, 42) + (text.length > 42 ? "…" : "") }
           : t,
       ),
@@ -258,8 +268,8 @@ export function EditorWorkspace() {
     window.setTimeout(() => {
       setChatMap((prev) => ({
         ...prev,
-        [activeId]: [
-          ...(prev[activeId] ?? []),
+        [threadId]: [
+          ...(prev[threadId] ?? []),
           {
             id: crypto.randomUUID(),
             role: "assistant",
@@ -288,359 +298,329 @@ export function EditorWorkspace() {
   const showPreview = isDesktop ? true : mobilePane === "preview";
 
   return (
-    <div className="flex h-dvh overflow-hidden bg-bg text-fg">
-      <HistorySidebar
-        open={sidebarOpen}
-        threads={threads}
-        activeId={activeId}
-        search={search}
-        onSearchChange={setSearch}
-        onSelect={selectChat}
-        onNewChat={createNewChat}
-        onToggle={() => setSidebarOpen(false)}
-      />
+    <TooltipProvider>
+      <div className="flex h-dvh overflow-hidden bg-background text-foreground">
+        <HistorySidebar
+          open={sidebarOpen}
+          threads={threads}
+          activeId={activeId}
+          search={search}
+          onSearchChange={setSearch}
+          onSelect={selectChat}
+          onNewChat={createNewChat}
+          onToggle={() => setSidebarOpen(false)}
+        />
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex h-12 shrink-0 items-center gap-1.5 border-b border-border bg-bg-elevated px-2 sm:gap-2 sm:px-3">
-          <button
-            type="button"
-            onClick={() => setSidebarOpen(true)}
-            className={`inline-flex h-8 w-8 items-center justify-center rounded-[var(--radius-control)] text-fg-muted transition hover:bg-bg-muted hover:text-fg ${
-              sidebarOpen && isDesktop ? "lg:hidden" : ""
-            }`}
-            aria-label="Open sidebar"
-            title="Open sidebar"
-          >
-            <IconSidebar className="h-4 w-4" />
-          </button>
-          <button
-            type="button"
-            onClick={createNewChat}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-[var(--radius-control)] text-fg-muted transition hover:bg-bg-muted hover:text-fg lg:hidden"
-            aria-label="New chat"
-            title="New chat"
-          >
-            <IconPenNew className="h-4 w-4" />
-          </button>
-
-          {!sidebarOpen && (
-            <button
-              type="button"
+        <div className="flex min-w-0 flex-1 flex-col">
+          <header className="flex h-12 shrink-0 items-center gap-1.5 border-b border-border bg-bg-elevated px-2 sm:gap-2 sm:px-3">
+            <IconButton
+              label="Open sidebar"
+              tooltip="Open sidebar"
+              onClick={() => setSidebarOpen(true)}
+              className={cn(sidebarOpen && isDesktop && "lg:hidden")}
+            >
+              <PanelLeft />
+            </IconButton>
+            <IconButton
+              label="New chat"
+              tooltip="New chat"
               onClick={createNewChat}
-              className="hidden h-8 w-8 items-center justify-center rounded-[var(--radius-control)] text-fg-muted transition hover:bg-bg-muted hover:text-fg lg:inline-flex"
-              aria-label="New chat"
-              title="New chat"
+              className="lg:hidden"
             >
-              <IconPenNew className="h-4 w-4" />
-            </button>
-          )}
+              <SquarePen />
+            </IconButton>
 
-          <button
-            type="button"
-            onClick={() => setChatOpen((v) => !v)}
-            className="hidden h-8 w-8 items-center justify-center rounded-[var(--radius-control)] text-fg-muted transition hover:bg-bg-muted hover:text-fg lg:inline-flex"
-            aria-label={chatOpen ? "Collapse chat" : "Expand chat"}
-            title="Toggle chat (Ctrl+B)"
-          >
-            <IconPanel className="h-4 w-4" />
-          </button>
+            {!sidebarOpen && (
+              <IconButton
+                label="New chat"
+                tooltip="New chat"
+                onClick={createNewChat}
+                className="hidden lg:inline-flex"
+              >
+                <SquarePen />
+              </IconButton>
+            )}
 
-          <div className="mx-0.5 hidden h-4 w-px bg-border sm:block lg:mx-1" />
+            <IconButton
+              label={chatOpen ? "Collapse chat" : "Expand chat"}
+              tooltip="Toggle chat (Ctrl+B)"
+              onClick={() => setChatOpen((v) => !v)}
+              className="hidden lg:inline-flex"
+            >
+              <PanelLeft className="rotate-180" />
+            </IconButton>
 
-          <div className="flex min-w-0 flex-1 items-center gap-2">
-            <IconLogo className="hidden h-6 w-6 shrink-0 text-accent sm:block" />
-            <div className="min-w-0">
-              <div className="flex items-center gap-1.5">
-                <span className="truncate text-sm font-semibold tracking-tight">
-                  {projectTitle}
-                </span>
-                <IconChevron className="hidden h-3.5 w-3.5 shrink-0 text-fg-subtle sm:block" />
+            <Separator orientation="vertical" className="mx-0.5 hidden sm:block lg:mx-1" />
+
+            <div className="flex min-w-0 flex-1 items-center gap-2">
+              <IconLogo className="hidden h-6 w-6 shrink-0 text-accent sm:block" />
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <span className="truncate text-sm font-semibold tracking-tight">
+                    {projectTitle}
+                  </span>
+                  <ChevronRight className="hidden size-3.5 shrink-0 text-icon sm:block" strokeWidth={1.6} />
+                </div>
+                <p className="hidden truncate text-[11px] text-fg-subtle sm:block">
+                  MrOS workspace
+                </p>
               </div>
-              <p className="hidden truncate text-[11px] text-fg-subtle sm:block">
-                MrOS workspace
-              </p>
             </div>
-          </div>
 
-          <div className="flex shrink-0 items-center gap-1.5">
-            <button
-              type="button"
-              className="h-8 rounded-[var(--radius-control)] bg-accent px-2.5 text-xs font-semibold text-white transition hover:bg-accent-hover sm:px-3.5"
-            >
-              Publish
-            </button>
-            <div className="hidden h-8 w-8 items-center justify-center rounded-full bg-accent text-[11px] font-semibold text-white sm:flex">
-              IF
+            <div className="flex shrink-0 items-center gap-1.5">
+              <Button
+                type="button"
+                size="sm"
+                className="px-2.5 sm:px-3.5"
+                onClick={() => toast.success("Ready to publish", { description: "Connect a project to go live." })}
+              >
+                Publish
+              </Button>
+              <div className="hidden h-8 w-8 items-center justify-center rounded-full bg-accent text-[11px] font-semibold text-white sm:flex">
+                IF
+              </div>
             </div>
-          </div>
-        </header>
+          </header>
 
-        {/* Mobile / tablet pane switcher */}
-        <div className="flex shrink-0 border-b border-border bg-bg-elevated px-2 py-1.5 lg:hidden">
-          <div className="flex w-full rounded-[var(--radius-control)] bg-bg-muted p-0.5">
-            <button
-              type="button"
-              onClick={() => setMobilePane("chat")}
-              className={`flex-1 rounded-[8px] px-3 py-1.5 text-xs font-medium transition ${
-                mobilePane === "chat"
-                  ? "bg-bg-elevated text-fg shadow-sm"
-                  : "text-fg-muted"
-              }`}
+          <div className="flex shrink-0 border-b border-border bg-bg-elevated px-2 py-1.5 lg:hidden">
+            <ToggleGroup
+              type="single"
+              value={mobilePane}
+              onValueChange={(value) => {
+                if (value) setMobilePane(value as MobilePane);
+              }}
+              className="w-full"
             >
-              Chat
-            </button>
-            <button
-              type="button"
-              onClick={() => setMobilePane("preview")}
-              className={`flex-1 rounded-[8px] px-3 py-1.5 text-xs font-medium transition ${
-                mobilePane === "preview"
-                  ? "bg-bg-elevated text-fg shadow-sm"
-                  : "text-fg-muted"
-              }`}
-            >
-              Preview
-            </button>
-          </div>
-        </div>
-
-        <div className="flex min-h-0 flex-1">
-          <aside
-            className={`min-h-0 flex-col border-r border-border bg-bg-chat transition-[width,opacity] duration-300 ease-out ${
-              showChat
-                ? "flex w-full flex-1 opacity-100 lg:w-[360px] lg:flex-none xl:w-[400px]"
-                : "hidden w-0 overflow-hidden border-r-0 opacity-0 lg:flex"
-            } ${!chatOpen && isDesktop ? "!hidden !w-0 !flex-none !border-r-0" : ""}`}
-          >
-            <div className="flex items-center justify-between border-b border-border px-3 py-2.5 sm:px-4">
-              <span className="text-xs font-semibold tracking-wide text-fg-muted uppercase">
+              <ToggleGroupItem value="chat" className="flex-1">
                 Chat
-              </span>
-              <span className="rounded-md bg-accent-soft px-2 py-0.5 text-[11px] font-medium text-accent">
-                Build mode
-              </span>
-            </div>
+              </ToggleGroupItem>
+              <ToggleGroupItem value="preview" className="flex-1">
+                Preview
+              </ToggleGroupItem>
+            </ToggleGroup>
+          </div>
 
-            <div className="scrollbar-thin flex-1 space-y-4 overflow-y-auto overscroll-contain px-3 py-4 sm:px-4">
-              {messages.length === 0 && !building && (
-                <div className="flex h-full min-h-[200px] flex-col items-center justify-center px-4 text-center">
-                  <IconLogo className="mb-3 h-9 w-9 text-accent" />
-                  <p className="text-sm font-semibold">Start building</p>
-                  <p className="mt-1 max-w-[240px] text-xs leading-relaxed text-fg-muted">
-                    Describe an app or a change. MrOS will update the live preview as you chat.
-                  </p>
-                </div>
+          <div className="flex min-h-0 flex-1">
+            <aside
+              className={cn(
+                "min-h-0 flex-col border-r border-border bg-bg-chat transition-[width,opacity] duration-300 ease-out",
+                showChat
+                  ? "flex w-full flex-1 opacity-100 lg:w-[360px] lg:flex-none xl:w-[400px]"
+                  : "hidden w-0 overflow-hidden border-r-0 opacity-0 lg:flex",
+                !chatOpen && isDesktop && "!hidden !w-0 !flex-none !border-r-0",
               )}
-
-              {messages.map((msg, i) => (
-                <article
-                  key={msg.id}
-                  className="animate-fade-up"
-                  style={{ animationDelay: `${Math.min(i, 4) * 40}ms` }}
-                >
-                  {msg.role === "user" ? (
-                    <div className="ml-2 rounded-2xl rounded-br-md bg-bg-elevated px-3.5 py-2.5 text-sm leading-relaxed shadow-[var(--shadow-soft)] ring-1 ring-border sm:ml-6">
-                      {msg.content}
-                    </div>
-                  ) : (
-                    <div className="space-y-2.5">
-                      <div className="flex items-center gap-2">
-                        <IconLogo className="h-5 w-5 text-accent" />
-                        <span className="text-xs font-semibold text-fg-muted">MrOS</span>
-                      </div>
-                      <p className="text-sm leading-relaxed text-fg">{msg.content}</p>
-                      {msg.files && msg.files.length > 0 && (
-                        <ul className="flex flex-wrap gap-1.5">
-                          {msg.files.map((file) => (
-                            <li
-                              key={file}
-                              className="inline-flex max-w-full items-center gap-1.5 rounded-md bg-bg-muted px-2 py-1 font-mono text-[11px] text-fg-muted"
-                            >
-                              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-success" />
-                              <span className="truncate">{file}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </div>
-                  )}
-                </article>
-              ))}
-
-              {building && (
-                <div className="animate-fade-up space-y-2">
-                  <div className="flex items-center gap-2">
-                    <IconLogo className="h-5 w-5 text-accent" />
-                    <span className="text-xs font-semibold text-fg-muted">MrOS</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-fg-muted">
-                    <span className="flex gap-1">
-                      <span className="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-accent" />
-                      <span
-                        className="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-accent"
-                        style={{ animationDelay: "0.2s" }}
-                      />
-                      <span
-                        className="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-accent"
-                        style={{ animationDelay: "0.4s" }}
-                      />
-                    </span>
-                    Building…
-                  </div>
-                  <div className="building-bar h-0.5 rounded-full" />
-                </div>
-              )}
-              <div ref={endRef} />
-            </div>
-
-            <div className="border-t border-border p-2.5 sm:p-3">
-              <div className="composer rounded-[var(--radius-panel)] border border-border bg-bg-elevated p-2 shadow-[var(--shadow-soft)] transition">
-                <textarea
-                  ref={inputRef}
-                  value={draft}
-                  onChange={(e) => setDraft(e.target.value)}
-                  onKeyDown={onKeyDown}
-                  rows={3}
-                  placeholder="Ask MrOS to change anything…"
-                  className="max-h-32 min-h-[64px] w-full resize-none bg-transparent px-2 py-1.5 text-sm leading-relaxed text-fg outline-none placeholder:text-fg-subtle sm:min-h-[72px]"
-                />
-                <div className="flex items-center justify-between px-1 pb-0.5">
-                  <button
-                    type="button"
-                    className="inline-flex h-8 w-8 items-center justify-center rounded-[var(--radius-control)] text-fg-muted transition hover:bg-bg-muted hover:text-fg"
-                    aria-label="Attach"
-                  >
-                    <IconPlus className="h-4 w-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={sendMessage}
-                    disabled={!draft.trim() || building}
-                    className="inline-flex h-8 items-center gap-1.5 rounded-[var(--radius-control)] bg-fg px-3 text-xs font-semibold text-bg-elevated transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-35"
-                  >
-                    Send
-                    <IconSend className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-              </div>
-              <p className="mt-2 hidden text-center text-[11px] text-fg-subtle sm:block">
-                Enter to send · Shift+Enter for new line
-              </p>
-            </div>
-          </aside>
-
-          <section
-            className={`min-w-0 flex-col bg-bg ${
-              showPreview ? "flex flex-1" : "hidden lg:flex lg:flex-1"
-            }`}
-          >
-            <div className="flex h-11 shrink-0 items-center gap-1 overflow-x-auto border-b border-border px-2 sm:gap-2 sm:px-3">
-              <div className="flex shrink-0 rounded-[var(--radius-control)] bg-bg-muted p-0.5">
-                <button
-                  type="button"
-                  onClick={() => setTab("preview")}
-                  className={`rounded-[8px] px-2.5 py-1 text-xs font-medium transition ${
-                    tab === "preview"
-                      ? "bg-bg-elevated text-fg shadow-sm"
-                      : "text-fg-muted hover:text-fg"
-                  }`}
-                >
-                  Preview
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setTab("code")}
-                  className={`inline-flex items-center gap-1 rounded-[8px] px-2.5 py-1 text-xs font-medium transition ${
-                    tab === "code"
-                      ? "bg-bg-elevated text-fg shadow-sm"
-                      : "text-fg-muted hover:text-fg"
-                  }`}
-                >
-                  <IconCode className="h-3.5 w-3.5" />
-                  Code
-                </button>
-              </div>
-
-              {tab === "preview" && (
-                <>
-                  <div className="mx-1 hidden h-4 w-px shrink-0 bg-border md:block" />
-                  <div className="hidden items-center gap-0.5 rounded-[var(--radius-control)] bg-bg-muted p-0.5 md:flex">
-                    {(
-                      [
-                        ["desktop", IconDesktop],
-                        ["tablet", IconTablet],
-                        ["mobile", IconPhone],
-                      ] as const
-                    ).map(([id, Icon]) => (
-                      <button
-                        key={id}
-                        type="button"
-                        onClick={() => setDevice(id)}
-                        className={`inline-flex h-7 w-7 items-center justify-center rounded-[8px] transition ${
-                          device === id
-                            ? "bg-bg-elevated text-fg shadow-sm"
-                            : "text-fg-muted hover:text-fg"
-                        }`}
-                        aria-label={id}
-                      >
-                        <Icon className="h-3.5 w-3.5" />
-                      </button>
-                    ))}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setRefreshKey((k) => k + 1)}
-                    className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-[var(--radius-control)] text-fg-muted transition hover:bg-bg-muted hover:text-fg"
-                    aria-label="Refresh preview"
-                  >
-                    <IconRefresh className="h-3.5 w-3.5" />
-                  </button>
-                  <button
-                    type="button"
-                    className="hidden h-7 items-center gap-1 rounded-[var(--radius-control)] px-2 text-xs font-medium text-fg-muted transition hover:bg-bg-muted hover:text-fg sm:inline-flex"
-                  >
-                    <IconSelect className="h-3.5 w-3.5" />
-                    <span className="hidden md:inline">Select</span>
-                  </button>
-                </>
-              )}
-
-              <div className="ml-auto flex shrink-0 items-center gap-1">
-                <span className="mr-1 hidden items-center gap-1.5 text-[11px] text-fg-subtle md:inline-flex">
-                  <span className="h-1.5 w-1.5 rounded-full bg-success" />
-                  Live
+            >
+              <div className="flex items-center justify-between border-b border-border px-3 py-2.5 sm:px-4">
+                <span className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                  Chat
                 </span>
-                <button
-                  type="button"
-                  className="inline-flex h-7 w-7 items-center justify-center rounded-[var(--radius-control)] text-fg-muted transition hover:bg-bg-muted hover:text-fg"
-                  aria-label="Open preview"
-                >
-                  <IconExternal className="h-3.5 w-3.5" />
-                </button>
+                <Badge variant="soft">Build mode</Badge>
               </div>
-            </div>
 
-            <div className="relative flex min-h-0 flex-1 items-stretch justify-center p-2 sm:p-3 md:p-4">
-              {tab === "preview" ? (
-                <div
-                  key={refreshKey}
-                  className="animate-fade-up flex h-full max-h-full w-full overflow-hidden rounded-[var(--radius-panel)] border border-border bg-bg-elevated shadow-[var(--shadow-soft)] transition-[width] duration-300"
-                  style={{
-                    width: isDesktop ? deviceWidth : "100%",
-                    maxWidth: "100%",
-                  }}
-                >
-                  <MockPreviewApp />
+              <div className="scrollbar-thin flex-1 space-y-4 overflow-y-auto overscroll-contain px-3 py-4 sm:px-4">
+                {messages.length === 0 && !building && (
+                  <div className="flex h-full min-h-[200px] flex-col items-center justify-center px-4 text-center">
+                    <IconLogo className="mb-3 h-9 w-9 text-accent" />
+                    <p className="text-sm font-semibold">Start building</p>
+                    <p className="mt-1 max-w-[240px] text-xs leading-relaxed text-muted-foreground">
+                      Describe an app or a change. MrOS will update the live preview as you chat.
+                    </p>
+                  </div>
+                )}
+
+                {messages.map((msg, i) => (
+                  <article
+                    key={msg.id}
+                    className="animate-fade-up"
+                    style={{ animationDelay: `${Math.min(i, 4) * 40}ms` }}
+                  >
+                    {msg.role === "user" ? (
+                      <div className="ml-2 rounded-2xl rounded-br-md bg-bg-elevated px-3.5 py-2.5 text-sm leading-relaxed shadow-[var(--shadow-soft)] ring-1 ring-border sm:ml-6">
+                        {msg.content}
+                      </div>
+                    ) : (
+                      <div className="space-y-2.5">
+                        <div className="flex items-center gap-2">
+                          <IconLogo className="h-5 w-5 text-accent" />
+                          <span className="text-xs font-semibold text-muted-foreground">MrOS</span>
+                        </div>
+                        <p className="text-sm leading-relaxed text-foreground">{msg.content}</p>
+                        {msg.files && msg.files.length > 0 && (
+                          <ul className="flex flex-wrap gap-1.5">
+                            {msg.files.map((file) => (
+                              <li
+                                key={file}
+                                className="inline-flex max-w-full items-center gap-1.5 rounded-md bg-muted px-2 py-1 font-mono text-[11px] text-muted-foreground"
+                              >
+                                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-success" />
+                                <span className="truncate">{file}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    )}
+                  </article>
+                ))}
+
+                {building && (
+                  <div className="animate-fade-up space-y-2">
+                    <div className="flex items-center gap-2">
+                      <IconLogo className="h-5 w-5 text-accent" />
+                      <span className="text-xs font-semibold text-muted-foreground">MrOS</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <span className="flex gap-1">
+                        <span className="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-accent" />
+                        <span
+                          className="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-accent"
+                          style={{ animationDelay: "0.2s" }}
+                        />
+                        <span
+                          className="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-accent"
+                          style={{ animationDelay: "0.4s" }}
+                        />
+                      </span>
+                      Building…
+                    </div>
+                    <div className="building-bar h-0.5 rounded-full" />
+                  </div>
+                )}
+                <div ref={endRef} />
+              </div>
+
+              <div className="border-t border-border p-2.5 sm:p-3">
+                <div className="composer rounded-[var(--radius-panel)] border border-border bg-bg-elevated p-2 shadow-[var(--shadow-soft)] transition">
+                  <Textarea
+                    ref={inputRef}
+                    value={draft}
+                    onChange={(e) => setDraft(e.target.value)}
+                    onKeyDown={onKeyDown}
+                    rows={3}
+                    placeholder="Ask MrOS to change anything…"
+                    className="max-h-32"
+                  />
+                  <div className="flex items-center justify-between px-1 pb-0.5">
+                    <IconButton label="Attach" tooltip="Attach file">
+                      <Plus />
+                    </IconButton>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      onClick={sendMessage}
+                      disabled={!draft.trim() || building}
+                      className="gap-1.5"
+                    >
+                      Send
+                      <SendHorizontal className="size-3.5" strokeWidth={1.7} />
+                    </Button>
+                  </div>
                 </div>
-              ) : (
-                <div className="animate-fade-up h-full w-full overflow-auto rounded-[var(--radius-panel)] border border-border bg-preview-chrome p-3 font-mono text-[12px] leading-6 text-[#e8e4de] shadow-[var(--shadow-soft)] sm:p-5 sm:text-[12.5px]">
-                  <pre className="whitespace-pre-wrap break-words">{CODE_SNIPPET}</pre>
-                </div>
+                <p className="mt-2 hidden text-center text-[11px] text-fg-subtle sm:block">
+                  Enter to send · Shift+Enter for new line
+                </p>
+              </div>
+            </aside>
+
+            <section
+              className={cn(
+                "min-w-0 flex-col bg-background",
+                showPreview ? "flex flex-1" : "hidden lg:flex lg:flex-1",
               )}
-            </div>
-          </section>
+            >
+              <div className="flex h-11 shrink-0 items-center gap-1 overflow-x-auto border-b border-border px-2 sm:gap-2 sm:px-3">
+                <ToggleGroup
+                  type="single"
+                  value={tab}
+                  onValueChange={(value) => {
+                    if (value) setTab(value as "preview" | "code");
+                  }}
+                  size="sm"
+                >
+                  <ToggleGroupItem value="preview">Preview</ToggleGroupItem>
+                  <ToggleGroupItem value="code" className="gap-1">
+                    <Code2 className="size-3.5" strokeWidth={1.6} />
+                    Code
+                  </ToggleGroupItem>
+                </ToggleGroup>
+
+                {tab === "preview" && (
+                  <>
+                    <Separator orientation="vertical" className="mx-1 hidden md:block" />
+                    <ToggleGroup
+                      type="single"
+                      value={device}
+                      onValueChange={(value) => {
+                        if (value) setDevice(value as Device);
+                      }}
+                      size="icon"
+                      className="hidden md:flex"
+                    >
+                      <ToggleGroupItem value="desktop" aria-label="Desktop">
+                        <Monitor className="size-3.5" strokeWidth={1.6} />
+                      </ToggleGroupItem>
+                      <ToggleGroupItem value="tablet" aria-label="Tablet">
+                        <Tablet className="size-3.5" strokeWidth={1.6} />
+                      </ToggleGroupItem>
+                      <ToggleGroupItem value="mobile" aria-label="Mobile">
+                        <Smartphone className="size-3.5" strokeWidth={1.6} />
+                      </ToggleGroupItem>
+                    </ToggleGroup>
+                    <IconButton
+                      label="Refresh preview"
+                      tooltip="Refresh"
+                      size="icon-sm"
+                      onClick={() => setRefreshKey((k) => k + 1)}
+                    >
+                      <RefreshCw />
+                    </IconButton>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="hidden h-7 gap-1 px-2 text-icon hover:bg-icon-hover hover:text-icon-active sm:inline-flex"
+                    >
+                      <Frame className="size-3.5" strokeWidth={1.6} />
+                      <span className="hidden md:inline">Select</span>
+                    </Button>
+                  </>
+                )}
+
+                <div className="ml-auto flex shrink-0 items-center gap-1">
+                  <span className="mr-1 hidden items-center gap-1.5 text-[11px] text-fg-subtle md:inline-flex">
+                    <span className="h-1.5 w-1.5 rounded-full bg-success" />
+                    Live
+                  </span>
+                  <IconButton label="Open preview" tooltip="Open preview" size="icon-sm">
+                    <ExternalLink />
+                  </IconButton>
+                </div>
+              </div>
+
+              <div className="relative flex min-h-0 flex-1 items-stretch justify-center p-2 sm:p-3 md:p-4">
+                {tab === "preview" ? (
+                  <div
+                    key={refreshKey}
+                    className="animate-fade-up flex h-full max-h-full w-full overflow-hidden rounded-[var(--radius-panel)] border border-border bg-bg-elevated shadow-[var(--shadow-soft)] transition-[width] duration-300"
+                    style={{
+                      width: isDesktop ? deviceWidth : "100%",
+                      maxWidth: "100%",
+                    }}
+                  >
+                    <MockPreviewApp />
+                  </div>
+                ) : (
+                  <div className="animate-fade-up h-full w-full overflow-auto rounded-[var(--radius-panel)] border border-border bg-preview-chrome p-3 font-mono text-[12px] leading-6 text-[#e8e4de] shadow-[var(--shadow-soft)] sm:p-5 sm:text-[12.5px]">
+                    <pre className="whitespace-pre-wrap break-words">{CODE_SNIPPET}</pre>
+                  </div>
+                )}
+              </div>
+            </section>
+          </div>
         </div>
       </div>
-    </div>
+    </TooltipProvider>
   );
 }
 
