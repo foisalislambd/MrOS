@@ -135,10 +135,10 @@ export function ChatHome() {
             </div>
           </header>
 
-          <main className="relative flex min-h-0 flex-1 flex-col items-center justify-center overflow-y-auto px-4 py-10 sm:px-6">
+          <main className="relative flex min-h-0 flex-1 flex-col items-center justify-center overflow-y-auto px-4 pt-4 pb-16 sm:px-6">
             <div className="accent-wash pointer-events-none absolute inset-0" />
 
-            <div className="relative w-full max-w-[640px]">
+            <div className="relative w-full max-w-[640px] -translate-y-6">
               <div className="mb-8 flex flex-col items-center text-center">
                 <h1 className="text-[1.9rem] font-semibold tracking-[-0.03em] text-white sm:text-[2.15rem]">
                   What can I help with?
