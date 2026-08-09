@@ -1,0 +1,25 @@
+{
+  "name": "@mros/agent",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "description": "Thin MrOS facade over OpenCode sdk-next (v1.18.15).",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "echo \"lint:agent skipped\"",
+    "clean": "bun -e \"import { rmSync } from 'fs'; for (const p of ['dist','.turbo']) rmSync(p,{recursive:true,force:true})\""
+  },
+  "dependencies": {
+    "@opencode-ai/sdk-next": "workspace:*",
+    "effect": "catalog:"
+  },
+  "devDependencies": {
+    "@mros/typescript-config": "workspace:*",
+    "@types/bun": "catalog:",
+    "typescript": "catalog:"
+  }
+}
