@@ -403,10 +403,10 @@ export function EditorWorkspace() {
           <div className="flex min-h-0 flex-1">
             <aside
               className={cn(
-                "min-h-0 flex-col border-r border-border bg-bg-chat transition-[width,opacity] duration-300 ease-out",
+                "min-h-0 flex-col border-r border-border bg-bg-chat transition-[width] duration-200 ease-out",
                 showChat
-                  ? "flex w-full flex-1 opacity-100 lg:w-[360px] lg:flex-none xl:w-[400px]"
-                  : "hidden w-0 overflow-hidden border-r-0 opacity-0 lg:flex",
+                  ? "flex w-full flex-1 lg:w-[360px] lg:flex-none xl:w-[400px]"
+                  : "hidden w-0 overflow-hidden border-r-0 lg:flex",
                 !chatOpen && isDesktop && "!hidden !w-0 !flex-none !border-r-0",
               )}
             >
@@ -428,12 +428,8 @@ export function EditorWorkspace() {
                   </div>
                 )}
 
-                {messages.map((msg, i) => (
-                  <article
-                    key={msg.id}
-                    className="animate-fade-up"
-                    style={{ animationDelay: `${Math.min(i, 4) * 40}ms` }}
-                  >
+                {messages.map((msg) => (
+                  <article key={msg.id}>
                     {msg.role === "user" ? (
                       <div className="ml-2 rounded-2xl rounded-br-md bg-bg-elevated px-3.5 py-2.5 text-sm leading-relaxed text-white shadow-[var(--shadow-soft)] ring-1 ring-border sm:ml-6">
                         {msg.content}
@@ -464,7 +460,7 @@ export function EditorWorkspace() {
                 ))}
 
                 {building && (
-                  <div className="animate-fade-up space-y-2">
+                  <div className="space-y-2">
                     <div className="flex items-center gap-2">
                       <IconLogo className="h-5 w-5 text-accent" />
                       <span className="text-xs font-semibold text-white/70">MrOS</span>
@@ -602,7 +598,7 @@ export function EditorWorkspace() {
                 {tab === "preview" ? (
                   <div
                     key={refreshKey}
-                    className="animate-fade-up flex h-full max-h-full w-full overflow-hidden rounded-[var(--radius-panel)] border border-border bg-bg-elevated shadow-[var(--shadow-soft)] transition-[width] duration-300"
+                    className="flex h-full max-h-full w-full overflow-hidden rounded-[var(--radius-panel)] border border-border bg-bg-elevated shadow-[var(--shadow-soft)]"
                     style={{
                       width: isDesktop ? deviceWidth : "100%",
                       maxWidth: "100%",
@@ -611,7 +607,7 @@ export function EditorWorkspace() {
                     <MockPreviewApp />
                   </div>
                 ) : (
-                  <div className="animate-fade-up h-full w-full overflow-auto rounded-[var(--radius-panel)] border border-border bg-preview-chrome p-3 font-mono text-[12px] leading-6 text-[#e8e4de] shadow-[var(--shadow-soft)] sm:p-5 sm:text-[12.5px]">
+                  <div className="h-full w-full overflow-auto rounded-[var(--radius-panel)] border border-border bg-preview-chrome p-3 font-mono text-[12px] leading-6 text-[#e8e4de] shadow-[var(--shadow-soft)] sm:p-5 sm:text-[12.5px]">
                     <pre className="whitespace-pre-wrap break-words">{CODE_SNIPPET}</pre>
                   </div>
                 )}

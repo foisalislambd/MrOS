@@ -67,7 +67,7 @@ export function MockPreviewApp() {
             {BARS.map((h, i) => (
               <div key={DAYS[i] + i} className="flex flex-1 flex-col items-center gap-2">
                 <div
-                  className="w-full rounded-md bg-gradient-to-t from-accent to-[#ff9a7a] transition-all"
+                  className="w-full rounded-md bg-gradient-to-t from-accent to-[#ff9a7a]"
                   style={{ height: `${h}%` }}
                 />
                 <span className="text-[10px] font-medium text-white/40">{DAYS[i]}</span>

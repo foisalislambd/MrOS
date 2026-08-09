@@ -205,7 +205,7 @@ export function HistorySidebar({
         <button
           type="button"
           className={cn(
-            "absolute inset-0 bg-black/60 transition-opacity duration-300",
+            "absolute inset-0 bg-black/60 transition-opacity duration-200",
             open ? "opacity-100" : "opacity-0",
           )}
           aria-label="Close sidebar overlay"
@@ -213,7 +213,7 @@ export function HistorySidebar({
         />
         <aside
           className={cn(
-            "absolute inset-y-0 left-0 border-r border-border shadow-[var(--shadow-soft)] transition-transform duration-300 ease-out",
+            "absolute inset-y-0 left-0 border-r border-border shadow-[var(--shadow-soft)] transition-transform duration-200 ease-out",
             open ? "translate-x-0" : "-translate-x-full",
           )}
         >
@@ -223,7 +223,7 @@ export function HistorySidebar({
 
       <aside
         className={cn(
-          "hidden h-full shrink-0 overflow-hidden border-r border-border transition-[width] duration-300 ease-out lg:block",
+          "hidden h-full shrink-0 overflow-hidden border-r border-border transition-[width] duration-200 ease-out lg:block",
           open ? "w-[260px]" : "w-0 border-r-0",
         )}
         aria-hidden={!open}
