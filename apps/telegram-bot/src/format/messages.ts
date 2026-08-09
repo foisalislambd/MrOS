@@ -1,161 +1,199 @@
 import { config } from "../config";
 import type { DemoProject, DemoSession } from "../demo/types";
-import { groupHeading } from "../keyboards/inline";
+import { groupHeading, statusEmoji } from "../keyboards/inline";
 import { escapeRichInline } from "./safe";
 
 export function welcomeMarkdown(opts: {
   name?: string;
   sessionCount: number;
   projectCount: number;
+  activeTitle?: string | null;
   sessions?: Record<DemoSession["group"], DemoSession[]>;
 }) {
   const greet = opts.name
     ? `Hey **${escapeRichInline(opts.name)}**`
-    : "Hey";
+    : "Hey there";
 
   const parts = [
     `# ${config.appName}`,
     ``,
-    `${greet} — your vibe coding control channel is live.`,
+    `${greet} 👋`,
     ``,
-    `| | |`,
-    `|:--|--:|`,
-    `| Sessions | **${opts.sessionCount}** |`,
-    `| Projects | **${opts.projectCount}** |`,
+    `Build apps by chatting — pick a chat below, start a project, or just tell me what you want.`,
     ``,
-    `Pick a session below, create a project, or just type what you want to build.`,
+    `**${opts.sessionCount}** chats · **${opts.projectCount}** projects` +
+      (opts.activeTitle
+        ? ` · active: **${escapeRichInline(opts.activeTitle)}**`
+        : ""),
   ];
 
   if (opts.sessions) {
     const order: DemoSession["group"][] = ["today", "yesterday", "week", "older"];
-    let any = false;
+    let shown = 0;
     for (const g of order) {
       const list = opts.sessions[g];
       if (!list.length) continue;
-      any = true;
-      parts.push(``, `## ${groupHeading(g)}`, ``);
-      for (const s of list) {
-        const tag = s.projectId ? "`project`" : "`chat`";
-        parts.push(`- ${tag} **${escapeRichInline(s.title)}**`);
+      // Keep home scannable — only first two groups in the body
+      if (shown >= 2) break;
+      shown++;
+      parts.push(``, `### ${groupHeading(g)}`);
+      for (const s of list.slice(0, 4)) {
+        const mark = s.projectId ? "◆" : "○";
+        parts.push(`- ${mark} **${escapeRichInline(s.title)}**`);
       }
+      if (list.length > 4) parts.push(`- _+${list.length - 4} more_`);
     }
-    if (!any) {
-      parts.push(``, `_No sessions yet. Create a project or send a prompt._`);
+    if (shown === 0) {
+      parts.push(
+        ``,
+        `_No chats yet. Tap **New chat** or type something like “Build a todo app.”_`,
+      );
     }
   }
 
-  parts.push(
-    ``,
-    `*Demo UI — backend wiring comes next; this Telegram surface stays.*`,
-  );
+  parts.push(``, `_Tip: type anything to start building._`);
 
   return parts.join("\n");
 }
 
 export function sessionsListMarkdown(
   grouped: Record<DemoSession["group"], DemoSession[]>,
+  opts?: { activeId?: string | null },
 ) {
   const order: DemoSession["group"][] = ["today", "yesterday", "week", "older"];
-  const parts: string[] = [`# Sessions\n`];
+  const parts: string[] = [
+    `# Your chats`,
+    ``,
+    `Tap a chat below to open it — or start a new one.`,
+  ];
 
+  let any = false;
   for (const g of order) {
     const list = grouped[g];
     if (!list.length) continue;
-    parts.push(`## ${groupHeading(g)}\n`);
+    any = true;
+    parts.push(``, `### ${groupHeading(g)}`);
     for (const s of list) {
-      const tag = s.projectId ? "`project`" : "`chat`";
-      parts.push(`- ${tag} **${escapeRichInline(s.title)}**`);
+      const mark = s.projectId ? "◆" : "○";
+      const active = opts?.activeId === s.id ? " ← open" : "";
+      parts.push(
+        `- ${mark} **${escapeRichInline(s.title)}**${active}`,
+      );
     }
-    parts.push("");
   }
 
-  if (parts.length === 1) {
-    parts.push("_No sessions yet. Create a project or send a prompt._");
+  if (!any) {
+    parts.push(
+      ``,
+      `_Nothing here yet. Tap **New chat** or describe an app to build._`,
+    );
   }
 
   return parts.join("\n");
 }
 
 export function sessionDetailMarkdown(session: DemoSession) {
-  const recent = session.messages.slice(-4);
+  const recent = session.messages.slice(-3);
   const history =
     recent.length === 0
-      ? "_No messages yet — send a prompt to start._"
+      ? `_Empty chat — send a message like “Add a dark mode toggle.”_`
       : recent
           .map((m) => {
-            const who = m.role === "user" ? "**You**" : "**MrOS**";
+            const who = m.role === "user" ? "**You**" : `**${config.appName}**`;
             const raw =
-              m.content.length > 280 ? `${m.content.slice(0, 280)}…` : m.content;
-            const body = escapeRichInline(raw);
-            const files = m.files?.length
-              ? `\n  - files: ${m.files.map((f) => `\`${f}\``).join(", ")}`
-              : "";
-            return `- ${who}: ${body}${files}`;
+              m.content.length > 160 ? `${m.content.slice(0, 160)}…` : m.content;
+            return `- ${who}: ${escapeRichInline(raw)}`;
           })
           .join("\n");
 
+  const link = session.projectId
+    ? `Linked to a project`
+    : `Not saved as a project yet`;
+
   return `# ${escapeRichInline(session.title)}
 
-| | |
-|:--|--:|
-| Session | \`${session.id.slice(0, 8)}\` |
-| Project | ${session.projectId ? `\`${session.projectId.slice(0, 8)}\`` : "_none_"} |
-| Messages | **${session.messages.length}** |
+${link} · **${session.messages.length}** messages
 
-## Recent
-
+### Recent
 ${history}
 
-Type a message to continue, or run **Demo AI Reply**.
+**What next?** Type a follow-up, or tap **Run demo AI** to see a sample build reply.
 `;
 }
 
 export function projectsListMarkdown(projects: DemoProject[]) {
   if (!projects.length) {
-    return `# Projects\n\n_No projects yet. Tap **New Project** to create one with a UUID._`;
+    return `# Projects
+
+_No projects yet._
+
+Create one to keep a chat, files, and status together.`;
   }
 
   const rows = projects
-    .map(
-      (p) =>
-        `| ${statusLabel(p.status)} | **${escapeRichInline(p.name)}** | \`${p.id.slice(0, 8)}\` |`,
-    )
+    .map((p) => {
+      const st = `${statusEmoji(p.status)} ${statusWord(p.status)}`;
+      return `| ${st} | **${escapeRichInline(p.name)}** |`;
+    })
     .join("\n");
 
   return `# Projects
 
-| Status | Name | ID |
-|:-------|:-----|:---|
+Your saved builds — tap one to open.
+
+| Status | Name |
+|:-------|:-----|
 ${rows}
 `;
 }
 
 export function projectCreatedMarkdown(project: DemoProject, session: DemoSession) {
-  return `# Project created
+  return `# You’re set ✨
 
 **${escapeRichInline(project.name)}** is ready.
 
-| | |
-|:--|--:|
-| Project ID | \`${project.id}\` |
-| Session ID | \`${session.id}\` |
-| Status | **${project.status}** |
+This chat is linked to the project. Tell me what to build, or try the demo AI.
 
-Send a prompt to start building, or tap **Demo AI Reply**.
-`;
+_Ref: \`${project.id.slice(0, 8)}\`_`;
 }
 
 export function projectDetailMarkdown(project: DemoProject) {
   return `# ${escapeRichInline(project.name)}
 
-| | |
-|:--|--:|
-| ID | \`${project.id}\` |
-| Status | **${project.status}** |
-| Updated | ${formatTime(project.updatedAt)} |
+${statusEmoji(project.status)} **${statusWord(project.status)}** · updated ${formatTime(project.updatedAt)}
 
-Use the buttons below to open the linked session or run a demo build.
+Open the chat to keep building, or run a demo reply to preview the agent flow.
 `;
+}
+
+export function newProjectMarkdown() {
+  return `# New project
+
+Create a project to keep this work together.
+
+- **Create now** — ready in one tap
+- **Name it** — choose a title first
+
+Then just describe what you want to build.`;
+}
+
+export function newChatMarkdown() {
+  return `# New chat
+
+Pick an idea to start fast — or type your own prompt anytime.`;
+}
+
+export function composeHintMarkdown() {
+  return `# Your turn
+
+Send a message describing what to build.
+
+Examples:
+- “Build a calm finance dashboard”
+- “SaaS landing with one strong CTA”
+- “Magic-link login screen”
+
+_Or /cancel to go back._`;
 }
 
 export function statusMarkdown(opts: {
@@ -163,53 +201,64 @@ export function statusMarkdown(opts: {
   projectCount: number;
   activeTitle?: string | null;
 }) {
-  return `# ${config.appName} status
+  return `# All good ✅
+
+**${config.appName}** is online.
 
 | | |
 |:--|--:|
-| Channel | **online** |
-| Mode | **demo** (in-memory) |
-| Sessions | **${opts.sessionCount}** |
+| Chats | **${opts.sessionCount}** |
 | Projects | **${opts.projectCount}** |
 | Active | ${opts.activeTitle ? `**${escapeRichInline(opts.activeTitle)}**` : "_none_"} |
 
-Rich Messages + streaming drafts are wired. Connect the API when ready.
-`;
+Demo mode — replies are simulated until the API is connected.`;
 }
 
 export function helpMarkdown() {
-  return `# Help
+  return `# How to use ${config.appName}
 
-## Commands
-- \`/start\` — welcome + sessions
-- \`/new\` — create project (UUID)
-- \`/sessions\` — list sessions
-- \`/projects\` — list projects
-- \`/status\` — bot status
-- \`/demo\` — stream a demo AI reply
-- \`/help\` — this message
+**Easiest path**
+1. Tap a chat, or **New chat**
+2. Type what you want to build
+3. Watch the demo AI reply (tools + preview)
 
-## Keyboard
-Use the bottom keyboard for **New Project**, **Sessions**, **Projects**, and **Demo AI Reply**.
+**Handy commands**
+- /start — home
+- /new — new project
+- /demo — sample AI reply
+- /help — this guide
 
-## Inline
-Type \`@your_bot \` in any chat to search sessions (inline mode).
+**Shortcuts**
+Just send a normal message — it continues your open chat (or starts a new one).
 
-## Tips
-Just send a message — it becomes a prompt in your active session (or opens a new one).
-`;
+Search chats from any chat with \`@\` + this bot’s username.`;
 }
 
-function statusLabel(status: DemoProject["status"]) {
+export function notFoundMarkdown(kind: "chat" | "project") {
+  return kind === "chat"
+    ? `# Chat not found\n\nIt may have been cleared. Head home and pick another.`
+    : `# Project not found\n\nTry the projects list again.`;
+}
+
+export const IDEA_PROMPTS: Record<string, string> = {
+  finance:
+    "Build a clean personal finance dashboard called Flux. Soft light UI, weekly spend chart, recent transactions, and a quick-add expense button.",
+  landing:
+    "Redesign my SaaS landing — bold headline, one CTA, full-bleed product shot.",
+  auth: "Build a magic-link auth flow with email input and a waiting state.",
+  booking: "Appointment booking UI with calendar and time slots.",
+};
+
+function statusWord(status: DemoProject["status"]) {
   switch (status) {
     case "ready":
-      return "✅ ready";
+      return "Ready";
     case "building":
-      return "🔨 building";
+      return "Building";
     case "failed":
-      return "⚠️ failed";
+      return "Needs attention";
     default:
-      return "📝 draft";
+      return "Draft";
   }
 }
 

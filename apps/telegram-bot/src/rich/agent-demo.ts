@@ -1,7 +1,7 @@
 import type { Context } from "grammy";
 import type { DemoSession, DemoToolCall } from "../demo/types";
 import { flattenPrompt, escapeRichInline } from "../format/safe";
-import { sessionActionsKeyboard } from "../keyboards/inline";
+import { afterAgentKeyboard } from "../keyboards/inline";
 import { streamAgentReply } from "./send";
 
 const DEMO_FILES = [
@@ -54,28 +54,29 @@ export function finalAgentMarkdown(opts: {
 }) {
   const { prompt, tools, sessionTitle } = opts;
   const toolRows = tools
-    .map((t) => `| \`${t.name}\` | ${escapeRichInline(String(t.result ?? "ok"))} |`)
+    .map(
+      (t) =>
+        `| \`${t.name}\` | ${escapeRichInline(String(t.result ?? "ok"))} |`,
+    )
     .join("\n");
 
-  const heading = escapeRichInline(sessionTitle ?? "MrOS agent");
+  const heading = escapeRichInline(sessionTitle ?? "Build complete");
 
   return `# ${heading}
 
-Got it — working on:
+Here’s what I put together for:
 
 > ${flattenPrompt(prompt)}
 
-## Tools used
-
+### Tools
 | Tool | Result |
 |:-----|:-------|
 ${toolRows}
 
-## Changes
-
-- Scaffolded layout + hero composition
-- Wired theme tokens and spacing
-- Preview refreshed on port \`5173\`
+### Changes
+- Laid out the main screen
+- Tuned spacing and theme tokens
+- Preview ready on \`5173\`
 
 \`\`\`tsx
 export function Hero() {
@@ -100,7 +101,7 @@ export function Hero() {
 
 ---
 
-*Demo reply — swap this stream for the real agent when the API is ready.*
+Type a follow-up to keep going — or open the chat for history.
 `;
 }
 
@@ -113,7 +114,7 @@ function toolsDraftMarkdown(tools: DemoToolCall[], revealed: number) {
     const args = JSON.stringify(t.args);
     return `${i + 1}. **${t.name}** \`${args}\` → *${t.result ?? "…"}*`;
   });
-  return `## Running tools\n\n${lines.join("\n")}`;
+  return `### Working…\n\n${lines.join("\n")}`;
 }
 
 function escape(text: string) {
@@ -134,13 +135,13 @@ export async function runDemoAgentReply(
   const title = opts.session?.title;
 
   const steps = [
-    { html: thinkingHtml("Planning the build…") },
-    { html: thinkingHtml("Choosing tools…") },
+    { html: thinkingHtml("Understanding your request…") },
+    { html: thinkingHtml("Picking the right tools…") },
     { markdown: toolsDraftMarkdown(tools, 1) },
     { markdown: toolsDraftMarkdown(tools, 2) },
     { markdown: toolsDraftMarkdown(tools, 4) },
     {
-      markdown: `${toolsDraftMarkdown(tools, 4)}\n\n## Drafting UI…\n\nScaffolding hero + tokens.`,
+      markdown: `${toolsDraftMarkdown(tools, 4)}\n\n### Almost there\n\nDrafting the UI…`,
     },
   ];
 
@@ -155,10 +156,8 @@ export async function runDemoAgentReply(
     steps,
     { markdown },
     {
-      reply_markup: opts.session
-        ? sessionActionsKeyboard(opts.session)
-        : undefined,
-      delayMs: 380,
+      reply_markup: opts.session ? afterAgentKeyboard(opts.session) : undefined,
+      delayMs: 320,
     },
   );
 }

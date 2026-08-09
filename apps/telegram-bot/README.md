@@ -1,41 +1,39 @@
 # @mros/telegram-bot
 
-Telegram control channel for MrOS — **full demo UI** on Bot API Rich Messages.
+Telegram control channel for MrOS — human-friendly demo UI on Bot API Rich Messages.
 
-## Features (demo)
+## What it feels like
 
-- `/start` welcome + reply keyboard + inline session list
-- Sessions / projects with UUID create flow
-- Free-text prompts → demo agent reply
-- `sendRichMessageDraft` streaming (`<tg-thinking>`, tool steps) → final `sendRichMessage`
-- Inline mode: `@bot query` searches sessions
-- In-memory per-user store (seeded like the web demo)
+- **/start** → one home card: greeting, recent chats, clear buttons
+- **New chat** → quick ideas (finance, landing, auth…) or type your own
+- **New project** → create now or name it (force-reply)
+- **Try demo** → streaming thinking + tools + polished final reply
+- Navigation edits in place when possible (less chat spam)
+- Short button labels, warm copy, typing indicators
 
 ## Run
 
-Root `.env` (repo root) is loaded automatically — Turbo runs the bot from `apps/telegram-bot`, so the package also falls back to `../../.env`.
+Root `.env` is loaded automatically (package also falls back to `../../.env`).
 
 ```bash
-# repo root .env
 TELEGRAM_BOT_TOKEN=123:ABC
-# optional allowlist
 TELEGRAM_ALLOWED_USER_IDS=123456789
 
 bun --filter @mros/telegram-bot dev
 ```
 
-Enable **Inline Mode** in [@BotFather](https://t.me/BotFather) for session search.
+Enable **Inline Mode** in [@BotFather](https://t.me/BotFather) for chat search.
 
 ## Layout
 
 ```text
 src/
-  index.ts           entry
+  index.ts           entry + bot menu copy
   bot.ts             Bot factory
-  config.ts
+  config.ts          root .env loader
   demo/              in-memory store + seed data
-  keyboards/         reply + inline keyboards
-  format/            rich markdown copy
+  keyboards/         reply + inline (2-per-row)
+  format/            human copy + safe markdown
   rich/              sendRichMessage + agent demo stream
   handlers/          commands, callbacks, inline queries
   middleware/        allowlist

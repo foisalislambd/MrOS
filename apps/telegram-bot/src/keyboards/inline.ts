@@ -4,14 +4,14 @@ import type { DemoProject, DemoSession } from "../demo/types";
 const GROUP_LABEL: Record<DemoSession["group"], string> = {
   today: "Today",
   yesterday: "Yesterday",
-  week: "This week",
+  week: "Earlier this week",
   older: "Older",
 };
 
-type Btn = { text: string; data: string };
+export type Btn = { text: string; data: string };
 
 /** Add buttons 2 per row; leftover single button gets its own row. */
-function addPairs(kb: InlineKeyboard, buttons: Btn[]) {
+export function addPairs(kb: InlineKeyboard, buttons: Btn[]) {
   for (let i = 0; i < buttons.length; i += 2) {
     const a = buttons[i]!;
     const b = buttons[i + 1];
@@ -21,62 +21,78 @@ function addPairs(kb: InlineKeyboard, buttons: Btn[]) {
   return kb;
 }
 
+const NAV_HOME: Btn[] = [
+  { text: "📁 Projects", data: "projects:list" },
+  { text: "❓ Help", data: "help" },
+];
+
 export function sessionsInlineKeyboard(
   sessions: DemoSession[],
-  opts?: { page?: number; pageSize?: number },
+  opts?: { page?: number; pageSize?: number; activeId?: string | null },
 ) {
   const pageSize = opts?.pageSize ?? 6;
   const page = opts?.page ?? 0;
   const start = page * pageSize;
   const slice = sessions.slice(start, start + pageSize);
+  const totalPages = Math.max(1, Math.ceil(sessions.length / pageSize));
   const kb = new InlineKeyboard();
 
   addPairs(
     kb,
-    slice.map((s) => ({
-      text: `${s.projectId ? "◆" : "○"} ${truncate(s.title, 18)}`,
-      data: `session:${s.id}`,
-    })),
+    slice.map((s) => {
+      const active = opts?.activeId === s.id ? "• " : "";
+      const mark = s.projectId ? "◆" : "○";
+      return {
+        text: `${active}${mark} ${truncate(s.title, 16)}`,
+        data: `session:${s.id}`,
+      };
+    }),
   );
 
   const nav: Btn[] = [];
   if (page > 0) nav.push({ text: "‹ Prev", data: `sessions:page:${page - 1}` });
   if (start + pageSize < sessions.length) {
-    nav.push({ text: "Next ›", data: `sessions:page:${page + 1}` });
+    nav.push({
+      text: totalPages > 1 ? `Next › (${page + 1}/${totalPages})` : "Next ›",
+      data: `sessions:page:${page + 1}`,
+    });
+  } else if (page > 0 && totalPages > 1) {
+    nav.push({ text: `${page + 1}/${totalPages}`, data: `sessions:page:${page}` });
   }
   addPairs(kb, nav);
 
+  // Primary actions first, then light nav
   addPairs(kb, [
-    { text: "🆕 New Project", data: "project:create" },
-    { text: "✨ Demo AI", data: "demo:agent" },
-    { text: "📁 Projects", data: "projects:list" },
-    { text: "⚡ Status", data: "status" },
-    { text: "❓ Help", data: "help" },
-    { text: "🏠 Home", data: "home" },
+    { text: "✨ New chat", data: "chat:new" },
+    { text: "🆕 New project", data: "project:create" },
+    { text: "⚡️ Try demo", data: "demo:agent" },
+    ...NAV_HOME,
   ]);
 
   return kb;
 }
 
 export function sessionActionsKeyboard(session: DemoSession) {
-  const kb = new InlineKeyboard();
   const buttons: Btn[] = [
-    { text: "✨ Continue", data: `session:chat:${session.id}` },
-    { text: "✨ Demo reply", data: `demo:agent:${session.id}` },
-    { text: "💬 Sessions", data: "sessions:page:0" },
-    { text: "🏠 Home", data: "home" },
+    { text: "⚡️ Run demo AI", data: `demo:agent:${session.id}` },
+    { text: "💬 All chats", data: "sessions:page:0" },
   ];
 
   if (session.projectId) {
-    buttons.push({ text: "📁 Open project", data: `project:open:${session.projectId}` });
+    buttons.push({
+      text: "📁 Open project",
+      data: `project:open:${session.projectId}`,
+    });
   } else {
     buttons.push({
-      text: "🆕 Attach project",
+      text: "🆕 Save as project",
       data: `project:from_session:${session.id}`,
     });
   }
 
-  return addPairs(kb, buttons);
+  buttons.push({ text: "🏠 Home", data: "home" });
+
+  return addPairs(new InlineKeyboard(), buttons);
 }
 
 export function projectsInlineKeyboard(projects: DemoProject[]) {
@@ -91,8 +107,8 @@ export function projectsInlineKeyboard(projects: DemoProject[]) {
   );
 
   addPairs(kb, [
-    { text: "🆕 Create", data: "project:create" },
-    { text: "💬 Sessions", data: "sessions:page:0" },
+    { text: "🆕 New project", data: "project:create" },
+    { text: "💬 Chats", data: "sessions:page:0" },
     { text: "🏠 Home", data: "home" },
   ]);
 
@@ -101,27 +117,48 @@ export function projectsInlineKeyboard(projects: DemoProject[]) {
 
 export function projectActionsKeyboard(project: DemoProject) {
   return addPairs(new InlineKeyboard(), [
-    { text: "💬 Open session", data: `project:session:${project.id}` },
-    { text: "✨ Demo build", data: `demo:agent:project:${project.id}` },
-    { text: "📁 Projects", data: "projects:list" },
+    { text: "💬 Open chat", data: `project:session:${project.id}` },
+    { text: "⚡️ Demo build", data: `demo:agent:project:${project.id}` },
+    { text: "📁 All projects", data: "projects:list" },
     { text: "🏠 Home", data: "home" },
   ]);
 }
 
 export function createProjectConfirmKeyboard() {
   return addPairs(new InlineKeyboard(), [
-    { text: "⚡ Instant (UUID)", data: "project:create:instant" },
-    { text: "✏️ Name first", data: "project:create:named" },
-    { text: "« Cancel", data: "home" },
+    { text: "✅ Create now", data: "project:create:instant" },
+    { text: "✏️ Name it", data: "project:create:named" },
+    { text: "« Back", data: "home" },
   ]);
 }
 
 export function homeInlineKeyboard() {
   return addPairs(new InlineKeyboard(), [
-    { text: "💬 Sessions", data: "sessions:page:0" },
+    { text: "💬 Chats", data: "sessions:page:0" },
     { text: "📁 Projects", data: "projects:list" },
-    { text: "🆕 New Project", data: "project:create" },
-    { text: "✨ Demo AI", data: "demo:agent" },
+    { text: "🆕 New project", data: "project:create" },
+    { text: "⚡️ Try demo", data: "demo:agent" },
+    { text: "🏠 Home", data: "home" },
+  ]);
+}
+
+export function newChatIdeasKeyboard() {
+  return addPairs(new InlineKeyboard(), [
+    { text: "💳 Finance app", data: "idea:finance" },
+    { text: "🚀 Landing page", data: "idea:landing" },
+    { text: "🔐 Auth flow", data: "idea:auth" },
+    { text: "📅 Booking UI", data: "idea:booking" },
+    { text: "✏️ Own idea…", data: "chat:compose" },
+    { text: "« Back", data: "home" },
+  ]);
+}
+
+export function afterAgentKeyboard(session: DemoSession) {
+  return addPairs(new InlineKeyboard(), [
+    { text: "💬 Open chat", data: `session:${session.id}` },
+    { text: "⚡️ Run again", data: `demo:agent:${session.id}` },
+    { text: "🆕 New project", data: "project:create" },
+    { text: "🏠 Home", data: "home" },
   ]);
 }
 
@@ -129,11 +166,7 @@ export function groupHeading(group: DemoSession["group"]) {
   return GROUP_LABEL[group];
 }
 
-function truncate(text: string, max: number) {
-  return text.length <= max ? text : `${text.slice(0, max - 1)}…`;
-}
-
-function statusEmoji(status: DemoProject["status"]) {
+export function statusEmoji(status: DemoProject["status"]) {
   switch (status) {
     case "ready":
       return "✅";
@@ -144,4 +177,8 @@ function statusEmoji(status: DemoProject["status"]) {
     default:
       return "📝";
   }
+}
+
+function truncate(text: string, max: number) {
+  return text.length <= max ? text : `${text.slice(0, max - 1)}…`;
 }

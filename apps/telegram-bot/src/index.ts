@@ -11,14 +11,24 @@ if (!config.token) {
 const bot = createBot(config.token);
 
 await bot.api.setMyCommands([
-  { command: "start", description: "Welcome + sessions" },
-  { command: "new", description: "Create a project (UUID)" },
-  { command: "sessions", description: "List sessions" },
-  { command: "projects", description: "List projects" },
-  { command: "demo", description: "Stream a demo AI reply" },
-  { command: "status", description: "Bot / platform status" },
-  { command: "help", description: "How to use the bot" },
+  { command: "start", description: "Home — chats & projects" },
+  { command: "new", description: "Create a new project" },
+  { command: "sessions", description: "Browse your chats" },
+  { command: "projects", description: "Browse your projects" },
+  { command: "demo", description: "Try a sample AI build reply" },
+  { command: "status", description: "Check bot status" },
+  { command: "help", description: "How to use MrOS" },
+  { command: "cancel", description: "Cancel and go home" },
 ]);
+
+try {
+  await bot.api.setMyDescription(
+    "MrOS — vibe coding in Telegram. Chat to build apps, manage projects, and preview AI replies.",
+  );
+  await bot.api.setMyShortDescription("Build apps by chatting with MrOS.");
+} catch {
+  /* older Bot API / permissions — ignore */
+}
 
 bot.start({
   onStart: (info) => {

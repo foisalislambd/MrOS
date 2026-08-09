@@ -9,8 +9,11 @@ import {
   openSession,
   promptCreateProject,
   runDemo,
+  runIdea,
+  showComposeHint,
   showHelp,
   showHome,
+  showNewChatIdeas,
   showProjects,
   showSessions,
   showStatus,
@@ -26,6 +29,11 @@ import { projectCreatedMarkdown } from "../format/messages";
 import { fromStartPayload, toStartPayload } from "../format/safe";
 import { sessionActionsKeyboard } from "../keyboards/inline";
 import { sendRichMarkdown } from "../rich/send";
+
+async function ack(ctx: Context, text?: string) {
+  if (!ctx.callbackQuery) return;
+  await ctx.answerCallbackQuery(text ? { text } : undefined).catch(() => undefined);
+}
 
 export function registerHandlers(bot: Bot<Context>) {
   bot.command("start", async (ctx) => {
@@ -67,64 +75,89 @@ export function registerHandlers(bot: Bot<Context>) {
   bot.command("cancel", async (ctx) => {
     if (!ctx.from) return;
     clearAwaitingProjectName(ctx.from.id);
-    await ctx.reply("Cancelled.");
+    await showHome(ctx);
   });
 
   bot.on("callback_query:data", async (ctx) => {
     if (!ctx.from) {
-      await ctx.answerCallbackQuery({ text: "User required", show_alert: true });
+      await ctx.answerCallbackQuery({ text: "Please open this in a private chat.", show_alert: true });
       return;
     }
 
     const data = ctx.callbackQuery.data;
-    await ctx.answerCallbackQuery().catch(() => undefined);
 
     if (data === "home") {
+      await ack(ctx);
       await showHome(ctx);
       return;
     }
     if (data === "projects:list") {
+      await ack(ctx);
       await showProjects(ctx);
       return;
     }
     if (data === "project:create") {
+      await ack(ctx);
       await promptCreateProject(ctx);
       return;
     }
     if (data === "project:create:instant") {
+      await ack(ctx, "Creating…");
       await createProjectInstant(ctx);
       return;
     }
     if (data === "project:create:named") {
+      await ack(ctx);
       await askProjectName(ctx);
       return;
     }
     if (data === "demo:agent") {
+      await ack(ctx, "Running demo…");
       await runDemo(ctx);
       return;
     }
     if (data === "status") {
+      await ack(ctx);
       await showStatus(ctx);
       return;
     }
     if (data === "help") {
+      await ack(ctx);
       await showHelp(ctx);
+      return;
+    }
+    if (data === "chat:new") {
+      await ack(ctx);
+      await showNewChatIdeas(ctx);
+      return;
+    }
+    if (data === "chat:compose") {
+      await ack(ctx);
+      await showComposeHint(ctx);
+      return;
+    }
+
+    const ideaMatch = /^idea:([a-z]+)$/.exec(data);
+    if (ideaMatch) {
+      await ack(ctx, "Starting…");
+      await runIdea(ctx, ideaMatch[1]!);
       return;
     }
 
     const pageMatch = /^sessions:page:(\d+)$/.exec(data);
     if (pageMatch) {
-      await showSessions(ctx, Number(pageMatch[1]), true);
+      await ack(ctx);
+      await showSessions(ctx, Number(pageMatch[1]));
       return;
     }
 
-    // More specific patterns first
     const demoProject = /^demo:agent:project:(.+)$/.exec(data);
     if (demoProject) {
       const projectId = demoProject[1]!;
       const session = getUser(ctx.from.id).sessions.find(
         (s) => s.projectId === projectId,
       );
+      await ack(ctx, "Running demo…");
       if (session) await runDemo(ctx, session.id);
       else if (getProject(ctx.from.id, projectId)) await runDemo(ctx);
       return;
@@ -132,12 +165,14 @@ export function registerHandlers(bot: Bot<Context>) {
 
     const demoSession = /^demo:agent:(.+)$/.exec(data);
     if (demoSession) {
+      await ack(ctx, "Running demo…");
       await runDemo(ctx, demoSession[1]);
       return;
     }
 
     const sessionChat = /^session:chat:(.+)$/.exec(data);
     if (sessionChat) {
+      await ack(ctx);
       setActiveSession(ctx.from.id, sessionChat[1]!);
       await openSession(ctx, sessionChat[1]!);
       return;
@@ -148,16 +183,18 @@ export function registerHandlers(bot: Bot<Context>) {
       const session = getUser(ctx.from.id).sessions.find(
         (s) => s.projectId === projectSession[1],
       );
+      await ack(ctx);
       if (session) await openSession(ctx, session.id);
-      else await ctx.reply("No session linked to this project yet.");
+      else await ctx.reply("This project doesn’t have a chat yet. Create one from Home.");
       return;
     }
 
     const fromSession = /^project:from_session:(.+)$/.exec(data);
     if (fromSession) {
       const attached = attachProjectToSession(ctx.from.id, fromSession[1]!);
+      await ack(ctx, attached ? "Saved as project" : "Not found");
       if (!attached) {
-        await ctx.reply("Session not found.");
+        await ctx.reply("Couldn’t find that chat.");
         return;
       }
       await sendRichMarkdown(
@@ -170,17 +207,20 @@ export function registerHandlers(bot: Bot<Context>) {
 
     const projectOpen = /^project:open:(.+)$/.exec(data);
     if (projectOpen) {
+      await ack(ctx);
       await openProject(ctx, projectOpen[1]!);
       return;
     }
 
     const sessionMatch = /^session:(.+)$/.exec(data);
     if (sessionMatch) {
+      await ack(ctx);
       await openSession(ctx, sessionMatch[1]!);
       return;
     }
 
-    await ctx.reply("Unknown action.");
+    await ack(ctx, "Unknown action");
+    await showHome(ctx);
   });
 
   bot.on("inline_query", async (ctx) => {
@@ -200,7 +240,7 @@ export function registerHandlers(bot: Bot<Context>) {
         : `Chat · ${s.messages.length} messages`,
       input_message_content: {
         rich_message: {
-          markdown: `# ${s.title.replace(/[`*|_]/g, "")}\n\nSession \`${s.id}\` — open MrOS bot and pick it from **Sessions**.`,
+          markdown: `**${s.title.replace(/[`*|_]/g, "")}**\n\nOpen in ${username ? `@${username}` : "MrOS"} to continue this chat.`,
         },
       },
       reply_markup: username
@@ -208,7 +248,7 @@ export function registerHandlers(bot: Bot<Context>) {
             inline_keyboard: [
               [
                 {
-                  text: "Open in MrOS",
+                  text: "Open chat",
                   url: `https://t.me/${username}?start=${toStartPayload(s.id)}`,
                 },
               ],

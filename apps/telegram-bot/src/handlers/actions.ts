@@ -1,4 +1,5 @@
 import type { Context } from "grammy";
+import type { InlineKeyboardMarkup, InputRichMessage, ReplyKeyboardMarkup } from "grammy/types";
 import {
   createSessionFromPrompt,
   getSession,
@@ -12,7 +13,12 @@ import {
   clearAwaitingProjectName,
 } from "../demo/store";
 import {
+  composeHintMarkdown,
   helpMarkdown,
+  IDEA_PROMPTS,
+  newChatMarkdown,
+  newProjectMarkdown,
+  notFoundMarkdown,
   projectCreatedMarkdown,
   projectDetailMarkdown,
   projectsListMarkdown,
@@ -24,6 +30,7 @@ import {
 import {
   createProjectConfirmKeyboard,
   homeInlineKeyboard,
+  newChatIdeasKeyboard,
   projectActionsKeyboard,
   projectsInlineKeyboard,
   sessionActionsKeyboard,
@@ -39,60 +46,82 @@ function uid(ctx: Context) {
   return id;
 }
 
-function escapeHtml(text: string) {
-  return text
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;");
+async function present(
+  ctx: Context,
+  markdown: string,
+  reply_markup?: InlineKeyboardMarkup | ReplyKeyboardMarkup,
+  opts?: { edit?: boolean },
+) {
+  const canEdit =
+    opts?.edit !== false &&
+    !!ctx.callbackQuery?.message &&
+    !!ctx.chat &&
+    // Only edit when markup is inline (reply keyboards can't edit onto old msgs usefully)
+    !(reply_markup && "keyboard" in reply_markup);
+
+  if (canEdit) {
+    try {
+      await ctx.api.editMessageText(
+        ctx.chat!.id,
+        ctx.callbackQuery!.message!.message_id,
+        { markdown } satisfies InputRichMessage,
+        { reply_markup: reply_markup as InlineKeyboardMarkup | undefined },
+      );
+      return;
+    } catch {
+      /* send fresh */
+    }
+  }
+
+  await sendRichMarkdown(ctx, markdown, { reply_markup });
 }
 
 export async function showHome(ctx: Context) {
   clearAwaitingProjectName(uid(ctx));
   const user = getUser(uid(ctx));
-  const name = ctx.from?.first_name;
-  await sendRichMarkdown(
+  const active = user.activeSessionId
+    ? user.sessions.find((s) => s.id === user.activeSessionId)
+    : undefined;
+
+  await present(
     ctx,
     welcomeMarkdown({
-      name,
+      name: ctx.from?.first_name,
       sessionCount: user.sessions.length,
       projectCount: user.projects.length,
+      activeTitle: active?.title,
       sessions: listSessionsGrouped(uid(ctx)),
     }),
-    {
-      reply_markup: sessionsInlineKeyboard(user.sessions, { page: 0 }),
-    },
+    sessionsInlineKeyboard(user.sessions, {
+      page: 0,
+      activeId: user.activeSessionId,
+    }),
   );
 }
 
-export async function showSessions(ctx: Context, page = 0, edit = false) {
+export async function showSessions(ctx: Context, page = 0) {
   clearAwaitingProjectName(uid(ctx));
   const user = getUser(uid(ctx));
-  const md = sessionsListMarkdown(listSessionsGrouped(uid(ctx)));
-  const markup = sessionsInlineKeyboard(user.sessions, { page });
-
-  if (edit && ctx.callbackQuery?.message && ctx.chat) {
-    try {
-      await ctx.api.editMessageText(
-        ctx.chat.id,
-        ctx.callbackQuery.message.message_id,
-        { markdown: md },
-        { reply_markup: markup },
-      );
-      return;
-    } catch {
-      /* fall through to send a fresh message */
-    }
-  }
-
-  await sendRichMarkdown(ctx, md, { reply_markup: markup });
+  await present(
+    ctx,
+    sessionsListMarkdown(listSessionsGrouped(uid(ctx)), {
+      activeId: user.activeSessionId,
+    }),
+    sessionsInlineKeyboard(user.sessions, {
+      page,
+      activeId: user.activeSessionId,
+    }),
+  );
 }
 
 export async function showProjects(ctx: Context) {
   clearAwaitingProjectName(uid(ctx));
   const user = getUser(uid(ctx));
-  await sendRichMarkdown(ctx, projectsListMarkdown(user.projects), {
-    reply_markup: projectsInlineKeyboard(user.projects),
-  });
+  await present(
+    ctx,
+    projectsListMarkdown(user.projects),
+    projectsInlineKeyboard(user.projects),
+  );
 }
 
 export async function showStatus(ctx: Context) {
@@ -101,71 +130,75 @@ export async function showStatus(ctx: Context) {
   const active = user.activeSessionId
     ? user.sessions.find((s) => s.id === user.activeSessionId)
     : undefined;
-  await sendRichMarkdown(
+  await present(
     ctx,
     statusMarkdown({
       sessionCount: user.sessions.length,
       projectCount: user.projects.length,
       activeTitle: active?.title,
     }),
-    { reply_markup: homeInlineKeyboard() },
+    homeInlineKeyboard(),
   );
 }
 
 export async function showHelp(ctx: Context) {
   clearAwaitingProjectName(uid(ctx));
-  await sendRichMarkdown(ctx, helpMarkdown(), {
-    reply_markup: homeInlineKeyboard(),
-  });
+  await present(ctx, helpMarkdown(), homeInlineKeyboard());
 }
 
 export async function openSession(ctx: Context, sessionId: string) {
   clearAwaitingProjectName(uid(ctx));
   const session = getSession(uid(ctx), sessionId);
   if (!session) {
-    await ctx.reply("Session not found.");
+    await present(ctx, notFoundMarkdown("chat"), homeInlineKeyboard());
     return;
   }
   setActiveSession(uid(ctx), session.id);
-  await sendRichMarkdown(ctx, sessionDetailMarkdown(session), {
-    reply_markup: sessionActionsKeyboard(session),
-  });
+  await present(ctx, sessionDetailMarkdown(session), sessionActionsKeyboard(session));
 }
 
 export async function openProject(ctx: Context, projectId: string) {
   clearAwaitingProjectName(uid(ctx));
   const project = getProject(uid(ctx), projectId);
   if (!project) {
-    await ctx.reply("Project not found.");
+    await present(ctx, notFoundMarkdown("project"), homeInlineKeyboard());
     return;
   }
-  await sendRichMarkdown(ctx, projectDetailMarkdown(project), {
-    reply_markup: projectActionsKeyboard(project),
-  });
+  await present(ctx, projectDetailMarkdown(project), projectActionsKeyboard(project));
 }
 
 export async function promptCreateProject(ctx: Context) {
   clearAwaitingProjectName(uid(ctx));
-  await sendRichMarkdown(
-    ctx,
-    `# New project\n\nCreate instantly with a **UUID**, or name it first.`,
-    { reply_markup: createProjectConfirmKeyboard() },
-  );
+  await present(ctx, newProjectMarkdown(), createProjectConfirmKeyboard());
 }
 
 export async function createProjectInstant(ctx: Context, name?: string) {
   const { project, session } = createProject(uid(ctx), name);
-  await sendRichMarkdown(ctx, projectCreatedMarkdown(project, session), {
-    reply_markup: sessionActionsKeyboard(session),
-  });
+  await present(
+    ctx,
+    projectCreatedMarkdown(project, session),
+    sessionActionsKeyboard(session),
+  );
 }
 
 export async function askProjectName(ctx: Context) {
   const user = getUser(uid(ctx));
   user.awaitingProjectName = true;
-  await ctx.reply(
-    "Send a project name (or /cancel). A UUID will be assigned automatically.",
-  );
+  await ctx.reply("What should we call this project?", {
+    reply_markup: { force_reply: true, input_field_placeholder: "e.g. Flux finance" },
+  });
+}
+
+export async function showNewChatIdeas(ctx: Context) {
+  clearAwaitingProjectName(uid(ctx));
+  await present(ctx, newChatMarkdown(), newChatIdeasKeyboard());
+}
+
+export async function showComposeHint(ctx: Context) {
+  const user = getUser(uid(ctx));
+  user.awaitingProjectName = false;
+  // reuse flag? better a compose mode - for cancel just clear via home
+  await present(ctx, composeHintMarkdown(), homeInlineKeyboard());
 }
 
 export async function handlePrompt(ctx: Context, text: string) {
@@ -197,16 +230,14 @@ export async function handlePrompt(ctx: Context, text: string) {
     updateProjectStatus(uid(ctx), session.projectId, "building");
   }
 
-  await ctx.reply(`Working in <b>${escapeHtml(session.title)}</b>…`, {
-    parse_mode: "HTML",
-  });
+  await ctx.api.sendChatAction(ctx.chat!.id, "typing").catch(() => undefined);
 
   try {
     await runDemoAgentReply(ctx, { prompt, session });
     appendMessage(uid(ctx), session.id, {
       id: crypto.randomUUID(),
       role: "assistant",
-      content: "Demo agent reply completed (see rich message above).",
+      content: "Demo agent reply completed.",
       createdAt: new Date().toISOString(),
       files: ["src/App.tsx", "src/components/Hero.tsx"],
     });
@@ -217,8 +248,20 @@ export async function handlePrompt(ctx: Context, text: string) {
     if (session.projectId) {
       updateProjectStatus(uid(ctx), session.projectId, "failed");
     }
+    await ctx.reply("Something went wrong showing the demo reply. Try again in a moment.");
     throw err;
   }
+}
+
+export async function runIdea(ctx: Context, ideaKey: string) {
+  const prompt = IDEA_PROMPTS[ideaKey];
+  if (!prompt) {
+    await showNewChatIdeas(ctx);
+    return;
+  }
+  // Force a fresh chat for idea starters
+  setActiveSession(uid(ctx), null);
+  await handlePrompt(ctx, prompt);
 }
 
 export async function runDemo(ctx: Context, sessionId?: string) {
@@ -232,7 +275,7 @@ export async function runDemo(ctx: Context, sessionId?: string) {
 
   const prompt =
     session?.messages.find((m) => m.role === "user")?.content ??
-    "Build a calm landing page for MrOS with a strong brand mark and one CTA.";
+    IDEA_PROMPTS.landing!;
 
   if (session) {
     setActiveSession(uid(ctx), session.id);
@@ -252,13 +295,17 @@ export async function runDemo(ctx: Context, sessionId?: string) {
     }
   }
 
+  if (ctx.chat) {
+    await ctx.api.sendChatAction(ctx.chat.id, "typing").catch(() => undefined);
+  }
+
   try {
     await runDemoAgentReply(ctx, { prompt, session });
     if (session) {
       appendMessage(uid(ctx), session.id, {
         id: crypto.randomUUID(),
         role: "assistant",
-        content: "Demo agent reply completed (see rich message above).",
+        content: "Demo agent reply completed.",
         createdAt: new Date().toISOString(),
         files: ["src/App.tsx", "src/components/Hero.tsx"],
       });
@@ -270,6 +317,7 @@ export async function runDemo(ctx: Context, sessionId?: string) {
     if (session?.projectId) {
       updateProjectStatus(uid(ctx), session.projectId, "failed");
     }
+    await ctx.reply("Couldn’t run the demo just now. Try again?");
     throw err;
   }
 }

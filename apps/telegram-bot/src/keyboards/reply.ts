@@ -1,12 +1,12 @@
 import { Keyboard } from "grammy";
 
 export const BTN = {
-  newProject: "🆕 New Project",
-  sessions: "💬 Sessions",
+  newProject: "🆕 New project",
+  sessions: "💬 Chats",
   projects: "📁 Projects",
   status: "⚡ Status",
   help: "❓ Help",
-  demoAgent: "✨ Demo AI Reply",
+  demoAgent: "⚡️ Try demo",
 } as const;
 
 export function mainReplyKeyboard() {
