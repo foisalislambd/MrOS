@@ -14,7 +14,7 @@ const buttonVariants = cva(
         secondary:
           "bg-fg text-bg-elevated shadow-sm hover:opacity-90",
         ghost:
-          "text-icon hover:bg-icon-hover hover:text-icon-active",
+          "text-white/90 hover:bg-icon-hover hover:text-white",
         outline:
           "border border-border bg-transparent text-foreground hover:bg-muted/80",
         soft: "bg-bg-elevated text-foreground ring-1 ring-border hover:bg-muted",

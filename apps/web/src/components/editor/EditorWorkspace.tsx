@@ -356,12 +356,12 @@ export function EditorWorkspace() {
               <IconLogo className="hidden h-6 w-6 shrink-0 text-accent sm:block" />
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <span className="truncate text-sm font-semibold tracking-tight">
+                  <span className="truncate text-sm font-semibold tracking-tight text-white">
                     {projectTitle}
                   </span>
-                  <ChevronRight className="hidden size-3.5 shrink-0 text-icon sm:block" strokeWidth={1.6} />
+                  <ChevronRight className="hidden size-3.5 shrink-0 text-white/80 sm:block" strokeWidth={1.6} />
                 </div>
-                <p className="hidden truncate text-[11px] text-fg-subtle sm:block">
+                <p className="hidden truncate text-[11px] text-white/50 sm:block">
                   MrOS workspace
                 </p>
               </div>
@@ -411,7 +411,7 @@ export function EditorWorkspace() {
               )}
             >
               <div className="flex items-center justify-between border-b border-border px-3 py-2.5 sm:px-4">
-                <span className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                <span className="text-xs font-semibold tracking-wide text-white/70 uppercase">
                   Chat
                 </span>
                 <Badge variant="soft">Build mode</Badge>
@@ -421,8 +421,8 @@ export function EditorWorkspace() {
                 {messages.length === 0 && !building && (
                   <div className="flex h-full min-h-[200px] flex-col items-center justify-center px-4 text-center">
                     <IconLogo className="mb-3 h-9 w-9 text-accent" />
-                    <p className="text-sm font-semibold">Start building</p>
-                    <p className="mt-1 max-w-[240px] text-xs leading-relaxed text-muted-foreground">
+                    <p className="text-sm font-semibold text-white">Start building</p>
+                    <p className="mt-1 max-w-[240px] text-xs leading-relaxed text-white/60">
                       Describe an app or a change. MrOS will update the live preview as you chat.
                     </p>
                   </div>
@@ -435,22 +435,22 @@ export function EditorWorkspace() {
                     style={{ animationDelay: `${Math.min(i, 4) * 40}ms` }}
                   >
                     {msg.role === "user" ? (
-                      <div className="ml-2 rounded-2xl rounded-br-md bg-bg-elevated px-3.5 py-2.5 text-sm leading-relaxed shadow-[var(--shadow-soft)] ring-1 ring-border sm:ml-6">
+                      <div className="ml-2 rounded-2xl rounded-br-md bg-bg-elevated px-3.5 py-2.5 text-sm leading-relaxed text-white shadow-[var(--shadow-soft)] ring-1 ring-border sm:ml-6">
                         {msg.content}
                       </div>
                     ) : (
                       <div className="space-y-2.5">
                         <div className="flex items-center gap-2">
                           <IconLogo className="h-5 w-5 text-accent" />
-                          <span className="text-xs font-semibold text-muted-foreground">MrOS</span>
+                          <span className="text-xs font-semibold text-white/70">MrOS</span>
                         </div>
-                        <p className="text-sm leading-relaxed text-foreground">{msg.content}</p>
+                        <p className="text-sm leading-relaxed text-white">{msg.content}</p>
                         {msg.files && msg.files.length > 0 && (
                           <ul className="flex flex-wrap gap-1.5">
                             {msg.files.map((file) => (
                               <li
                                 key={file}
-                                className="inline-flex max-w-full items-center gap-1.5 rounded-md bg-muted px-2 py-1 font-mono text-[11px] text-muted-foreground"
+                                className="inline-flex max-w-full items-center gap-1.5 rounded-md bg-muted px-2 py-1 font-mono text-[11px] text-white/70"
                               >
                                 <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-success" />
                                 <span className="truncate">{file}</span>
@@ -467,9 +467,9 @@ export function EditorWorkspace() {
                   <div className="animate-fade-up space-y-2">
                     <div className="flex items-center gap-2">
                       <IconLogo className="h-5 w-5 text-accent" />
-                      <span className="text-xs font-semibold text-muted-foreground">MrOS</span>
+                      <span className="text-xs font-semibold text-white/70">MrOS</span>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-2 text-sm text-white/65">
                       <span className="flex gap-1">
                         <span className="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-accent" />
                         <span
@@ -517,7 +517,7 @@ export function EditorWorkspace() {
                     </Button>
                   </div>
                 </div>
-                <p className="mt-2 hidden text-center text-[11px] text-fg-subtle sm:block">
+                <p className="mt-2 hidden text-center text-[11px] text-white/40 sm:block">
                   Enter to send · Shift+Enter for new line
                 </p>
               </div>
@@ -579,7 +579,7 @@ export function EditorWorkspace() {
                       type="button"
                       variant="ghost"
                       size="sm"
-                      className="hidden h-7 gap-1 px-2 text-icon hover:bg-icon-hover hover:text-icon-active sm:inline-flex"
+                      className="hidden h-7 gap-1 px-2 text-white/90 hover:bg-icon-hover hover:text-white sm:inline-flex"
                     >
                       <Frame className="size-3.5" strokeWidth={1.6} />
                       <span className="hidden md:inline">Select</span>
@@ -588,7 +588,7 @@ export function EditorWorkspace() {
                 )}
 
                 <div className="ml-auto flex shrink-0 items-center gap-1">
-                  <span className="mr-1 hidden items-center gap-1.5 text-[11px] text-fg-subtle md:inline-flex">
+                  <span className="mr-1 hidden items-center gap-1.5 text-[11px] text-white/50 md:inline-flex">
                     <span className="h-1.5 w-1.5 rounded-full bg-success" />
                     Live
                   </span>

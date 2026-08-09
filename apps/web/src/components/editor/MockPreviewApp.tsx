@@ -12,7 +12,7 @@ const DAYS = ["M", "T", "W", "T", "F", "S", "S"];
 
 export function MockPreviewApp() {
   return (
-    <div className="flex h-full w-full flex-col overflow-auto bg-[#121214] text-foreground">
+    <div className="flex h-full w-full flex-col overflow-auto bg-[#121214] text-white">
       <div className="relative overflow-hidden border-b border-border px-4 pt-5 pb-6 sm:px-6 sm:pt-6 sm:pb-7">
         <div
           className="pointer-events-none absolute inset-0 opacity-90"
@@ -30,7 +30,7 @@ export function MockPreviewApp() {
               <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">
                 $12,480.00
               </h1>
-              <p className="mt-1 text-sm text-muted-foreground">Available balance · Aug 2026</p>
+              <p className="mt-1 text-sm text-white/60">Available balance · Aug 2026</p>
             </div>
             <Button type="button" size="sm" className="w-fit rounded-xl px-3.5">
               + Expense
@@ -49,8 +49,8 @@ export function MockPreviewApp() {
                   i === 2 ? "col-span-2 sm:col-span-1" : ""
                 }`}
               >
-                <p className="text-[11px] text-muted-foreground">{stat.label}</p>
-                <p className="mt-0.5 text-base font-semibold tracking-tight">{stat.value}</p>
+                <p className="text-[11px] text-white/55">{stat.label}</p>
+                <p className="mt-0.5 text-base font-semibold tracking-tight text-white">{stat.value}</p>
               </div>
             ))}
           </div>
@@ -60,8 +60,8 @@ export function MockPreviewApp() {
       <div className="space-y-5 px-4 py-5 sm:space-y-6 sm:px-6 sm:py-6">
         <section>
           <div className="mb-3 flex items-end justify-between gap-2">
-            <h2 className="text-sm font-semibold">Weekly spend</h2>
-            <span className="shrink-0 text-[11px] text-muted-foreground">vs last week −8%</span>
+            <h2 className="text-sm font-semibold text-white">Weekly spend</h2>
+            <span className="shrink-0 text-[11px] text-white/55">vs last week −8%</span>
           </div>
           <div className="flex h-28 items-end gap-1.5 rounded-2xl bg-bg-elevated p-3 ring-1 ring-border sm:h-36 sm:gap-2 sm:p-4">
             {BARS.map((h, i) => (
@@ -70,14 +70,14 @@ export function MockPreviewApp() {
                   className="w-full rounded-md bg-gradient-to-t from-accent to-[#ff9a7a] transition-all"
                   style={{ height: `${h}%` }}
                 />
-                <span className="text-[10px] font-medium text-fg-subtle">{DAYS[i]}</span>
+                <span className="text-[10px] font-medium text-white/40">{DAYS[i]}</span>
               </div>
             ))}
           </div>
         </section>
 
         <section>
-          <h2 className="mb-3 text-sm font-semibold">Recent</h2>
+          <h2 className="mb-3 text-sm font-semibold text-white">Recent</h2>
           <ul className="divide-y divide-border overflow-hidden rounded-2xl bg-bg-elevated ring-1 ring-border">
             {TRANSACTIONS.map((tx) => (
               <li key={tx.name + tx.time} className="flex items-center gap-3 px-3 py-3 sm:px-4 sm:py-3.5">
@@ -85,14 +85,14 @@ export function MockPreviewApp() {
                   {tx.name.slice(0, 1)}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium">{tx.name}</p>
-                  <p className="truncate text-[11px] text-muted-foreground">
+                  <p className="truncate text-sm font-medium text-white">{tx.name}</p>
+                  <p className="truncate text-[11px] text-white/55">
                     {tx.cat} · {tx.time}
                   </p>
                 </div>
                 <span
                   className={`shrink-0 text-sm font-semibold tabular-nums ${
-                    tx.amount.startsWith("+") ? "text-success" : "text-foreground"
+                    tx.amount.startsWith("+") ? "text-success" : "text-white"
                   }`}
                 >
                   {tx.amount}

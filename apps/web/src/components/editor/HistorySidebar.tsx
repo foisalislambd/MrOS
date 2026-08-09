@@ -76,7 +76,7 @@ export function HistorySidebar({
         </IconButton>
         <div className="ml-0.5 flex min-w-0 items-center gap-2">
           <IconLogo className="h-5 w-5 shrink-0 text-accent" />
-          <span className="truncate text-sm font-semibold tracking-tight">MrOS</span>
+          <span className="truncate text-sm font-semibold tracking-tight text-white">MrOS</span>
         </div>
         <IconButton
           label="New chat"
@@ -93,7 +93,7 @@ export function HistorySidebar({
           type="button"
           variant="soft"
           onClick={onNewChat}
-          className="h-auto w-full justify-start gap-2.5 rounded-xl px-3 py-2.5 text-sm font-medium"
+          className="h-auto w-full justify-start gap-2.5 rounded-xl px-3 py-2.5 text-sm font-medium text-white"
         >
           <SquarePen className="size-4 text-accent" strokeWidth={1.6} />
           New chat
@@ -102,7 +102,7 @@ export function HistorySidebar({
 
       <div className="px-2.5 pb-2">
         <label className="flex items-center gap-2 rounded-xl bg-white/[0.04] px-2.5 py-1.5 ring-1 ring-transparent transition focus-within:bg-bg-elevated focus-within:ring-border">
-          <Search className="size-3.5 shrink-0 text-icon" strokeWidth={1.6} />
+          <Search className="size-3.5 shrink-0 text-white/75" strokeWidth={1.6} />
           <Input
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
@@ -116,7 +116,7 @@ export function HistorySidebar({
         <Button
           type="button"
           variant="ghost"
-          className="h-auto w-full justify-start gap-2.5 rounded-lg px-2.5 py-2 text-sm text-icon hover:bg-icon-hover hover:text-icon-active"
+          className="h-auto w-full justify-start gap-2.5 rounded-lg px-2.5 py-2 text-sm text-white/90 hover:bg-icon-hover hover:text-white"
         >
           <Library className="size-4" strokeWidth={1.6} />
           Library
@@ -124,7 +124,7 @@ export function HistorySidebar({
         <Button
           type="button"
           variant="ghost"
-          className="h-auto w-full justify-start gap-2.5 rounded-lg px-2.5 py-2 text-sm text-icon hover:bg-icon-hover hover:text-icon-active"
+          className="h-auto w-full justify-start gap-2.5 rounded-lg px-2.5 py-2 text-sm text-white/90 hover:bg-icon-hover hover:text-white"
         >
           <Folder className="size-4" strokeWidth={1.6} />
           Projects
@@ -137,7 +137,7 @@ export function HistorySidebar({
         ) : (
           grouped.map(({ group, items }) => (
             <div key={group} className="mb-3">
-              <p className="px-2.5 pb-1.5 pt-1 text-[11px] font-semibold tracking-wide text-fg-subtle uppercase">
+              <p className="px-2.5 pb-1.5 pt-1 text-[11px] font-semibold tracking-wide text-white/40 uppercase">
                 {GROUP_LABEL[group]}
               </p>
               <ul className="space-y-0.5">
@@ -151,8 +151,8 @@ export function HistorySidebar({
                         className={cn(
                           "flex w-full items-center rounded-lg px-2.5 py-2 text-left text-[13px] leading-snug transition-colors duration-200",
                           active
-                            ? "bg-bg-elevated font-medium text-fg ring-1 ring-border"
-                            : "text-icon hover:bg-icon-hover hover:text-icon-active",
+                            ? "bg-bg-elevated font-medium text-white ring-1 ring-border"
+                            : "text-white/85 hover:bg-icon-hover hover:text-white",
                         )}
                       >
                         <span className="truncate pr-6">{thread.title}</span>
@@ -184,10 +184,10 @@ export function HistorySidebar({
             IF
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium text-fg">Ifois</p>
-            <p className="truncate text-[11px] text-fg-subtle">Free plan</p>
+            <p className="truncate text-sm font-medium text-white">Ifois</p>
+            <p className="truncate text-[11px] text-white/50">Free plan</p>
           </div>
-          <Settings className="size-4 shrink-0 text-icon" strokeWidth={1.6} />
+          <Settings className="size-4 shrink-0 text-white/85" strokeWidth={1.6} />
         </Button>
       </div>
     </div>

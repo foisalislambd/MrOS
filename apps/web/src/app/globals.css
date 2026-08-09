@@ -7,9 +7,9 @@
   --bg-muted: #1e1e21;
   --bg-chat: #111113;
   --bg-sidebar: #0a0a0b;
-  --fg: #ededec;
-  --fg-muted: #9b9b98;
-  --fg-subtle: #6a6a67;
+  --fg: #ffffff;
+  --fg-muted: #c8c8c5;
+  --fg-subtle: #9a9a96;
   --border: #2a2a2e;
   --border-strong: #3a3a40;
   --accent: #ff6b4a;
@@ -23,9 +23,9 @@
   --radius-control: 10px;
 
   /* Smoother icon palette */
-  --icon: #8a8a87;
-  --icon-active: #d4d4d1;
-  --icon-hover-bg: rgba(255, 255, 255, 0.055);
+  --icon: #e8e8e6;
+  --icon-active: #ffffff;
+  --icon-hover-bg: rgba(255, 255, 255, 0.08);
 
   /* shadcn semantic tokens mapped to MrOS theme */
   --background: var(--bg);
