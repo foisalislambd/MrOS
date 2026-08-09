@@ -19,6 +19,7 @@ import {
 import { HistorySidebar, type ChatThread } from "./HistorySidebar";
 import { IconButton } from "./IconButton";
 import { IconLogo } from "./icons";
+import { CodeExplorer } from "./CodeExplorer";
 import { MockPreviewApp } from "./MockPreviewApp";
 import { toast } from "./Toast";
 import { Badge } from "@/components/ui/badge";
@@ -594,11 +595,11 @@ export function EditorWorkspace() {
                 </div>
               </div>
 
-              <div className="relative flex min-h-0 flex-1 items-stretch justify-center p-2 sm:p-3 md:p-4">
+              <div className="relative flex min-h-0 flex-1 items-stretch justify-center">
                 {tab === "preview" ? (
                   <div
                     key={refreshKey}
-                    className="flex h-full max-h-full w-full overflow-hidden rounded-[var(--radius-panel)] border border-border bg-bg-elevated shadow-[var(--shadow-soft)]"
+                    className="flex h-full max-h-full w-full overflow-hidden border-border bg-bg-elevated"
                     style={{
                       width: isDesktop ? deviceWidth : "100%",
                       maxWidth: "100%",
@@ -607,9 +608,7 @@ export function EditorWorkspace() {
                     <MockPreviewApp />
                   </div>
                 ) : (
-                  <div className="h-full w-full overflow-auto rounded-[var(--radius-panel)] border border-border bg-preview-chrome p-3 font-mono text-[12px] leading-6 text-[#e8e4de] shadow-[var(--shadow-soft)] sm:p-5 sm:text-[12.5px]">
-                    <pre className="whitespace-pre-wrap break-words">{CODE_SNIPPET}</pre>
-                  </div>
+                  <CodeExplorer />
                 )}
               </div>
             </section>
@@ -619,18 +618,3 @@ export function EditorWorkspace() {
     </TooltipProvider>
   );
 }
-
-const CODE_SNIPPET = `// src/App.tsx
-export default function App() {
-  return (
-    <main className="flux-shell">
-      <header>
-        <p className="eyebrow">Flux</p>
-        <h1>$12,480.00</h1>
-        <p>Available balance</p>
-      </header>
-      <SpendChart />
-      <Transactions />
-    </main>
-  );
-}`;
