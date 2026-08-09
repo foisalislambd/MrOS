@@ -230,6 +230,11 @@ body {
   backdrop-filter: blur(10px);
 }
 
+.app-shell-sidebar {
+  background: color-mix(in srgb, var(--bg-elevated) 92%, transparent);
+  backdrop-filter: blur(10px);
+}
+
 .scrollbar-thin {
   scrollbar-width: thin;
   scrollbar-color: var(--border) transparent;

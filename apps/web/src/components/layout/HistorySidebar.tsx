@@ -116,7 +116,7 @@ export function HistorySidebar({
   const panel = (
     <div
       ref={panelRef}
-      className="flex h-full w-[min(100vw,280px)] flex-col bg-bg-sidebar lg:w-[260px]"
+      className="app-shell-sidebar flex h-full w-[min(100vw,280px)] flex-col lg:w-[260px]"
     >
       <div className="flex h-12 shrink-0 items-center gap-2 border-b border-border px-3">
         <BrandLogo className="h-5 w-5 shrink-0 text-accent" />
