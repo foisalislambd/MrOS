@@ -21,6 +21,18 @@ export type ChatMessage = {
 export type TelegramCommand =
   | { type: "status" }
   | { type: "list_projects" }
-  | { type: "run"; projectId: string; prompt: string };
+  | { type: "list_sessions" }
+  | { type: "create_project"; name?: string }
+  | { type: "open_session"; sessionId: string }
+  | { type: "open_project"; projectId: string }
+  | { type: "run"; projectId?: string; sessionId?: string; prompt: string };
+
+/** Session summary shaped for Telegram / API sync later. */
+export type TelegramSessionSummary = {
+  id: string;
+  title: string;
+  projectId: string | null;
+  updatedAt: string;
+};
 
 export const APP_NAME = "MrOS";

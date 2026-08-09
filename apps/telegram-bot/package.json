@@ -4,16 +4,16 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "bun --hot src/index.ts",
+    "dev": "bun --env-file=../../.env --hot src/index.ts",
     "build": "bun build ./src/index.ts --outdir ./dist --target=bun",
-    "start": "bun dist/index.js",
+    "start": "bun --env-file=../../.env dist/index.js",
     "typecheck": "tsc --noEmit",
     "lint": "echo \"lint:telegram-bot skipped\"",
     "clean": "bun -e \"import { rmSync } from 'fs'; for (const p of ['dist','.turbo']) rmSync(p,{recursive:true,force:true})\""
   },
   "dependencies": {
     "@mros/shared": "workspace:*",
-    "grammy": "^1.36.1"
+    "grammy": "^1.45.1"
   },
   "devDependencies": {
     "@mros/typescript-config": "workspace:*",

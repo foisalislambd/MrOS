@@ -1,24 +1,29 @@
-import { Bot } from "grammy";
-import { APP_NAME } from "@mros/shared";
+import { config } from "./config";
+import { createBot } from "./bot";
 
-const token = process.env.TELEGRAM_BOT_TOKEN;
-
-if (!token) {
+if (!config.token) {
   console.log(
-    `[telegram-bot] ${APP_NAME}: set TELEGRAM_BOT_TOKEN to start the bot.`,
+    `[telegram-bot] ${config.appName}: set TELEGRAM_BOT_TOKEN to start the bot.`,
   );
   process.exit(0);
 }
 
-const bot = new Bot(token);
+const bot = createBot(config.token);
 
-bot.command("start", (ctx) =>
-  ctx.reply(`${APP_NAME} online. Use /status to check the platform.`),
-);
+await bot.api.setMyCommands([
+  { command: "start", description: "Welcome + sessions" },
+  { command: "new", description: "Create a project (UUID)" },
+  { command: "sessions", description: "List sessions" },
+  { command: "projects", description: "List projects" },
+  { command: "demo", description: "Stream a demo AI reply" },
+  { command: "status", description: "Bot / platform status" },
+  { command: "help", description: "How to use the bot" },
+]);
 
-bot.command("status", (ctx) =>
-  ctx.reply(`${APP_NAME} telegram control channel is ready.`),
-);
-
-bot.start();
-console.log(`[telegram-bot] ${APP_NAME} bot started`);
+bot.start({
+  onStart: (info) => {
+    console.log(
+      `[telegram-bot] ${config.appName} @${info.username} online (demo UI)`,
+    );
+  },
+});

@@ -93,5 +93,5 @@ MIT © [Foisal Islam](https://github.com/foisalislambd) — see [LICENSE](./LICE
 
 ## Notes
 
-- `apps/web` is the current demo UI.
-- Telegram bot stays idle until `TELEGRAM_BOT_TOKEN` is set.
+- `apps/web` is the current web demo UI.
+- `apps/telegram-bot` is a full **Telegram demo UI** (sessions, projects, reply/inline keyboards, Rich Message AI streaming with tool calls). It stays idle until `TELEGRAM_BOT_TOKEN` is set. Swap the in-memory store for the API when the backend is ready — keep the handlers/keyboards.
