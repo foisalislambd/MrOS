@@ -22,6 +22,7 @@ import { MockPreviewApp } from "./MockPreviewApp";
 
 type Device = "desktop" | "tablet" | "mobile";
 type Role = "user" | "assistant";
+type MobilePane = "chat" | "preview";
 
 type Message = {
   id: string;
@@ -126,9 +127,25 @@ const THREAD_MESSAGES: Record<string, Message[]> = {
   ],
 };
 
+function useIsDesktop() {
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const update = () => setIsDesktop(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
+  return isDesktop;
+}
+
 export function EditorWorkspace() {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const isDesktop = useIsDesktop();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(true);
+  const [mobilePane, setMobilePane] = useState<MobilePane>("chat");
   const [threads, setThreads] = useState<ChatThread[]>(INITIAL_THREADS);
   const [chatMap, setChatMap] = useState<Record<string, Message[]>>(THREAD_MESSAGES);
   const [activeId, setActiveId] = useState("flux");
@@ -140,10 +157,25 @@ export function EditorWorkspace() {
   const [refreshKey, setRefreshKey] = useState(0);
   const endRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const hydrated = useRef(false);
 
   const messages = chatMap[activeId] ?? [];
   const activeThread = threads.find((t) => t.id === activeId);
   const projectTitle = activeThread?.title ?? "New chat";
+
+  useEffect(() => {
+    if (!hydrated.current) {
+      hydrated.current = true;
+      const desktop = window.matchMedia("(min-width: 1024px)").matches;
+      setSidebarOpen(desktop);
+      return;
+    }
+    if (isDesktop) {
+      setMobilePane("chat");
+    } else {
+      setSidebarOpen(false);
+    }
+  }, [isDesktop]);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -153,7 +185,8 @@ export function EditorWorkspace() {
     function onKey(e: KeyboardEvent) {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "b") {
         e.preventDefault();
-        setChatOpen((v) => !v);
+        if (isDesktop) setChatOpen((v) => !v);
+        else setMobilePane((v) => (v === "chat" ? "preview" : "chat"));
       }
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "\\") {
         e.preventDefault();
@@ -166,8 +199,8 @@ export function EditorWorkspace() {
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- createNewChat is stable enough for this demo
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isDesktop]);
 
   function createNewChat() {
     const id = crypto.randomUUID();
@@ -182,6 +215,8 @@ export function EditorWorkspace() {
     setDraft("");
     setBuilding(false);
     setChatOpen(true);
+    setMobilePane("chat");
+    if (!isDesktop) setSidebarOpen(false);
     window.setTimeout(() => inputRef.current?.focus(), 50);
   }
 
@@ -190,6 +225,8 @@ export function EditorWorkspace() {
     setDraft("");
     setBuilding(false);
     setChatOpen(true);
+    setMobilePane("chat");
+    if (!isDesktop) setSidebarOpen(false);
   }
 
   function sendMessage() {
@@ -207,7 +244,6 @@ export function EditorWorkspace() {
       [activeId]: [...(prev[activeId] ?? []), userMsg],
     }));
 
-    // Rename "New chat" from first user message
     setThreads((prev) =>
       prev.map((t) =>
         t.id === activeId && t.title === "New chat"
@@ -248,8 +284,11 @@ export function EditorWorkspace() {
   const deviceWidth =
     device === "desktop" ? "100%" : device === "tablet" ? "768px" : "390px";
 
+  const showChat = isDesktop ? chatOpen : mobilePane === "chat";
+  const showPreview = isDesktop ? true : mobilePane === "preview";
+
   return (
-    <div className="flex h-dvh bg-bg text-fg">
+    <div className="flex h-dvh overflow-hidden bg-bg text-fg">
       <HistorySidebar
         open={sidebarOpen}
         threads={threads}
@@ -262,76 +301,117 @@ export function EditorWorkspace() {
       />
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex h-12 shrink-0 items-center gap-2 border-b border-border bg-bg-elevated px-3">
+        <header className="flex h-12 shrink-0 items-center gap-1.5 border-b border-border bg-bg-elevated px-2 sm:gap-2 sm:px-3">
+          <button
+            type="button"
+            onClick={() => setSidebarOpen(true)}
+            className={`inline-flex h-8 w-8 items-center justify-center rounded-[var(--radius-control)] text-fg-muted transition hover:bg-bg-muted hover:text-fg ${
+              sidebarOpen && isDesktop ? "lg:hidden" : ""
+            }`}
+            aria-label="Open sidebar"
+            title="Open sidebar"
+          >
+            <IconSidebar className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={createNewChat}
+            className="inline-flex h-8 w-8 items-center justify-center rounded-[var(--radius-control)] text-fg-muted transition hover:bg-bg-muted hover:text-fg lg:hidden"
+            aria-label="New chat"
+            title="New chat"
+          >
+            <IconPenNew className="h-4 w-4" />
+          </button>
+
           {!sidebarOpen && (
-            <>
-              <button
-                type="button"
-                onClick={() => setSidebarOpen(true)}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-[var(--radius-control)] text-fg-muted transition hover:bg-bg-muted hover:text-fg"
-                aria-label="Open sidebar"
-                title="Open sidebar (Ctrl+\\)"
-              >
-                <IconSidebar className="h-4 w-4" />
-              </button>
-              <button
-                type="button"
-                onClick={createNewChat}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-[var(--radius-control)] text-fg-muted transition hover:bg-bg-muted hover:text-fg"
-                aria-label="New chat"
-                title="New chat"
-              >
-                <IconPenNew className="h-4 w-4" />
-              </button>
-              <div className="mx-1 h-4 w-px bg-border" />
-            </>
+            <button
+              type="button"
+              onClick={createNewChat}
+              className="hidden h-8 w-8 items-center justify-center rounded-[var(--radius-control)] text-fg-muted transition hover:bg-bg-muted hover:text-fg lg:inline-flex"
+              aria-label="New chat"
+              title="New chat"
+            >
+              <IconPenNew className="h-4 w-4" />
+            </button>
           )}
 
           <button
             type="button"
             onClick={() => setChatOpen((v) => !v)}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-[var(--radius-control)] text-fg-muted transition hover:bg-bg-muted hover:text-fg"
+            className="hidden h-8 w-8 items-center justify-center rounded-[var(--radius-control)] text-fg-muted transition hover:bg-bg-muted hover:text-fg lg:inline-flex"
             aria-label={chatOpen ? "Collapse chat" : "Expand chat"}
             title="Toggle chat (Ctrl+B)"
           >
             <IconPanel className="h-4 w-4" />
           </button>
 
-          <div className="flex min-w-0 items-center gap-2">
-            <IconLogo className="h-6 w-6 shrink-0 text-accent" />
+          <div className="mx-0.5 hidden h-4 w-px bg-border sm:block lg:mx-1" />
+
+          <div className="flex min-w-0 flex-1 items-center gap-2">
+            <IconLogo className="hidden h-6 w-6 shrink-0 text-accent sm:block" />
             <div className="min-w-0">
               <div className="flex items-center gap-1.5">
                 <span className="truncate text-sm font-semibold tracking-tight">
                   {projectTitle}
                 </span>
-                <IconChevron className="h-3.5 w-3.5 shrink-0 text-fg-subtle" />
+                <IconChevron className="hidden h-3.5 w-3.5 shrink-0 text-fg-subtle sm:block" />
               </div>
-              <p className="truncate text-[11px] text-fg-subtle">MrOS workspace</p>
+              <p className="hidden truncate text-[11px] text-fg-subtle sm:block">
+                MrOS workspace
+              </p>
             </div>
           </div>
 
-          <div className="ml-auto flex items-center gap-1.5">
+          <div className="flex shrink-0 items-center gap-1.5">
             <button
               type="button"
-              className="h-8 rounded-[var(--radius-control)] bg-accent px-3.5 text-xs font-semibold text-white transition hover:bg-accent-hover"
+              className="h-8 rounded-[var(--radius-control)] bg-accent px-2.5 text-xs font-semibold text-white transition hover:bg-accent-hover sm:px-3.5"
             >
               Publish
             </button>
-            <div className="ml-1 flex h-8 w-8 items-center justify-center rounded-full bg-accent text-[11px] font-semibold text-white">
+            <div className="hidden h-8 w-8 items-center justify-center rounded-full bg-accent text-[11px] font-semibold text-white sm:flex">
               IF
             </div>
           </div>
         </header>
 
+        {/* Mobile / tablet pane switcher */}
+        <div className="flex shrink-0 border-b border-border bg-bg-elevated px-2 py-1.5 lg:hidden">
+          <div className="flex w-full rounded-[var(--radius-control)] bg-bg-muted p-0.5">
+            <button
+              type="button"
+              onClick={() => setMobilePane("chat")}
+              className={`flex-1 rounded-[8px] px-3 py-1.5 text-xs font-medium transition ${
+                mobilePane === "chat"
+                  ? "bg-bg-elevated text-fg shadow-sm"
+                  : "text-fg-muted"
+              }`}
+            >
+              Chat
+            </button>
+            <button
+              type="button"
+              onClick={() => setMobilePane("preview")}
+              className={`flex-1 rounded-[8px] px-3 py-1.5 text-xs font-medium transition ${
+                mobilePane === "preview"
+                  ? "bg-bg-elevated text-fg shadow-sm"
+                  : "text-fg-muted"
+              }`}
+            >
+              Preview
+            </button>
+          </div>
+        </div>
+
         <div className="flex min-h-0 flex-1">
           <aside
-            className={`flex min-h-0 shrink-0 flex-col border-r border-border bg-bg-chat transition-[width,opacity] duration-300 ease-out ${
-              chatOpen
-                ? "w-full opacity-100 sm:w-[360px] lg:w-[400px]"
-                : "w-0 overflow-hidden border-r-0 opacity-0"
-            }`}
+            className={`min-h-0 flex-col border-r border-border bg-bg-chat transition-[width,opacity] duration-300 ease-out ${
+              showChat
+                ? "flex w-full flex-1 opacity-100 lg:w-[360px] lg:flex-none xl:w-[400px]"
+                : "hidden w-0 overflow-hidden border-r-0 opacity-0 lg:flex"
+            } ${!chatOpen && isDesktop ? "!hidden !w-0 !flex-none !border-r-0" : ""}`}
           >
-            <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
+            <div className="flex items-center justify-between border-b border-border px-3 py-2.5 sm:px-4">
               <span className="text-xs font-semibold tracking-wide text-fg-muted uppercase">
                 Chat
               </span>
@@ -340,7 +420,7 @@ export function EditorWorkspace() {
               </span>
             </div>
 
-            <div className="scrollbar-thin flex-1 space-y-4 overflow-y-auto px-4 py-4">
+            <div className="scrollbar-thin flex-1 space-y-4 overflow-y-auto overscroll-contain px-3 py-4 sm:px-4">
               {messages.length === 0 && !building && (
                 <div className="flex h-full min-h-[200px] flex-col items-center justify-center px-4 text-center">
                   <IconLogo className="mb-3 h-9 w-9 text-accent" />
@@ -358,7 +438,7 @@ export function EditorWorkspace() {
                   style={{ animationDelay: `${Math.min(i, 4) * 40}ms` }}
                 >
                   {msg.role === "user" ? (
-                    <div className="ml-6 rounded-2xl rounded-br-md bg-bg-elevated px-3.5 py-2.5 text-sm leading-relaxed shadow-[var(--shadow-soft)] ring-1 ring-border">
+                    <div className="ml-2 rounded-2xl rounded-br-md bg-bg-elevated px-3.5 py-2.5 text-sm leading-relaxed shadow-[var(--shadow-soft)] ring-1 ring-border sm:ml-6">
                       {msg.content}
                     </div>
                   ) : (
@@ -369,13 +449,13 @@ export function EditorWorkspace() {
                       </div>
                       <p className="text-sm leading-relaxed text-fg">{msg.content}</p>
                       {msg.files && msg.files.length > 0 && (
-                        <ul className="space-y-1">
+                        <ul className="flex flex-wrap gap-1.5">
                           {msg.files.map((file) => (
                             <li
                               key={file}
                               className="inline-flex max-w-full items-center gap-1.5 rounded-md bg-bg-muted px-2 py-1 font-mono text-[11px] text-fg-muted"
                             >
-                              <span className="h-1.5 w-1.5 rounded-full bg-success" />
+                              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-success" />
                               <span className="truncate">{file}</span>
                             </li>
                           ))}
@@ -412,7 +492,7 @@ export function EditorWorkspace() {
               <div ref={endRef} />
             </div>
 
-            <div className="border-t border-border p-3">
+            <div className="border-t border-border p-2.5 sm:p-3">
               <div className="composer rounded-[var(--radius-panel)] border border-border bg-bg-elevated p-2 shadow-[var(--shadow-soft)] transition">
                 <textarea
                   ref={inputRef}
@@ -421,7 +501,7 @@ export function EditorWorkspace() {
                   onKeyDown={onKeyDown}
                   rows={3}
                   placeholder="Ask MrOS to change anything…"
-                  className="w-full resize-none bg-transparent px-2 py-1.5 text-sm leading-relaxed text-fg outline-none placeholder:text-fg-subtle"
+                  className="max-h-32 min-h-[64px] w-full resize-none bg-transparent px-2 py-1.5 text-sm leading-relaxed text-fg outline-none placeholder:text-fg-subtle sm:min-h-[72px]"
                 />
                 <div className="flex items-center justify-between px-1 pb-0.5">
                   <button
@@ -442,15 +522,19 @@ export function EditorWorkspace() {
                   </button>
                 </div>
               </div>
-              <p className="mt-2 text-center text-[11px] text-fg-subtle">
+              <p className="mt-2 hidden text-center text-[11px] text-fg-subtle sm:block">
                 Enter to send · Shift+Enter for new line
               </p>
             </div>
           </aside>
 
-          <section className="flex min-w-0 flex-1 flex-col bg-bg">
-            <div className="flex h-11 shrink-0 items-center gap-2 border-b border-border px-3">
-              <div className="flex rounded-[var(--radius-control)] bg-bg-muted p-0.5">
+          <section
+            className={`min-w-0 flex-col bg-bg ${
+              showPreview ? "flex flex-1" : "hidden lg:flex lg:flex-1"
+            }`}
+          >
+            <div className="flex h-11 shrink-0 items-center gap-1 overflow-x-auto border-b border-border px-2 sm:gap-2 sm:px-3">
+              <div className="flex shrink-0 rounded-[var(--radius-control)] bg-bg-muted p-0.5">
                 <button
                   type="button"
                   onClick={() => setTab("preview")}
@@ -478,8 +562,8 @@ export function EditorWorkspace() {
 
               {tab === "preview" && (
                 <>
-                  <div className="mx-1 hidden h-4 w-px bg-border sm:block" />
-                  <div className="hidden items-center gap-0.5 rounded-[var(--radius-control)] bg-bg-muted p-0.5 sm:flex">
+                  <div className="mx-1 hidden h-4 w-px shrink-0 bg-border md:block" />
+                  <div className="hidden items-center gap-0.5 rounded-[var(--radius-control)] bg-bg-muted p-0.5 md:flex">
                     {(
                       [
                         ["desktop", IconDesktop],
@@ -505,14 +589,14 @@ export function EditorWorkspace() {
                   <button
                     type="button"
                     onClick={() => setRefreshKey((k) => k + 1)}
-                    className="inline-flex h-7 w-7 items-center justify-center rounded-[var(--radius-control)] text-fg-muted transition hover:bg-bg-muted hover:text-fg"
+                    className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-[var(--radius-control)] text-fg-muted transition hover:bg-bg-muted hover:text-fg"
                     aria-label="Refresh preview"
                   >
                     <IconRefresh className="h-3.5 w-3.5" />
                   </button>
                   <button
                     type="button"
-                    className="inline-flex h-7 items-center gap-1 rounded-[var(--radius-control)] px-2 text-xs font-medium text-fg-muted transition hover:bg-bg-muted hover:text-fg"
+                    className="hidden h-7 items-center gap-1 rounded-[var(--radius-control)] px-2 text-xs font-medium text-fg-muted transition hover:bg-bg-muted hover:text-fg sm:inline-flex"
                   >
                     <IconSelect className="h-3.5 w-3.5" />
                     <span className="hidden md:inline">Select</span>
@@ -520,8 +604,8 @@ export function EditorWorkspace() {
                 </>
               )}
 
-              <div className="ml-auto flex items-center gap-1">
-                <span className="mr-2 hidden items-center gap-1.5 text-[11px] text-fg-subtle md:inline-flex">
+              <div className="ml-auto flex shrink-0 items-center gap-1">
+                <span className="mr-1 hidden items-center gap-1.5 text-[11px] text-fg-subtle md:inline-flex">
                   <span className="h-1.5 w-1.5 rounded-full bg-success" />
                   Live
                 </span>
@@ -535,18 +619,21 @@ export function EditorWorkspace() {
               </div>
             </div>
 
-            <div className="relative flex min-h-0 flex-1 items-stretch justify-center p-3 sm:p-4">
+            <div className="relative flex min-h-0 flex-1 items-stretch justify-center p-2 sm:p-3 md:p-4">
               {tab === "preview" ? (
                 <div
                   key={refreshKey}
-                  className="animate-fade-up flex h-full max-h-full overflow-hidden rounded-[var(--radius-panel)] border border-border bg-bg-elevated shadow-[var(--shadow-soft)] transition-[width] duration-300"
-                  style={{ width: deviceWidth, maxWidth: "100%" }}
+                  className="animate-fade-up flex h-full max-h-full w-full overflow-hidden rounded-[var(--radius-panel)] border border-border bg-bg-elevated shadow-[var(--shadow-soft)] transition-[width] duration-300"
+                  style={{
+                    width: isDesktop ? deviceWidth : "100%",
+                    maxWidth: "100%",
+                  }}
                 >
                   <MockPreviewApp />
                 </div>
               ) : (
-                <div className="animate-fade-up h-full w-full overflow-auto rounded-[var(--radius-panel)] border border-border bg-preview-chrome p-5 font-mono text-[12.5px] leading-6 text-[#e8e4de] shadow-[var(--shadow-soft)]">
-                  <pre className="whitespace-pre-wrap">{CODE_SNIPPET}</pre>
+                <div className="animate-fade-up h-full w-full overflow-auto rounded-[var(--radius-panel)] border border-border bg-preview-chrome p-3 font-mono text-[12px] leading-6 text-[#e8e4de] shadow-[var(--shadow-soft)] sm:p-5 sm:text-[12.5px]">
+                  <pre className="whitespace-pre-wrap break-words">{CODE_SNIPPET}</pre>
                 </div>
               )}
             </div>

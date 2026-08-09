@@ -61,6 +61,14 @@ body {
   color: var(--fg);
   font-family: var(--font-outfit), sans-serif;
   overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (max-width: 1023px) {
+  body {
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
 }
 
 ::selection {

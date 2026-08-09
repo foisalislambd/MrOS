@@ -57,13 +57,8 @@ export function HistorySidebar({
     items: filtered.filter((t) => t.group === group),
   })).filter((g) => g.items.length > 0);
 
-  return (
-    <aside
-      className={`flex h-full shrink-0 flex-col border-r border-border bg-bg-sidebar transition-[width] duration-300 ease-out ${
-        open ? "w-[260px]" : "w-0 overflow-hidden border-r-0"
-      }`}
-      aria-hidden={!open}
-    >
+  const panel = (
+    <div className="flex h-full w-[min(100vw,280px)] flex-col bg-bg-sidebar lg:w-[260px]">
       <div className="flex h-12 shrink-0 items-center gap-1 px-2.5">
         <button
           type="button"
@@ -156,7 +151,7 @@ export function HistorySidebar({
                       </button>
                       <button
                         type="button"
-                        className="absolute top-1/2 right-1.5 hidden h-6 w-6 -translate-y-1/2 items-center justify-center rounded-md text-fg-subtle opacity-0 transition group-hover:flex group-hover:opacity-100 hover:bg-white/8 hover:text-fg"
+                        className="absolute top-1/2 right-1.5 hidden h-6 w-6 -translate-y-1/2 items-center justify-center rounded-md text-fg-subtle opacity-0 transition group-hover:flex group-hover:opacity-100 hover:bg-white/[0.08] hover:text-fg"
                         aria-label="Chat options"
                       >
                         <IconDots className="h-3.5 w-3.5" />
@@ -185,6 +180,42 @@ export function HistorySidebar({
           <IconSettings className="h-4 w-4 shrink-0 text-fg-subtle" />
         </button>
       </div>
-    </aside>
+    </div>
+  );
+
+  return (
+    <>
+      {/* Mobile / tablet: overlay drawer */}
+      <div
+        className={`fixed inset-0 z-40 lg:hidden ${open ? "pointer-events-auto" : "pointer-events-none"}`}
+        aria-hidden={!open}
+      >
+        <button
+          type="button"
+          className={`absolute inset-0 bg-black/60 transition-opacity duration-300 ${
+            open ? "opacity-100" : "opacity-0"
+          }`}
+          aria-label="Close sidebar overlay"
+          onClick={onToggle}
+        />
+        <aside
+          className={`absolute inset-y-0 left-0 border-r border-border shadow-[var(--shadow-soft)] transition-transform duration-300 ease-out ${
+            open ? "translate-x-0" : "-translate-x-full"
+          }`}
+        >
+          {panel}
+        </aside>
+      </div>
+
+      {/* Desktop: inline sidebar */}
+      <aside
+        className={`hidden h-full shrink-0 overflow-hidden border-r border-border transition-[width] duration-300 ease-out lg:block ${
+          open ? "w-[260px]" : "w-0 border-r-0"
+        }`}
+        aria-hidden={!open}
+      >
+        {open ? panel : null}
+      </aside>
+    </>
   );
 }

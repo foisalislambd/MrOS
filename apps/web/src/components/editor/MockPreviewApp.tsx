@@ -11,7 +11,7 @@ const DAYS = ["M", "T", "W", "T", "F", "S", "S"];
 export function MockPreviewApp() {
   return (
     <div className="flex h-full w-full flex-col overflow-auto bg-[#121214] text-[#ededec]">
-      <div className="relative overflow-hidden border-b border-[#2a2a2e] px-6 pb-7 pt-6">
+      <div className="relative overflow-hidden border-b border-[#2a2a2e] px-4 pb-6 pt-5 sm:px-6 sm:pb-7 sm:pt-6">
         <div
           className="pointer-events-none absolute inset-0 opacity-90"
           style={{
@@ -20,31 +20,35 @@ export function MockPreviewApp() {
           }}
         />
         <div className="relative">
-          <div className="mb-5 flex items-center justify-between">
+          <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-[11px] font-semibold tracking-[0.18em] text-[#ff6b4a] uppercase">
                 Flux
               </p>
-              <h1 className="mt-1 text-3xl font-semibold tracking-tight">$12,480.00</h1>
+              <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">
+                $12,480.00
+              </h1>
               <p className="mt-1 text-sm text-[#9b9b98]">Available balance · Aug 2026</p>
             </div>
             <button
               type="button"
-              className="rounded-xl bg-[#ff6b4a] px-3.5 py-2 text-xs font-semibold text-white transition hover:bg-[#ff8266]"
+              className="w-fit rounded-xl bg-[#ff6b4a] px-3.5 py-2 text-xs font-semibold text-white transition hover:bg-[#ff8266]"
             >
               + Expense
             </button>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3">
             {[
               { label: "This week", value: "$428" },
               { label: "Saved", value: "$1,120" },
               { label: "Goals", value: "3 active" },
-            ].map((stat) => (
+            ].map((stat, i) => (
               <div
                 key={stat.label}
-                className="rounded-xl bg-white/[0.04] px-3.5 py-3 ring-1 ring-[#2a2a2e]"
+                className={`rounded-xl bg-white/[0.04] px-3 py-3 ring-1 ring-[#2a2a2e] sm:px-3.5 ${
+                  i === 2 ? "col-span-2 sm:col-span-1" : ""
+                }`}
               >
                 <p className="text-[11px] text-[#9b9b98]">{stat.label}</p>
                 <p className="mt-0.5 text-base font-semibold tracking-tight">{stat.value}</p>
@@ -54,13 +58,13 @@ export function MockPreviewApp() {
         </div>
       </div>
 
-      <div className="space-y-6 px-6 py-6">
+      <div className="space-y-5 px-4 py-5 sm:space-y-6 sm:px-6 sm:py-6">
         <section>
-          <div className="mb-3 flex items-end justify-between">
+          <div className="mb-3 flex items-end justify-between gap-2">
             <h2 className="text-sm font-semibold">Weekly spend</h2>
-            <span className="text-[11px] text-[#9b9b98]">vs last week −8%</span>
+            <span className="shrink-0 text-[11px] text-[#9b9b98]">vs last week −8%</span>
           </div>
-          <div className="flex h-36 items-end gap-2 rounded-2xl bg-[#161618] p-4 ring-1 ring-[#2a2a2e]">
+          <div className="flex h-28 items-end gap-1.5 rounded-2xl bg-[#161618] p-3 ring-1 ring-[#2a2a2e] sm:h-36 sm:gap-2 sm:p-4">
             {BARS.map((h, i) => (
               <div key={DAYS[i] + i} className="flex flex-1 flex-col items-center gap-2">
                 <div
@@ -77,18 +81,18 @@ export function MockPreviewApp() {
           <h2 className="mb-3 text-sm font-semibold">Recent</h2>
           <ul className="divide-y divide-[#2a2a2e] overflow-hidden rounded-2xl bg-[#161618] ring-1 ring-[#2a2a2e]">
             {TRANSACTIONS.map((tx) => (
-              <li key={tx.name + tx.time} className="flex items-center gap-3 px-4 py-3.5">
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[rgba(255,107,74,0.14)] text-xs font-semibold text-[#ff6b4a]">
+              <li key={tx.name + tx.time} className="flex items-center gap-3 px-3 py-3 sm:px-4 sm:py-3.5">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[rgba(255,107,74,0.14)] text-xs font-semibold text-[#ff6b4a]">
                   {tx.name.slice(0, 1)}
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium">{tx.name}</p>
-                  <p className="text-[11px] text-[#9b9b98]">
+                  <p className="truncate text-[11px] text-[#9b9b98]">
                     {tx.cat} · {tx.time}
                   </p>
                 </div>
                 <span
-                  className={`text-sm font-semibold tabular-nums ${
+                  className={`shrink-0 text-sm font-semibold tabular-nums ${
                     tx.amount.startsWith("+") ? "text-[#3ecf8e]" : "text-[#ededec]"
                   }`}
                 >
