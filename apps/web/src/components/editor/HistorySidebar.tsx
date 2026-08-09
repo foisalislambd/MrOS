@@ -52,7 +52,7 @@ export function HistorySidebar({
     : threads;
 
   const panel = (
-    <div className="flex h-full w-[min(100vw,280px)] flex-col bg-black lg:w-[260px]">
+    <div className="flex h-full w-[min(100vw,280px)] flex-col bg-bg-sidebar lg:w-[260px]">
       {/* Header: logo left, search right */}
       <div className="flex h-12 shrink-0 items-center gap-1 px-2">
         <div className="flex h-8 w-8 items-center justify-center">
@@ -71,7 +71,7 @@ export function HistorySidebar({
 
       {searchOpen && (
         <div className="px-2 pb-1">
-          <label className="flex items-center gap-2 rounded-full bg-white/[0.06] px-3 py-1.5">
+          <label className="flex items-center gap-2 rounded-full bg-bg-muted px-3 py-1.5 ring-1 ring-border">
             <Search className="size-3.5 shrink-0 text-white/50" strokeWidth={1.6} />
             <Input
               autoFocus
@@ -90,7 +90,7 @@ export function HistorySidebar({
           type="button"
           variant="ghost"
           onClick={onNewChat}
-          className="h-10 w-full justify-start gap-2.5 rounded-lg px-2.5 text-[14px] font-normal text-white hover:bg-white/[0.06] hover:text-white"
+          className="h-10 w-full justify-start gap-2.5 rounded-lg px-2.5 text-[14px] font-normal text-white hover:bg-icon-hover hover:text-white"
         >
           <SquarePen className="size-4 text-white/90" strokeWidth={1.6} />
           New chat
@@ -99,7 +99,7 @@ export function HistorySidebar({
         <Button
           type="button"
           variant="ghost"
-          className="h-10 w-full justify-start gap-2.5 rounded-lg px-2.5 text-[14px] font-normal text-white/90 hover:bg-white/[0.06] hover:text-white"
+          className="h-10 w-full justify-start gap-2.5 rounded-lg px-2.5 text-[14px] font-normal text-white/90 hover:bg-icon-hover hover:text-white"
         >
           <Library className="size-4" strokeWidth={1.6} />
           Library
@@ -108,7 +108,7 @@ export function HistorySidebar({
         <Button
           type="button"
           variant="ghost"
-          className="h-10 w-full justify-start gap-2.5 rounded-lg px-2.5 text-[14px] font-normal text-white/90 hover:bg-white/[0.06] hover:text-white"
+          className="h-10 w-full justify-start gap-2.5 rounded-lg px-2.5 text-[14px] font-normal text-white/90 hover:bg-icon-hover hover:text-white"
         >
           <Folder className="size-4" strokeWidth={1.6} />
           Projects
@@ -147,8 +147,8 @@ export function HistorySidebar({
                       className={cn(
                         "flex w-full items-center rounded-full px-3 py-2 text-left text-[13.5px] leading-snug",
                         active
-                          ? "bg-[#212121] font-medium text-white"
-                          : "text-white/85 hover:bg-white/[0.06] hover:text-white",
+                          ? "bg-bg-elevated font-medium text-white ring-1 ring-border"
+                          : "text-white/85 hover:bg-icon-hover hover:text-white",
                       )}
                     >
                       <span className="truncate pr-6">{thread.title}</span>
@@ -156,7 +156,7 @@ export function HistorySidebar({
                     <IconButton
                       label="Chat options"
                       size="icon-xs"
-                      className="absolute top-1/2 right-1.5 hidden -translate-y-1/2 opacity-0 group-hover:inline-flex group-hover:opacity-100 hover:bg-white/10"
+                      className="absolute top-1/2 right-1.5 hidden -translate-y-1/2 opacity-0 group-hover:inline-flex group-hover:opacity-100 hover:bg-icon-hover"
                     >
                       <MoreHorizontal />
                     </IconButton>
@@ -168,8 +168,8 @@ export function HistorySidebar({
       </div>
 
       {/* Footer: profile + Upgrade */}
-      <div className="shrink-0 p-2">
-        <div className="flex items-center gap-2.5 rounded-xl px-1.5 py-1.5 hover:bg-white/[0.04]">
+      <div className="shrink-0 border-t border-border p-2">
+        <div className="flex items-center gap-2.5 rounded-xl px-1.5 py-1.5 hover:bg-icon-hover">
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent text-[11px] font-semibold text-white">
             FI
           </div>
@@ -181,7 +181,7 @@ export function HistorySidebar({
             type="button"
             variant="outline"
             size="sm"
-            className="h-7 shrink-0 rounded-full border-white/15 bg-transparent px-3 text-[12px] font-medium text-white hover:bg-white/[0.06] hover:text-white"
+            className="h-7 shrink-0 rounded-full border-border bg-bg-elevated px-3 text-[12px] font-medium text-white hover:bg-bg-muted hover:text-white"
           >
             Upgrade
           </Button>
