@@ -115,7 +115,7 @@ export function ChatHome() {
         />
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="flex h-12 shrink-0 items-center gap-1.5 border-b border-border bg-bg-elevated px-2 sm:gap-2 sm:px-3">
+          <header className="app-shell-header flex h-12 shrink-0 items-center gap-1.5 border-b border-border px-2 sm:gap-2 sm:px-3">
             {!sidebarOpen && (
               <>
                 <IconButton
@@ -139,39 +139,43 @@ export function ChatHome() {
             )}
             <div className="min-w-0 flex-1" />
             <div
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-accent text-[11px] font-semibold text-primary-foreground"
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-bg-muted text-[11px] font-semibold text-fg-muted ring-1 ring-border"
               aria-label="Account"
             >
               FI
             </div>
           </header>
 
-          <main className="relative flex min-h-0 flex-1 flex-col items-center justify-center overflow-y-auto px-4 py-8 sm:px-6">
+          <main className="relative flex min-h-0 flex-1 flex-col items-center justify-center overflow-y-auto px-4 py-10 sm:px-6">
             <div className="accent-wash pointer-events-none absolute inset-0" />
 
-            <div className="relative w-full max-w-xl">
-              <div className="mb-6 flex flex-col items-center text-center">
-                <BrandLogo className="mb-3 h-9 w-9 text-accent" />
-                <h1 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
-                  What should we build?
+            <div className="relative w-full max-w-[640px]">
+              <div className="mb-8 flex flex-col items-center text-center">
+                <BrandLogo className="mb-4 h-10 w-10 text-accent" />
+                <p className="text-[13px] font-semibold tracking-[-0.02em] text-foreground">
+                  MrOS
+                </p>
+                <h1 className="mt-3 text-[1.75rem] font-semibold tracking-[-0.03em] text-foreground sm:text-[2rem]">
+                  What can I help with?
                 </h1>
-                <p className="mt-1.5 max-w-sm text-sm text-fg-subtle">
-                  Describe an app, import a design, or drop a repo.
+                <p className="mt-2 max-w-md text-[14px] leading-relaxed text-fg-subtle">
+                  Ask a question or describe a product to build. Preview appears only when there’s a
+                  UI to show.
                 </p>
               </div>
 
-              <div className="composer rounded-xl border border-border bg-bg-elevated p-2 shadow-[var(--shadow-soft)]">
+              <div className="composer rounded-[var(--radius-panel)] border border-border bg-bg-elevated p-2.5 shadow-[var(--shadow-soft)]">
                 <Textarea
                   ref={inputRef}
                   value={draft}
                   onChange={(e) => setDraft(e.target.value)}
                   onKeyDown={onKeyDown}
                   rows={2}
-                  placeholder="Build a personal finance dashboard…"
-                  className="min-h-[56px] max-h-32 sm:min-h-[64px]"
-                  aria-label="Describe what to build"
+                  placeholder="Ask anything, or describe an app to build…"
+                  className="min-h-[60px] max-h-36 px-2.5 text-[15px] sm:min-h-[72px]"
+                  aria-label="Message MrOS"
                 />
-                <div className="flex items-center justify-between gap-2 px-0.5 pt-0.5">
+                <div className="flex items-center justify-between gap-2 px-0.5 pt-1">
                   <IconButton
                     label="Attach"
                     tooltip="Attach file"
@@ -186,11 +190,10 @@ export function ChatHome() {
                   </IconButton>
                   <Button
                     type="button"
-                    variant="secondary"
                     size="sm"
                     onClick={() => startAgent(draft)}
                     disabled={!draft.trim() || sending}
-                    className="h-7 gap-1.5 px-2.5 text-xs"
+                    className="h-8 gap-1.5 px-3"
                   >
                     {sending ? "Starting…" : "Send"}
                     <SendHorizontal className="size-3.5" strokeWidth={1.7} />
@@ -198,14 +201,14 @@ export function ChatHome() {
                 </div>
               </div>
 
-              <div className="mt-3 flex flex-wrap items-center justify-center gap-1.5">
+              <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
                 {IMPORT_OPTIONS.map(({ id, label, icon: Icon }) => (
                   <Button
                     key={id}
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="h-7 gap-1.5 rounded-lg border-border bg-bg-elevated/80 px-2.5 text-[11px] font-medium text-fg-muted hover:bg-bg-muted hover:text-foreground"
+                    className="h-8 gap-1.5 border-border bg-transparent px-3 text-[12px] font-medium text-fg-muted hover:bg-bg-muted hover:text-foreground"
                     onClick={() =>
                       toast.message(label, {
                         description: "Import wiring comes next — describe it in chat for now.",
@@ -218,7 +221,7 @@ export function ChatHome() {
                 ))}
               </div>
 
-              <p className="mt-4 text-center text-[11px] text-fg-faint">
+              <p className="mt-6 text-center text-[12px] text-fg-faint">
                 Enter to send · Shift+Enter for new line
               </p>
             </div>

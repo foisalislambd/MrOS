@@ -9,6 +9,8 @@ import {
   Frame,
   Monitor,
   PanelLeft,
+  PanelRight,
+  PanelRightClose,
   Plus,
   RefreshCw,
   SendHorizontal,
@@ -42,6 +44,17 @@ import { cn } from "@/lib/utils";
 
 type Device = "desktop" | "tablet" | "mobile";
 type MobilePane = "chat" | "preview";
+
+function threadHasPreview(messages: Message[]) {
+  return messages.some((m) => (m.files?.length ?? 0) > 0);
+}
+
+/** Heuristic: UI/app work opens preview; plain Q&A stays chat-only. */
+function promptLooksLikeBuild(text: string) {
+  return /\b(build|create|make|design|scaffold|app|website|webpage|web\s*page|page|ui|ux|dashboard|landing|site|component|layout|screen|form|kanban|portfolio|auth|crm|docs|booking|frontend|interface|mockup)\b/i.test(
+    text,
+  );
+}
 
 function seedFromAgentId(agentId: string): {
   threads: ChatThread[];
@@ -100,6 +113,10 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
     seeded.current = seedFromAgentId(agentId);
   }
 
+  const initialMessages = seeded.current.chatMap[agentId] ?? [];
+  const bootstrapPrompt = seeded.current.bootstrapPrompt;
+  const initialHasArtifact = threadHasPreview(initialMessages);
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mobilePane, setMobilePane] = useState<MobilePane>("chat");
   const [threads, setThreads] = useState<ChatThread[]>(seeded.current.threads);
@@ -108,8 +125,10 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
   const [device, setDevice] = useState<Device>("desktop");
   const [tab, setTab] = useState<"preview" | "code">("preview");
   const [draft, setDraft] = useState("");
-  const [building, setBuilding] = useState(Boolean(seeded.current.bootstrapPrompt));
+  const [building, setBuilding] = useState(Boolean(bootstrapPrompt));
   const [refreshKey, setRefreshKey] = useState(0);
+  const [previewReady, setPreviewReady] = useState(initialHasArtifact);
+  const [previewOpen, setPreviewOpen] = useState(initialHasArtifact);
   const endRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const sidebarReady = useRef(false);
@@ -118,7 +137,8 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
   const messages = chatMap[agentId] ?? [];
   const activeThread = threads.find((t) => t.id === agentId);
   const projectTitle = activeThread?.title ?? "New chat";
-  const framed = isDesktop === true && device !== "desktop";
+  const panelOpen = previewReady && previewOpen;
+  const framed = isDesktop === true && panelOpen && device !== "desktop";
 
   useEffect(() => {
     if (isDesktop === null) return;
@@ -141,26 +161,60 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
     bootstrapped.current = true;
 
     const threadId = agentId;
+    const prompt = seeded.current.bootstrapPrompt;
+    const shouldPreview = promptLooksLikeBuild(prompt);
+
     const timer = window.setTimeout(() => {
       setChatMap((prev) => ({
         ...prev,
         [threadId]: [
           ...(prev[threadId] ?? []),
-          {
-            id: crypto.randomUUID(),
-            role: "assistant",
-            content:
-              "Got it — scaffolding your project now. Preview is live; keep chatting to iterate.",
-            files: ["src/App.tsx"],
-          },
+          shouldPreview
+            ? {
+                id: crypto.randomUUID(),
+                role: "assistant",
+                content:
+                  "Got it — scaffolding your project now. Preview is live; keep chatting to iterate.",
+                files: ["src/App.tsx"],
+              }
+            : {
+                id: crypto.randomUUID(),
+                role: "assistant",
+                content:
+                  "Happy to help with that. Ask a follow-up anytime — if you want a live UI, describe the app or page to build and I’ll open preview.",
+              },
         ],
       }));
       setBuilding(false);
-      setRefreshKey((k) => k + 1);
+      if (shouldPreview) {
+        setPreviewReady(true);
+        setPreviewOpen(true);
+        setRefreshKey((k) => k + 1);
+        if (isDesktop === false) setMobilePane("preview");
+      } else {
+        setPreviewReady(false);
+        setPreviewOpen(false);
+      }
     }, 1600);
 
     return () => window.clearTimeout(timer);
-  }, [agentId]);
+  }, [agentId, isDesktop]);
+
+  function openPreview() {
+    setPreviewOpen(true);
+    if (isDesktop === false) setMobilePane("preview");
+  }
+
+  function closePreview() {
+    setPreviewOpen(false);
+    setMobilePane("chat");
+  }
+
+  function togglePreview() {
+    if (!previewReady) return;
+    if (previewOpen) closePreview();
+    else openPreview();
+  }
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -172,10 +226,20 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
         e.preventDefault();
         router.push("/");
       }
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === "e") {
+        if (!previewReady) return;
+        e.preventDefault();
+        setPreviewOpen((open) => {
+          const next = !open;
+          if (!next) setMobilePane("chat");
+          else if (isDesktop === false) setMobilePane("preview");
+          return next;
+        });
+      }
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [router]);
+  }, [router, previewReady, isDesktop]);
 
   function sendMessage() {
     const text = draft.trim();
@@ -202,6 +266,29 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
     );
 
     setDraft("");
+
+    const shouldBuild = previewReady || promptLooksLikeBuild(text);
+
+    if (!shouldBuild) {
+      setBuilding(true);
+      window.setTimeout(() => {
+        setChatMap((prev) => ({
+          ...prev,
+          [threadId]: [
+            ...(prev[threadId] ?? []),
+            {
+              id: crypto.randomUUID(),
+              role: "assistant",
+              content:
+                "Here’s a take on that. Stay in chat for ideas and answers — when you want a live site or UI, ask me to build it and preview will open.",
+            },
+          ],
+        }));
+        setBuilding(false);
+      }, 700);
+      return;
+    }
+
     setBuilding(true);
 
     window.setTimeout(() => {
@@ -212,14 +299,18 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
           {
             id: crypto.randomUUID(),
             role: "assistant",
-            content:
-              "Applied your change and refreshed the preview. Tweak anything else and I’ll keep iterating.",
+            content: previewReady
+              ? "Applied your change and refreshed the preview. Tweak anything else and I’ll keep iterating."
+              : "Scaffolded a first pass. Preview is open — keep chatting to iterate.",
             files: ["src/App.tsx"],
           },
         ],
       }));
       setBuilding(false);
+      setPreviewReady(true);
+      setPreviewOpen(true);
       setRefreshKey((k) => k + 1);
+      if (isDesktop === false) setMobilePane("preview");
     }, 1600);
   }
 
@@ -236,8 +327,9 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
     device === "mobile" ? "min(844px, 100%)" : device === "tablet" ? "min(1024px, 100%)" : "100%";
 
   // Treat unknown (pre-hydration) as mobile so we don't flash both panes.
-  const showChat = isDesktop === true || mobilePane === "chat";
-  const showPreview = isDesktop === true || mobilePane === "preview";
+  const showChat = !panelOpen || isDesktop === true || mobilePane === "chat";
+  const showPreview = panelOpen && (isDesktop === true || mobilePane === "preview");
+  const chatOnly = !panelOpen;
 
   return (
     <TooltipProvider>
@@ -260,7 +352,7 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
         />
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="flex h-12 shrink-0 items-center gap-1.5 border-b border-border bg-bg-elevated px-2 sm:gap-2 sm:px-3">
+          <header className="app-shell-header flex h-12 shrink-0 items-center gap-1.5 border-b border-border px-2 sm:gap-2 sm:px-3">
             {!sidebarOpen && (
               <>
                 <IconButton
@@ -281,39 +373,53 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
               </>
             )}
 
-            <div className="flex min-w-0 flex-1 items-center gap-2">
-              <BrandLogo className="hidden h-6 w-6 shrink-0 text-accent sm:block" />
+            <div className="flex min-w-0 flex-1 items-center gap-2.5">
+              <BrandLogo className="hidden h-5 w-5 shrink-0 text-accent sm:block" />
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <span className="truncate text-sm font-semibold tracking-tight text-foreground">
+                  <span className="truncate text-[13px] font-semibold tracking-[-0.02em] text-foreground">
                     {projectTitle}
                   </span>
-                  <ChevronRight
-                    className="hidden size-3.5 shrink-0 text-fg-subtle sm:block"
-                    strokeWidth={1.6}
-                  />
+                  {previewReady && (
+                    <ChevronRight
+                      className="hidden size-3.5 shrink-0 text-fg-faint sm:block"
+                      strokeWidth={1.6}
+                    />
+                  )}
                 </div>
-                <p className="hidden truncate text-[11px] text-fg-subtle sm:block">
-                  MrOS workspace
+                <p className="hidden truncate text-[11px] text-fg-faint sm:block">
+                  {previewReady ? "Workspace" : "Conversation"}
                 </p>
               </div>
             </div>
 
             <div className="flex shrink-0 items-center gap-1.5">
-              <Button
-                type="button"
-                size="sm"
-                className="px-2.5 sm:px-3.5"
-                onClick={() =>
-                  toast.success("Ready to publish", {
-                    description: "Connect a project to go live.",
-                  })
-                }
-              >
-                Publish
-              </Button>
+              {previewReady && (
+                <IconButton
+                  label={previewOpen ? "Close preview" : "Open preview"}
+                  tooltip={previewOpen ? "Close preview" : "Open preview"}
+                  onClick={togglePreview}
+                  className="hidden sm:inline-flex"
+                >
+                  {previewOpen ? <PanelRightClose /> : <PanelRight />}
+                </IconButton>
+              )}
+              {previewReady && (
+                <Button
+                  type="button"
+                  size="sm"
+                  className="px-3"
+                  onClick={() =>
+                    toast.success("Ready to publish", {
+                      description: "Connect a project to go live.",
+                    })
+                  }
+                >
+                  Publish
+                </Button>
+              )}
               <div
-                className="hidden h-8 w-8 items-center justify-center rounded-full bg-accent text-[11px] font-semibold text-primary-foreground sm:flex"
+                className="hidden h-8 w-8 items-center justify-center rounded-full bg-bg-muted text-[11px] font-semibold text-fg-muted ring-1 ring-border sm:flex"
                 aria-label="Account"
               >
                 FI
@@ -321,272 +427,343 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
             </div>
           </header>
 
-          <div className="flex shrink-0 border-b border-border bg-bg-elevated px-2 py-1.5 lg:hidden">
-            <ToggleGroup
-              type="single"
-              value={mobilePane}
-              onValueChange={(value) => {
-                if (value) setMobilePane(value as MobilePane);
-              }}
-              className="w-full"
-              aria-label="Workspace pane"
-            >
-              <ToggleGroupItem value="chat" className="flex-1">
-                Chat
-              </ToggleGroupItem>
-              <ToggleGroupItem value="preview" className="flex-1">
-                Preview
-              </ToggleGroupItem>
-            </ToggleGroup>
-          </div>
+          {previewReady && panelOpen && (
+            <div className="flex shrink-0 border-b border-border bg-bg-chat px-2 py-1.5 lg:hidden">
+              <ToggleGroup
+                type="single"
+                value={mobilePane}
+                onValueChange={(value) => {
+                  if (value) setMobilePane(value as MobilePane);
+                }}
+                className="w-full"
+                aria-label="Workspace pane"
+              >
+                <ToggleGroupItem value="chat" className="flex-1">
+                  Chat
+                </ToggleGroupItem>
+                <ToggleGroupItem value="preview" className="flex-1">
+                  Preview
+                </ToggleGroupItem>
+              </ToggleGroup>
+            </div>
+          )}
+
+          {previewReady && !panelOpen && (
+            <div className="flex shrink-0 items-center justify-between gap-2 border-b border-border bg-bg-chat px-3 py-2 sm:hidden">
+              <span className="text-[12px] text-fg-subtle">Preview ready</span>
+              <Button type="button" variant="outline" size="sm" className="h-7" onClick={openPreview}>
+                Open preview
+              </Button>
+            </div>
+          )}
 
           <div className="flex min-h-0 flex-1">
             <aside
               className={cn(
-                "min-h-0 flex-col border-r border-border bg-bg-chat",
-                showChat
-                  ? "flex w-full flex-1 lg:w-[360px] lg:flex-none xl:w-[400px]"
-                  : "hidden w-0 overflow-hidden border-r-0 lg:flex",
+                "min-h-0 flex-col bg-bg-chat",
+                showChat ? "flex" : "hidden",
+                chatOnly
+                  ? "w-full flex-1"
+                  : "w-full flex-1 border-r border-border lg:w-[380px] lg:flex-none xl:w-[420px]",
               )}
             >
-              <div className="flex h-11 shrink-0 items-center justify-between border-b border-border px-3 sm:px-4">
-                <span className="text-xs font-semibold tracking-wide text-fg-subtle uppercase">
-                  Chat
-                </span>
-                <Badge variant="soft">Build mode</Badge>
-              </div>
-
-              <div className="scrollbar-thin flex-1 space-y-4 overflow-y-auto overscroll-contain px-3 py-4 sm:px-4">
-                {messages.length === 0 && !building && (
-                  <div className="flex h-full min-h-[200px] flex-col items-center justify-center px-4 text-center">
-                    <BrandLogo className="mb-3 h-9 w-9 text-accent" />
-                    <p className="text-sm font-semibold text-foreground">Start building</p>
-                    <p className="mt-1 max-w-[240px] text-xs leading-relaxed text-fg-subtle">
-                      Describe an app or a change. MrOS will update the live preview as you chat.
-                    </p>
-                  </div>
+              <div
+                className={cn(
+                  "flex h-11 shrink-0 items-center justify-between border-b border-border px-3 sm:px-4",
+                  chatOnly && "border-b-0",
                 )}
-
-                {messages.map((msg) => (
-                  <article key={msg.id}>
-                    {msg.role === "user" ? (
-                      <div className="ml-2 rounded-2xl rounded-br-md bg-bg-elevated px-3.5 py-2.5 text-sm leading-relaxed text-foreground shadow-[var(--shadow-soft)] ring-1 ring-border sm:ml-6">
-                        {msg.content}
-                      </div>
+              >
+                <div
+                  className={cn(
+                    "flex w-full items-center justify-between",
+                    chatOnly && "mx-auto max-w-3xl px-4 sm:px-6",
+                  )}
+                >
+                  <span className="text-[11px] font-medium tracking-[0.04em] text-fg-faint uppercase">
+                    Chat
+                  </span>
+                  <div className="flex items-center gap-1.5">
+                    {previewReady ? (
+                      <Badge variant={panelOpen ? "success" : "soft"}>
+                        {panelOpen ? "Preview open" : "Preview ready"}
+                      </Badge>
                     ) : (
-                      <div className="space-y-2.5">
-                        <div className="flex items-center gap-2">
-                          <BrandLogo className="h-5 w-5 text-accent" />
-                          <span className="text-xs font-semibold text-fg-subtle">MrOS</span>
-                        </div>
-                        <p className="text-sm leading-relaxed text-foreground">{msg.content}</p>
-                        {msg.files && msg.files.length > 0 && (
-                          <ul className="flex flex-wrap gap-1.5">
-                            {msg.files.map((file) => (
-                              <li
-                                key={file}
-                                className="inline-flex max-w-full items-center gap-1.5 rounded-md bg-muted px-2 py-1 font-mono text-[11px] text-fg-muted"
-                              >
-                                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-success" />
-                                <span className="truncate">{file}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </div>
+                      <Badge variant="soft">Chat only</Badge>
                     )}
-                  </article>
-                ))}
-
-                {building && (
-                  <div className="space-y-2" aria-live="polite">
-                    <div className="flex items-center gap-2">
-                      <BrandLogo className="h-5 w-5 text-accent" />
-                      <span className="text-xs font-semibold text-fg-subtle">MrOS</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-fg-muted">
-                      <span className="flex gap-1" aria-hidden>
-                        <span className="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-accent" />
-                        <span
-                          className="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-accent"
-                          style={{ animationDelay: "0.2s" }}
-                        />
-                        <span
-                          className="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-accent"
-                          style={{ animationDelay: "0.4s" }}
-                        />
-                      </span>
-                      Building…
-                    </div>
-                    <div className="building-bar h-0.5 rounded-full" />
-                  </div>
-                )}
-                <div ref={endRef} />
-              </div>
-
-              <div className="border-t border-border p-2.5 sm:p-3">
-                <div className="composer rounded-[var(--radius-panel)] border border-border bg-bg-elevated p-2 shadow-[var(--shadow-soft)] transition">
-                  <Textarea
-                    ref={inputRef}
-                    value={draft}
-                    onChange={(e) => setDraft(e.target.value)}
-                    onKeyDown={onKeyDown}
-                    rows={3}
-                    placeholder="Ask MrOS to change anything…"
-                    className="max-h-32"
-                    aria-label="Message MrOS"
-                  />
-                  <div className="flex items-center justify-between px-1 pb-0.5">
-                    <IconButton
-                      label="Attach"
-                      tooltip="Attach file"
-                      onClick={() =>
-                        toast.message("Attach file", {
-                          description: "File uploads come next — describe files in chat for now.",
-                        })
-                      }
-                    >
-                      <Plus />
-                    </IconButton>
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      size="sm"
-                      onClick={sendMessage}
-                      disabled={!draft.trim() || building}
-                      className="gap-1.5"
-                    >
-                      {building ? "Building…" : "Send"}
-                      <SendHorizontal className="size-3.5" strokeWidth={1.7} />
-                    </Button>
+                    {previewReady && isDesktop === false && (
+                      <IconButton
+                        label={previewOpen ? "Close preview" : "Open preview"}
+                        tooltip={previewOpen ? "Close preview" : "Open preview"}
+                        size="icon-sm"
+                        onClick={togglePreview}
+                      >
+                        {previewOpen ? <PanelRightClose /> : <PanelRight />}
+                      </IconButton>
+                    )}
                   </div>
                 </div>
-                <p className="mt-2 hidden text-center text-[11px] text-fg-subtle sm:block">
-                  Enter to send · Shift+Enter for new line
-                </p>
+              </div>
+
+              <div className="scrollbar-thin min-h-0 flex-1 overflow-y-auto overscroll-contain">
+                <div
+                  className={cn(
+                    "space-y-5 px-3 py-5 sm:px-4",
+                    chatOnly && "mx-auto w-full max-w-3xl px-4 sm:px-6",
+                  )}
+                >
+                  {messages.length === 0 && !building && (
+                    <div className="flex h-full min-h-[220px] flex-col items-center justify-center px-4 text-center">
+                      <BrandLogo className="mb-3 h-8 w-8 text-accent" />
+                      <p className="text-[15px] font-semibold tracking-[-0.02em] text-foreground">
+                        Ask anything
+                      </p>
+                      <p className="mt-1.5 max-w-[300px] text-[13px] leading-relaxed text-fg-subtle">
+                        Stay in chat for answers. When you build a site or UI, preview opens here — open
+                        or close it anytime.
+                      </p>
+                    </div>
+                  )}
+
+                  {messages.map((msg) => (
+                    <article key={msg.id}>
+                      {msg.role === "user" ? (
+                        <div
+                          className={cn(
+                            "rounded-[var(--radius-panel)] bg-bg-muted px-3.5 py-2.5 text-[14px] leading-relaxed text-foreground ring-1 ring-border",
+                            chatOnly
+                              ? "ml-auto w-fit max-w-[min(42%,20rem)]"
+                              : "ml-2 w-fit max-w-[85%] sm:ml-8",
+                          )}
+                        >
+                          {msg.content}
+                        </div>
+                      ) : (
+                        <div className="space-y-2.5">
+                          <div className="flex items-center gap-2">
+                            <BrandLogo className="h-4 w-4 text-accent" />
+                            <span className="text-[11px] font-semibold tracking-[-0.01em] text-fg-subtle">
+                              MrOS
+                            </span>
+                          </div>
+                          <p className="text-[14px] leading-relaxed text-foreground">{msg.content}</p>
+                          {msg.files && msg.files.length > 0 && (
+                            <ul className="flex flex-wrap gap-1.5">
+                              {msg.files.map((file) => (
+                                <li
+                                  key={file}
+                                  className="inline-flex max-w-full items-center gap-1.5 rounded-[6px] bg-bg-muted px-2 py-1 font-mono text-[11px] text-fg-muted ring-1 ring-border"
+                                >
+                                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-success" />
+                                  <span className="truncate">{file}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
+                      )}
+                    </article>
+                  ))}
+
+                  {building && (
+                    <div className="space-y-2" aria-live="polite">
+                      <div className="flex items-center gap-2">
+                        <BrandLogo className="h-4 w-4 text-accent" />
+                        <span className="text-[11px] font-semibold text-fg-subtle">MrOS</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-[13px] text-fg-muted">
+                        <span className="flex gap-1" aria-hidden>
+                          <span className="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-accent" />
+                          <span
+                            className="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-accent"
+                            style={{ animationDelay: "0.2s" }}
+                          />
+                          <span
+                            className="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-accent"
+                            style={{ animationDelay: "0.4s" }}
+                          />
+                        </span>
+                        {previewReady || promptLooksLikeBuild(messages.at(-1)?.content ?? "")
+                          ? "Building…"
+                          : "Thinking…"}
+                      </div>
+                      <div className="building-bar h-0.5 rounded-full" />
+                    </div>
+                  )}
+                  <div ref={endRef} />
+                </div>
+              </div>
+
+              <div className="px-3 pb-3 sm:px-4">
+                <div className={cn(chatOnly && "mx-auto w-full max-w-3xl px-1 sm:px-2")}>
+                  <div className="composer rounded-xl border border-border bg-bg-elevated p-1.5">
+                    <Textarea
+                      ref={inputRef}
+                      value={draft}
+                      onChange={(e) => setDraft(e.target.value)}
+                      onKeyDown={onKeyDown}
+                      rows={2}
+                      placeholder={
+                        previewReady
+                          ? "Ask MrOS to change anything…"
+                          : "Ask anything, or describe an app to build…"
+                      }
+                      className="min-h-[44px] max-h-24 px-2 py-1.5 text-[13px] sm:min-h-[48px]"
+                      aria-label="Message MrOS"
+                    />
+                    <div className="flex items-center justify-between px-0.5">
+                      <IconButton
+                        label="Attach"
+                        tooltip="Attach file"
+                        size="icon-sm"
+                        onClick={() =>
+                          toast.message("Attach file", {
+                            description: "File uploads come next — describe files in chat for now.",
+                          })
+                        }
+                      >
+                        <Plus />
+                      </IconButton>
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={sendMessage}
+                        disabled={!draft.trim() || building}
+                        className="h-7 gap-1 px-2.5 text-[11px]"
+                      >
+                        {building ? "Working…" : "Send"}
+                        <SendHorizontal className="size-3" strokeWidth={1.7} />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
               </div>
             </aside>
 
-            <section
-              className={cn(
-                "min-w-0 flex-col bg-background",
-                showPreview ? "flex flex-1" : "hidden lg:flex lg:flex-1",
-              )}
-            >
-              <div className="flex h-11 shrink-0 items-center gap-1 overflow-x-auto border-b border-border px-2 sm:gap-2 sm:px-3">
-                <ToggleGroup
-                  type="single"
-                  value={tab}
-                  onValueChange={(value) => {
-                    if (value) setTab(value as "preview" | "code");
-                  }}
-                  size="sm"
-                  aria-label="Preview or code"
-                >
-                  <ToggleGroupItem value="preview">Preview</ToggleGroupItem>
-                  <ToggleGroupItem value="code" className="gap-1">
-                    <Code2 className="size-3.5" strokeWidth={1.6} />
-                    Code
-                  </ToggleGroupItem>
-                </ToggleGroup>
+            {showPreview && (
+              <section className="flex min-w-0 flex-1 flex-col bg-background">
+                <div className="flex h-11 shrink-0 items-center gap-1 overflow-x-auto border-b border-border px-2 sm:gap-2 sm:px-3">
+                  <ToggleGroup
+                    type="single"
+                    value={tab}
+                    onValueChange={(value) => {
+                      if (value) setTab(value as "preview" | "code");
+                    }}
+                    size="sm"
+                    aria-label="Preview or code"
+                  >
+                    <ToggleGroupItem value="preview">Preview</ToggleGroupItem>
+                    <ToggleGroupItem value="code" className="gap-1">
+                      <Code2 className="size-3.5" strokeWidth={1.6} />
+                      Code
+                    </ToggleGroupItem>
+                  </ToggleGroup>
 
-                {tab === "preview" && (
-                  <>
-                    <Separator orientation="vertical" className="mx-1 hidden md:block" />
-                    <ToggleGroup
-                      type="single"
-                      value={device}
-                      onValueChange={(value) => {
-                        if (value) setDevice(value as Device);
-                      }}
-                      size="icon"
-                      className="hidden md:flex"
-                      aria-label="Device size"
-                    >
-                      <ToggleGroupItem value="desktop" aria-label="Desktop">
-                        <Monitor className="size-3.5" strokeWidth={1.6} />
-                      </ToggleGroupItem>
-                      <ToggleGroupItem value="tablet" aria-label="Tablet">
-                        <Tablet className="size-3.5" strokeWidth={1.6} />
-                      </ToggleGroupItem>
-                      <ToggleGroupItem value="mobile" aria-label="Mobile">
-                        <Smartphone className="size-3.5" strokeWidth={1.6} />
-                      </ToggleGroupItem>
-                    </ToggleGroup>
+                  {tab === "preview" && (
+                    <>
+                      <Separator orientation="vertical" className="mx-1 hidden md:block" />
+                      <ToggleGroup
+                        type="single"
+                        value={device}
+                        onValueChange={(value) => {
+                          if (value) setDevice(value as Device);
+                        }}
+                        size="icon"
+                        className="hidden md:flex"
+                        aria-label="Device size"
+                      >
+                        <ToggleGroupItem value="desktop" aria-label="Desktop">
+                          <Monitor className="size-3.5" strokeWidth={1.6} />
+                        </ToggleGroupItem>
+                        <ToggleGroupItem value="tablet" aria-label="Tablet">
+                          <Tablet className="size-3.5" strokeWidth={1.6} />
+                        </ToggleGroupItem>
+                        <ToggleGroupItem value="mobile" aria-label="Mobile">
+                          <Smartphone className="size-3.5" strokeWidth={1.6} />
+                        </ToggleGroupItem>
+                      </ToggleGroup>
+                      <IconButton
+                        label="Refresh preview"
+                        tooltip="Refresh"
+                        size="icon-sm"
+                        onClick={() => setRefreshKey((k) => k + 1)}
+                      >
+                        <RefreshCw />
+                      </IconButton>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="hidden h-7 gap-1 px-2 text-fg-muted hover:bg-icon-hover hover:text-foreground sm:inline-flex"
+                        onClick={() =>
+                          toast.message("Select element", {
+                            description: "Element picker comes next.",
+                          })
+                        }
+                      >
+                        <Frame className="size-3.5" strokeWidth={1.6} />
+                        <span className="hidden md:inline">Select</span>
+                      </Button>
+                    </>
+                  )}
+
+                  <div className="ml-auto flex shrink-0 items-center gap-1">
+                    <span className="mr-1 hidden items-center gap-1.5 text-[11px] text-fg-subtle md:inline-flex">
+                      <span className="h-1.5 w-1.5 rounded-full bg-success" />
+                      Live
+                    </span>
                     <IconButton
-                      label="Refresh preview"
-                      tooltip="Refresh"
+                      label="Open preview"
+                      tooltip="Open external preview"
                       size="icon-sm"
-                      onClick={() => setRefreshKey((k) => k + 1)}
-                    >
-                      <RefreshCw />
-                    </IconButton>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="hidden h-7 gap-1 px-2 text-fg-muted hover:bg-icon-hover hover:text-foreground sm:inline-flex"
                       onClick={() =>
-                        toast.message("Select element", {
-                          description: "Element picker comes next.",
+                        toast.message("Open preview", {
+                          description: "External preview window comes next.",
                         })
                       }
                     >
-                      <Frame className="size-3.5" strokeWidth={1.6} />
-                      <span className="hidden md:inline">Select</span>
-                    </Button>
-                  </>
-                )}
-
-                <div className="ml-auto flex shrink-0 items-center gap-1">
-                  <span className="mr-1 hidden items-center gap-1.5 text-[11px] text-fg-subtle md:inline-flex">
-                    <span className="h-1.5 w-1.5 rounded-full bg-success" />
-                    Live
-                  </span>
-                  <IconButton
-                    label="Open preview"
-                    tooltip="Open preview"
-                    size="icon-sm"
-                    onClick={() =>
-                      toast.message("Open preview", {
-                        description: "External preview window comes next.",
-                      })
-                    }
-                  >
-                    <ExternalLink />
-                  </IconButton>
-                </div>
-              </div>
-
-              <div
-                className={cn(
-                  "relative flex min-h-0 flex-1",
-                  framed
-                    ? "items-center justify-center overflow-auto bg-preview-chrome p-4"
-                    : "items-stretch justify-center",
-                )}
-              >
-                {tab === "preview" ? (
-                  <div
-                    key={refreshKey}
-                    className={cn(
-                      "flex max-h-full overflow-hidden border-border bg-bg-elevated",
-                      framed &&
-                        "rounded-[var(--radius-panel)] border shadow-[var(--shadow-soft)]",
-                    )}
-                    style={{
-                      width: isDesktop ? deviceWidth : "100%",
-                      height: framed ? deviceHeight : "100%",
-                      maxWidth: "100%",
-                    }}
-                  >
-                    <MockPreviewApp />
+                      <ExternalLink />
+                    </IconButton>
+                    <IconButton
+                      label="Close preview"
+                      tooltip="Close preview"
+                      size="icon-sm"
+                      onClick={closePreview}
+                    >
+                      <PanelRightClose />
+                    </IconButton>
                   </div>
-                ) : (
-                  <CodeExplorer />
-                )}
-              </div>
-            </section>
+                </div>
+
+                <div
+                  className={cn(
+                    "relative flex min-h-0 flex-1",
+                    framed
+                      ? "items-center justify-center overflow-auto bg-preview-chrome p-4"
+                      : "items-stretch justify-center",
+                  )}
+                >
+                  {tab === "preview" ? (
+                    <div
+                      key={refreshKey}
+                      className={cn(
+                        "flex max-h-full overflow-hidden border-border bg-bg-elevated",
+                        framed &&
+                          "rounded-[var(--radius-panel)] border shadow-[var(--shadow-soft)]",
+                      )}
+                      style={{
+                        width: isDesktop ? deviceWidth : "100%",
+                        height: framed ? deviceHeight : "100%",
+                        maxWidth: "100%",
+                      }}
+                    >
+                      <MockPreviewApp />
+                    </div>
+                  ) : (
+                    <CodeExplorer />
+                  )}
+                </div>
+              </section>
+            )}
           </div>
         </div>
       </div>

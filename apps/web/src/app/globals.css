@@ -2,48 +2,49 @@
 @import "tw-animate-css";
 
 :root {
-  /* Surfaces */
-  --bg: #0c0c0d;
-  --bg-elevated: #161618;
-  --bg-muted: #1e1e21;
-  --bg-chat: #111113;
-  --bg-sidebar: #0a0a0b;
-  --preview-chrome: #0e0e10;
-  --preview-canvas: #121214;
-  --code-panel: #0c0c0e;
-  --code-tabbar: #101012;
+  /* Surfaces — cool neutral slate for enterprise SaaS */
+  --bg: #0f1012;
+  --bg-elevated: #17181b;
+  --bg-muted: #1f2024;
+  --bg-chat: #121316;
+  --bg-sidebar: #0c0d0f;
+  --preview-chrome: #0e0f11;
+  --preview-canvas: #141518;
+  --code-panel: #0f1012;
+  --code-tabbar: #151619;
 
-  /* Foreground ladder: primary → muted → subtle → faint */
-  --fg: #ffffff;
-  --fg-muted: #c8c8c5;
-  --fg-subtle: #9a9a96;
-  --fg-faint: #6e6e6a;
-  --code-fg: #e8e4de;
+  /* Foreground ladder */
+  --fg: #f5f5f4;
+  --fg-muted: #c4c4c0;
+  --fg-subtle: #8f8f8a;
+  --fg-faint: #6a6a66;
+  --code-fg: #e6e4e0;
 
   /* Borders & overlays */
-  --border: #2a2a2e;
-  --border-strong: #3a3a40;
-  --overlay: rgba(0, 0, 0, 0.6);
-  --surface-tint: rgba(255, 255, 255, 0.04);
-  --surface-tint-strong: rgba(255, 255, 255, 0.08);
+  --border: #2a2b30;
+  --border-strong: #3b3c42;
+  --overlay: rgba(8, 9, 11, 0.55);
+  --surface-tint: rgba(255, 255, 255, 0.035);
+  --surface-tint-strong: rgba(255, 255, 255, 0.06);
 
-  /* Accent */
-  --accent: #ff6b4a;
-  --accent-hover: #ff8266;
-  --accent-bright: #ff9a7a;
-  --accent-soft: rgba(255, 107, 74, 0.14);
-  --accent-ring: rgba(255, 107, 74, 0.32);
-  --accent-glow: rgba(255, 107, 74, 0.12);
-  --accent-glow-strong: rgba(255, 107, 74, 0.22);
+  /* Accent — brand coral, used sparingly */
+  --accent: #e85d3d;
+  --accent-hover: #f06d4f;
+  --accent-bright: #f08a70;
+  --accent-soft: rgba(232, 93, 61, 0.12);
+  --accent-ring: rgba(232, 93, 61, 0.28);
+  --accent-glow: rgba(232, 93, 61, 0.06);
+  --accent-glow-strong: rgba(232, 93, 61, 0.1);
 
-  --success: #3ecf8e;
-  --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.35), 0 12px 32px rgba(0, 0, 0, 0.28);
-  --radius-panel: 14px;
-  --radius-control: 10px;
+  --success: #2fbf7a;
+  --shadow-soft: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 1px 2px rgba(0, 0, 0, 0.24),
+    0 8px 24px rgba(0, 0, 0, 0.2);
+  --radius-panel: 10px;
+  --radius-control: 8px;
 
   /* Icons */
-  --icon: #e8e8e6;
-  --icon-active: #ffffff;
+  --icon: #d4d4d0;
+  --icon-active: #f5f5f4;
   --icon-hover-bg: var(--surface-tint-strong);
 
   /* shadcn semantic tokens */
@@ -59,7 +60,7 @@
   --secondary-foreground: var(--fg);
   --muted: var(--bg-muted);
   --muted-foreground: var(--fg-muted);
-  --destructive: #ef4444;
+  --destructive: #e5484d;
   --destructive-foreground: #ffffff;
   --input: var(--border);
   --ring: var(--accent-ring);
@@ -120,9 +121,9 @@
 
   --font-sans: var(--font-outfit);
   --font-mono: var(--font-jetbrains);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
   --radius-xl: var(--radius-panel);
 }
 
@@ -144,7 +145,11 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-outfit), sans-serif;
+  font-feature-settings: "ss01" on, "cv11" on;
+  letter-spacing: -0.011em;
   overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -180,7 +185,7 @@ body {
 }
 
 .animate-pulse-dot {
-  animation: pulse-dot 1s ease-in-out infinite;
+  animation: pulse-dot 1.15s ease-in-out infinite;
 }
 
 .building-bar {
@@ -194,35 +199,39 @@ body {
   animation: shimmer 1.6s linear infinite;
 }
 
+.composer {
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
 .composer:focus-within {
   border-color: var(--border-strong);
+  box-shadow: 0 0 0 3px var(--surface-tint-strong);
 }
 
 .accent-wash {
   background: radial-gradient(
-    ellipse 70% 50% at 50% 20%,
+    ellipse 55% 40% at 50% 0%,
     var(--accent-glow) 0%,
-    transparent 55%
+    transparent 70%
   );
 }
 
 .accent-wash-strong {
-  background:
-    radial-gradient(
-      ellipse 80% 70% at 10% -20%,
-      var(--accent-glow-strong) 0%,
-      transparent 55%
-    ),
-    radial-gradient(
-      ellipse 60% 50% at 100% 0%,
-      rgba(255, 150, 80, 0.12) 0%,
-      transparent 45%
-    );
+  background: linear-gradient(
+    180deg,
+    var(--accent-soft) 0%,
+    transparent 72%
+  );
+}
+
+.app-shell-header {
+  background: color-mix(in srgb, var(--bg-elevated) 92%, transparent);
+  backdrop-filter: blur(10px);
 }
 
 .scrollbar-thin {
   scrollbar-width: thin;
-  scrollbar-color: var(--border-strong) transparent;
+  scrollbar-color: var(--border) transparent;
 }
 
 .scrollbar-thin::-webkit-scrollbar {
@@ -230,6 +239,10 @@ body {
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background: var(--border-strong);
+  background: var(--border);
   border-radius: 999px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: var(--border-strong);
 }

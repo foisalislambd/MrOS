@@ -116,16 +116,18 @@ export function HistorySidebar({
   const panel = (
     <div
       ref={panelRef}
-      className="flex h-full w-[min(100vw,280px)] flex-col bg-bg-elevated lg:w-[260px]"
+      className="flex h-full w-[min(100vw,280px)] flex-col bg-bg-sidebar lg:w-[260px]"
     >
-      <div className="flex h-12 shrink-0 items-center gap-1 px-2">
-        <div className="flex h-8 w-8 items-center justify-center">
-          <BrandLogo className="h-6 w-6 text-accent" />
-        </div>
+      <div className="flex h-12 shrink-0 items-center gap-2 border-b border-border px-3">
+        <BrandLogo className="h-5 w-5 shrink-0 text-accent" />
+        <span className="truncate text-[13px] font-semibold tracking-[-0.02em] text-foreground">
+          MrOS
+        </span>
         <div className="ml-auto flex items-center gap-0.5">
           <IconButton
             label={searchOpen ? "Close search" : "Search chats"}
             tooltip="Search"
+            size="icon-sm"
             onClick={toggleSearch}
             aria-pressed={searchOpen}
           >
@@ -134,6 +136,7 @@ export function HistorySidebar({
           <IconButton
             label="Close sidebar"
             tooltip="Close sidebar"
+            size="icon-sm"
             onClick={onToggle}
           >
             <PanelLeft />
@@ -142,27 +145,27 @@ export function HistorySidebar({
       </div>
 
       {searchOpen && (
-        <div className="px-2 pb-1">
-          <label className="flex items-center gap-2 rounded-lg bg-bg-muted px-3 py-1.5 ring-1 ring-border">
+        <div className="border-b border-border px-3 py-2">
+          <label className="flex items-center gap-2 rounded-[var(--radius-control)] bg-bg-muted px-2.5 py-1.5 ring-1 ring-border">
             <Search className="size-3.5 shrink-0 text-fg-subtle" strokeWidth={1.6} />
             <Input
               ref={searchInputRef}
               value={search}
               onChange={(e) => onSearchChange(e.target.value)}
               placeholder="Search chats"
-              className="h-7 px-0"
+              className="h-7 px-0 text-[13px]"
               aria-label="Search chats"
             />
           </label>
         </div>
       )}
 
-      <div className="px-2 pt-1">
+      <div className="space-y-0.5 px-2 pt-3">
         <Button
           type="button"
           variant="ghost"
           onClick={onNewChat}
-          className="h-10 w-full justify-start gap-2.5 rounded-lg px-2.5 text-[14px] font-normal text-foreground hover:bg-icon-hover hover:text-foreground"
+          className="h-9 w-full justify-start gap-2.5 rounded-[var(--radius-control)] px-2.5 text-[13px] font-medium text-foreground hover:bg-icon-hover hover:text-foreground"
         >
           <SquarePen className="size-4 text-icon" strokeWidth={1.6} />
           New chat
@@ -172,7 +175,7 @@ export function HistorySidebar({
           type="button"
           variant="ghost"
           onClick={() => comingSoon("Library")}
-          className="h-10 w-full justify-start gap-2.5 rounded-lg px-2.5 text-[14px] font-normal text-fg-muted hover:bg-icon-hover hover:text-foreground"
+          className="h-9 w-full justify-start gap-2.5 rounded-[var(--radius-control)] px-2.5 text-[13px] font-normal text-fg-muted hover:bg-icon-hover hover:text-foreground"
         >
           <Library className="size-4" strokeWidth={1.6} />
           Library
@@ -182,19 +185,19 @@ export function HistorySidebar({
           type="button"
           variant="ghost"
           onClick={() => comingSoon("Projects")}
-          className="h-10 w-full justify-start gap-2.5 rounded-lg px-2.5 text-[14px] font-normal text-fg-muted hover:bg-icon-hover hover:text-foreground"
+          className="h-9 w-full justify-start gap-2.5 rounded-[var(--radius-control)] px-2.5 text-[13px] font-normal text-fg-muted hover:bg-icon-hover hover:text-foreground"
         >
           <Folder className="size-4" strokeWidth={1.6} />
           Projects
         </Button>
       </div>
 
-      <div className="scrollbar-thin mt-2 min-h-0 flex-1 overflow-y-auto px-2 pb-2">
+      <div className="scrollbar-thin mt-3 min-h-0 flex-1 overflow-y-auto px-2 pb-2">
         <button
           type="button"
           onClick={() => setRecentsOpen((v) => !v)}
           aria-expanded={recentsOpen}
-          className="mb-1 flex w-full items-center gap-1 rounded-lg px-2.5 py-1.5 text-[12px] text-fg-subtle hover:text-fg-muted"
+          className="mb-1 flex w-full items-center gap-1 rounded-[var(--radius-control)] px-2.5 py-1 text-[11px] font-medium tracking-[0.04em] text-fg-faint uppercase hover:text-fg-subtle"
         >
           Recents
           <ChevronDown
@@ -208,13 +211,13 @@ export function HistorySidebar({
 
         {recentsOpen &&
           (filtered.length === 0 ? (
-            <p className="px-2.5 py-4 text-center text-xs text-fg-faint">No chats found</p>
+            <p className="px-2.5 py-6 text-center text-[12px] text-fg-faint">No chats found</p>
           ) : (
             <div className="space-y-3">
               {grouped.map((group) => (
                 <div key={group.key}>
                   {!q && (
-                    <p className="mb-1 px-2.5 text-[11px] font-medium tracking-wide text-fg-faint">
+                    <p className="mb-1 px-2.5 text-[11px] font-medium text-fg-faint">
                       {group.label}
                     </p>
                   )}
@@ -228,9 +231,9 @@ export function HistorySidebar({
                             onClick={() => onSelect(thread.id)}
                             aria-current={active ? "page" : undefined}
                             className={cn(
-                              "flex w-full items-center rounded-lg px-3 py-2 text-left text-[13.5px] leading-snug",
+                              "flex w-full items-center rounded-[var(--radius-control)] px-2.5 py-2 text-left text-[13px] leading-snug transition-colors",
                               active
-                                ? "bg-bg-elevated font-medium text-foreground ring-1 ring-border"
+                                ? "bg-bg-muted font-medium text-foreground"
                                 : "text-fg-muted hover:bg-icon-hover hover:text-foreground",
                             )}
                           >
@@ -258,26 +261,26 @@ export function HistorySidebar({
           ))}
       </div>
 
-      <div className="shrink-0 border-t border-border p-2">
-        <div className="flex items-center gap-2.5 rounded-xl px-1.5 py-1.5 hover:bg-icon-hover">
+      <div className="shrink-0 border-t border-border p-2.5">
+        <div className="flex items-center gap-2.5 rounded-[var(--radius-control)] px-1.5 py-1.5 hover:bg-icon-hover">
           <div
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent text-[11px] font-semibold text-primary-foreground"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-bg-muted text-[11px] font-semibold text-fg-muted ring-1 ring-border"
             aria-hidden
           >
             FI
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium text-foreground">Foisal Islam</p>
-            <p className="truncate text-[11px] text-fg-subtle">Free</p>
+            <p className="truncate text-[13px] font-medium text-foreground">Foisal Islam</p>
+            <p className="truncate text-[11px] text-fg-subtle">Business plan</p>
           </div>
           <Button
             type="button"
             variant="outline"
             size="sm"
             onClick={() => comingSoon("Upgrade")}
-            className="h-7 shrink-0 rounded-lg border-border bg-bg-elevated px-3 text-[12px] font-medium text-foreground hover:bg-bg-muted hover:text-foreground"
+            className="h-7 shrink-0 px-2.5 text-[11px] font-medium"
           >
-            Upgrade
+            Manage
           </Button>
         </div>
       </div>

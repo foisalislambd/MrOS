@@ -16,8 +16,8 @@ const jetbrains = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MrOS — Vibe Coding",
-  description: "Build apps by chatting. Preview live as you go.",
+  title: "MrOS — AI workspace",
+  description: "Chat, build, and preview products in one professional workspace.",
 };
 
 export default function RootLayout({
