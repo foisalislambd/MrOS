@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type KeyboardEvent, type MouseEvent } from "react";
+import { useMemo, useState, type MouseEvent } from "react";
 import {
   ChevronDown,
   ChevronRight,
@@ -301,47 +301,36 @@ export function CodeExplorer() {
               const name = path.split("/").pop() ?? path;
               const active = path === activePath;
               return (
-                <button
+                <div
                   key={path}
-                  type="button"
-                  onClick={() => setActivePath(path)}
                   className={cn(
-                    "group flex h-9 shrink-0 items-center gap-2 border-r border-border px-3 text-[12px]",
+                    "group flex h-9 shrink-0 items-stretch border-r border-border text-[12px]",
                     active
                       ? "bg-preview-chrome text-white"
                       : "bg-transparent text-white/55 hover:bg-white/[0.04] hover:text-white/85",
                   )}
                 >
-                  <FileCode2 className="size-3 shrink-0 text-white/50" strokeWidth={1.6} />
-                  <span>{name}</span>
-                  <span
-                    role="button"
-                    tabIndex={0}
+                  <button
+                    type="button"
+                    onClick={() => setActivePath(path)}
+                    className="flex items-center gap-2 px-3"
+                    aria-current={active ? "page" : undefined}
+                  >
+                    <FileCode2 className="size-3 shrink-0 text-white/50" strokeWidth={1.6} />
+                    <span>{name}</span>
+                  </button>
+                  <button
+                    type="button"
                     onClick={(e) => closeTab(path, e)}
-                    onKeyDown={(e: KeyboardEvent) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setOpenTabs((prev) => {
-                          const next = prev.filter((p) => p !== path);
-                          if (path === activePath) {
-                            setActivePath(
-                              next[next.length - 1] ?? Object.keys(FILE_CONTENTS)[0],
-                            );
-                          }
-                          return next;
-                        });
-                      }
-                    }}
                     className={cn(
-                      "ml-0.5 rounded px-0.5 text-[11px] text-white/40 hover:bg-white/10 hover:text-white",
-                      active ? "opacity-70" : "opacity-0 group-hover:opacity-70",
+                      "mr-1.5 self-center rounded px-1 text-[11px] text-white/40 hover:bg-white/10 hover:text-white",
+                      active ? "opacity-70" : "opacity-0 group-hover:opacity-70 focus-visible:opacity-70",
                     )}
                     aria-label={`Close ${name}`}
                   >
                     ×
-                  </span>
-                </button>
+                  </button>
+                </div>
               );
             })}
           </div>

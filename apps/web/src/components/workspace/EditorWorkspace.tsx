@@ -112,17 +112,19 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
   const [refreshKey, setRefreshKey] = useState(0);
   const endRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const hydrated = useRef(false);
+  const sidebarReady = useRef(false);
   const bootstrapped = useRef(false);
 
   const messages = chatMap[agentId] ?? [];
   const activeThread = threads.find((t) => t.id === agentId);
   const projectTitle = activeThread?.title ?? "New chat";
+  const framed = isDesktop === true && device !== "desktop";
 
   useEffect(() => {
-    if (!hydrated.current) {
-      hydrated.current = true;
-      setSidebarOpen(window.matchMedia("(min-width: 1024px)").matches);
+    if (isDesktop === null) return;
+    if (!sidebarReady.current) {
+      sidebarReady.current = true;
+      setSidebarOpen(isDesktop);
       return;
     }
     if (isDesktop) setMobilePane("chat");
@@ -139,7 +141,7 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
     bootstrapped.current = true;
 
     const threadId = agentId;
-    window.setTimeout(() => {
+    const timer = window.setTimeout(() => {
       setChatMap((prev) => ({
         ...prev,
         [threadId]: [
@@ -156,16 +158,13 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
       setBuilding(false);
       setRefreshKey((k) => k + 1);
     }, 1600);
+
+    return () => window.clearTimeout(timer);
   }, [agentId]);
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "b") {
-        e.preventDefault();
-        if (isDesktop) setSidebarOpen((v) => !v);
-        else setMobilePane((v) => (v === "chat" ? "preview" : "chat"));
-      }
-      if ((e.metaKey || e.ctrlKey) && e.key === "\\") {
+      if ((e.metaKey || e.ctrlKey) && (e.key.toLowerCase() === "b" || e.key === "\\")) {
         e.preventDefault();
         setSidebarOpen((v) => !v);
       }
@@ -176,7 +175,7 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [isDesktop, router]);
+  }, [router]);
 
   function sendMessage() {
     const text = draft.trim();
@@ -233,9 +232,12 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
 
   const deviceWidth =
     device === "desktop" ? "100%" : device === "tablet" ? "768px" : "390px";
+  const deviceHeight =
+    device === "mobile" ? "min(844px, 100%)" : device === "tablet" ? "min(1024px, 100%)" : "100%";
 
-  const showChat = isDesktop ? true : mobilePane === "chat";
-  const showPreview = isDesktop ? true : mobilePane === "preview";
+  // Treat unknown (pre-hydration) as mobile so we don't flash both panes.
+  const showChat = isDesktop === true || mobilePane === "chat";
+  const showPreview = isDesktop === true || mobilePane === "preview";
 
   return (
     <TooltipProvider>
@@ -247,11 +249,11 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
           search={search}
           onSearchChange={setSearch}
           onSelect={(id) => {
-            if (!isDesktop) setSidebarOpen(false);
+            if (isDesktop === false) setSidebarOpen(false);
             router.push(`/agent/${id}`);
           }}
           onNewChat={() => {
-            if (!isDesktop) setSidebarOpen(false);
+            if (isDesktop === false) setSidebarOpen(false);
             router.push("/");
           }}
           onToggle={() => setSidebarOpen(false)}
@@ -287,11 +289,11 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
                     {projectTitle}
                   </span>
                   <ChevronRight
-                    className="hidden size-3.5 shrink-0 text-white/80 sm:block"
+                    className="hidden size-3.5 shrink-0 text-fg-subtle sm:block"
                     strokeWidth={1.6}
                   />
                 </div>
-                <p className="hidden truncate text-[11px] text-white/50 sm:block">
+                <p className="hidden truncate text-[11px] text-fg-subtle sm:block">
                   MrOS workspace
                 </p>
               </div>
@@ -310,7 +312,10 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
               >
                 Publish
               </Button>
-              <div className="hidden h-8 w-8 items-center justify-center rounded-full bg-accent text-[11px] font-semibold text-white sm:flex">
+              <div
+                className="hidden h-8 w-8 items-center justify-center rounded-full bg-accent text-[11px] font-semibold text-white sm:flex"
+                aria-label="Account"
+              >
                 FI
               </div>
             </div>
@@ -324,6 +329,7 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
                 if (value) setMobilePane(value as MobilePane);
               }}
               className="w-full"
+              aria-label="Workspace pane"
             >
               <ToggleGroupItem value="chat" className="flex-1">
                 Chat
@@ -344,7 +350,7 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
               )}
             >
               <div className="flex h-11 shrink-0 items-center justify-between border-b border-border px-3 sm:px-4">
-                <span className="text-xs font-semibold tracking-wide text-white/70 uppercase">
+                <span className="text-xs font-semibold tracking-wide text-fg-subtle uppercase">
                   Chat
                 </span>
                 <Badge variant="soft">Build mode</Badge>
@@ -355,7 +361,7 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
                   <div className="flex h-full min-h-[200px] flex-col items-center justify-center px-4 text-center">
                     <BrandLogo className="mb-3 h-9 w-9 text-accent" />
                     <p className="text-sm font-semibold text-white">Start building</p>
-                    <p className="mt-1 max-w-[240px] text-xs leading-relaxed text-white/60">
+                    <p className="mt-1 max-w-[240px] text-xs leading-relaxed text-fg-subtle">
                       Describe an app or a change. MrOS will update the live preview as you chat.
                     </p>
                   </div>
@@ -371,7 +377,7 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
                       <div className="space-y-2.5">
                         <div className="flex items-center gap-2">
                           <BrandLogo className="h-5 w-5 text-accent" />
-                          <span className="text-xs font-semibold text-white/70">MrOS</span>
+                          <span className="text-xs font-semibold text-fg-subtle">MrOS</span>
                         </div>
                         <p className="text-sm leading-relaxed text-white">{msg.content}</p>
                         {msg.files && msg.files.length > 0 && (
@@ -379,7 +385,7 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
                             {msg.files.map((file) => (
                               <li
                                 key={file}
-                                className="inline-flex max-w-full items-center gap-1.5 rounded-md bg-muted px-2 py-1 font-mono text-[11px] text-white/70"
+                                className="inline-flex max-w-full items-center gap-1.5 rounded-md bg-muted px-2 py-1 font-mono text-[11px] text-fg-muted"
                               >
                                 <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-success" />
                                 <span className="truncate">{file}</span>
@@ -393,13 +399,13 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
                 ))}
 
                 {building && (
-                  <div className="space-y-2">
+                  <div className="space-y-2" aria-live="polite">
                     <div className="flex items-center gap-2">
                       <BrandLogo className="h-5 w-5 text-accent" />
-                      <span className="text-xs font-semibold text-white/70">MrOS</span>
+                      <span className="text-xs font-semibold text-fg-subtle">MrOS</span>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-white/65">
-                      <span className="flex gap-1">
+                    <div className="flex items-center gap-2 text-sm text-fg-muted">
+                      <span className="flex gap-1" aria-hidden>
                         <span className="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-accent" />
                         <span
                           className="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-accent"
@@ -428,9 +434,18 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
                     rows={3}
                     placeholder="Ask MrOS to change anything…"
                     className="max-h-32"
+                    aria-label="Message MrOS"
                   />
                   <div className="flex items-center justify-between px-1 pb-0.5">
-                    <IconButton label="Attach" tooltip="Attach file">
+                    <IconButton
+                      label="Attach"
+                      tooltip="Attach file"
+                      onClick={() =>
+                        toast.message("Attach file", {
+                          description: "File uploads come next — describe files in chat for now.",
+                        })
+                      }
+                    >
                       <Plus />
                     </IconButton>
                     <Button
@@ -441,12 +456,12 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
                       disabled={!draft.trim() || building}
                       className="gap-1.5"
                     >
-                      Send
+                      {building ? "Building…" : "Send"}
                       <SendHorizontal className="size-3.5" strokeWidth={1.7} />
                     </Button>
                   </div>
                 </div>
-                <p className="mt-2 hidden text-center text-[11px] text-white/40 sm:block">
+                <p className="mt-2 hidden text-center text-[11px] text-fg-subtle sm:block">
                   Enter to send · Shift+Enter for new line
                 </p>
               </div>
@@ -466,6 +481,7 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
                     if (value) setTab(value as "preview" | "code");
                   }}
                   size="sm"
+                  aria-label="Preview or code"
                 >
                   <ToggleGroupItem value="preview">Preview</ToggleGroupItem>
                   <ToggleGroupItem value="code" className="gap-1">
@@ -485,6 +501,7 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
                       }}
                       size="icon"
                       className="hidden md:flex"
+                      aria-label="Device size"
                     >
                       <ToggleGroupItem value="desktop" aria-label="Desktop">
                         <Monitor className="size-3.5" strokeWidth={1.6} />
@@ -508,7 +525,12 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
                       type="button"
                       variant="ghost"
                       size="sm"
-                      className="hidden h-7 gap-1 px-2 text-white/90 hover:bg-icon-hover hover:text-white sm:inline-flex"
+                      className="hidden h-7 gap-1 px-2 text-fg-muted hover:bg-icon-hover hover:text-white sm:inline-flex"
+                      onClick={() =>
+                        toast.message("Select element", {
+                          description: "Element picker comes next.",
+                        })
+                      }
                     >
                       <Frame className="size-3.5" strokeWidth={1.6} />
                       <span className="hidden md:inline">Select</span>
@@ -517,23 +539,44 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
                 )}
 
                 <div className="ml-auto flex shrink-0 items-center gap-1">
-                  <span className="mr-1 hidden items-center gap-1.5 text-[11px] text-white/50 md:inline-flex">
+                  <span className="mr-1 hidden items-center gap-1.5 text-[11px] text-fg-subtle md:inline-flex">
                     <span className="h-1.5 w-1.5 rounded-full bg-success" />
                     Live
                   </span>
-                  <IconButton label="Open preview" tooltip="Open preview" size="icon-sm">
+                  <IconButton
+                    label="Open preview"
+                    tooltip="Open preview"
+                    size="icon-sm"
+                    onClick={() =>
+                      toast.message("Open preview", {
+                        description: "External preview window comes next.",
+                      })
+                    }
+                  >
                     <ExternalLink />
                   </IconButton>
                 </div>
               </div>
 
-              <div className="relative flex min-h-0 flex-1 items-stretch justify-center">
+              <div
+                className={cn(
+                  "relative flex min-h-0 flex-1",
+                  framed
+                    ? "items-center justify-center overflow-auto bg-preview-chrome p-4"
+                    : "items-stretch justify-center",
+                )}
+              >
                 {tab === "preview" ? (
                   <div
                     key={refreshKey}
-                    className="flex h-full max-h-full w-full overflow-hidden border-border bg-bg-elevated"
+                    className={cn(
+                      "flex max-h-full overflow-hidden border-border bg-bg-elevated",
+                      framed &&
+                        "rounded-[var(--radius-panel)] border shadow-[var(--shadow-soft)]",
+                    )}
                     style={{
                       width: isDesktop ? deviceWidth : "100%",
+                      height: framed ? deviceHeight : "100%",
                       maxWidth: "100%",
                     }}
                   >

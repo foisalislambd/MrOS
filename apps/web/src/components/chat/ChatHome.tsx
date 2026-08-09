@@ -38,15 +38,20 @@ export function ChatHome() {
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const hydrated = useRef(false);
+  const sidebarReady = useRef(false);
 
   useEffect(() => {
-    if (!hydrated.current) {
-      hydrated.current = true;
-      setSidebarOpen(window.matchMedia("(min-width: 1024px)").matches);
+    if (isDesktop === null) return;
+    if (!sidebarReady.current) {
+      sidebarReady.current = true;
+      setSidebarOpen(isDesktop);
       return;
     }
     if (!isDesktop) setSidebarOpen(false);
+  }, [isDesktop]);
+
+  useEffect(() => {
+    if (isDesktop) inputRef.current?.focus();
   }, [isDesktop]);
 
   useEffect(() => {
@@ -69,9 +74,16 @@ export function ChatHome() {
     const text = prompt.trim();
     if (!text || sending) return;
     setSending(true);
-    const id = crypto.randomUUID();
-    setPendingAgent({ id, prompt: text });
-    router.push(`/agent/${id}`);
+    try {
+      const id = crypto.randomUUID();
+      setPendingAgent({ id, prompt: text });
+      router.push(`/agent/${id}`);
+    } catch {
+      setSending(false);
+      toast.error("Couldn’t start chat", {
+        description: "Try again in a moment.",
+      });
+    }
   }
 
   function onKeyDown(e: ReactKeyboardEvent<HTMLTextAreaElement>) {
@@ -90,11 +102,14 @@ export function ChatHome() {
           activeId=""
           search={search}
           onSearchChange={setSearch}
-          onSelect={(id) => router.push(`/agent/${id}`)}
+          onSelect={(id) => {
+            if (isDesktop === false) setSidebarOpen(false);
+            router.push(`/agent/${id}`);
+          }}
           onNewChat={() => {
             setDraft("");
             inputRef.current?.focus();
-            if (!isDesktop) setSidebarOpen(false);
+            if (isDesktop === false) setSidebarOpen(false);
           }}
           onToggle={() => setSidebarOpen(false)}
         />
@@ -123,7 +138,10 @@ export function ChatHome() {
               </>
             )}
             <div className="min-w-0 flex-1" />
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent text-[11px] font-semibold text-white">
+            <div
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-accent text-[11px] font-semibold text-white"
+              aria-label="Account"
+            >
               FI
             </div>
           </header>
@@ -143,7 +161,7 @@ export function ChatHome() {
                 <h1 className="text-xl font-semibold tracking-tight text-white sm:text-2xl">
                   What should we build?
                 </h1>
-                <p className="mt-1.5 max-w-sm text-sm text-white/55">
+                <p className="mt-1.5 max-w-sm text-sm text-fg-subtle">
                   Describe an app, import a design, or drop a repo.
                 </p>
               </div>
@@ -157,10 +175,19 @@ export function ChatHome() {
                   rows={2}
                   placeholder="Build a personal finance dashboard…"
                   className="min-h-[56px] max-h-32 sm:min-h-[64px]"
-                  autoFocus
+                  aria-label="Describe what to build"
                 />
                 <div className="flex items-center justify-between gap-2 px-0.5 pt-0.5">
-                  <IconButton label="Attach" tooltip="Attach file" size="icon-sm">
+                  <IconButton
+                    label="Attach"
+                    tooltip="Attach file"
+                    size="icon-sm"
+                    onClick={() =>
+                      toast.message("Attach file", {
+                        description: "File uploads come next — describe files in chat for now.",
+                      })
+                    }
+                  >
                     <Plus />
                   </IconButton>
                   <Button
@@ -184,7 +211,7 @@ export function ChatHome() {
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="h-7 gap-1.5 rounded-full border-border bg-bg-elevated/80 px-2.5 text-[11px] font-medium text-white/85 hover:bg-bg-muted hover:text-white"
+                    className="h-7 gap-1.5 rounded-lg border-border bg-bg-elevated/80 px-2.5 text-[11px] font-medium text-fg-muted hover:bg-bg-muted hover:text-white"
                     onClick={() =>
                       toast.message(label, {
                         description: "Import wiring comes next — describe it in chat for now.",
@@ -197,7 +224,7 @@ export function ChatHome() {
                 ))}
               </div>
 
-              <p className="mt-4 text-center text-[11px] text-white/35">
+              <p className="mt-4 text-center text-[11px] text-fg-subtle">
                 Enter to send · Shift+Enter for new line
               </p>
             </div>

@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 
-export function useIsDesktop(breakpoint = 1024) {
-  const [isDesktop, setIsDesktop] = useState(false);
+/** `null` until mounted — avoids treating SSR/mobile as desktop before matchMedia runs. */
+export function useIsDesktop(breakpoint = 1024): boolean | null {
+  const [isDesktop, setIsDesktop] = useState<boolean | null>(null);
 
   useEffect(() => {
     const mq = window.matchMedia(`(min-width: ${breakpoint}px)`);
