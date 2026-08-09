@@ -285,7 +285,7 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
               <BrandLogo className="hidden h-6 w-6 shrink-0 text-accent sm:block" />
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <span className="truncate text-sm font-semibold tracking-tight text-white">
+                  <span className="truncate text-sm font-semibold tracking-tight text-foreground">
                     {projectTitle}
                   </span>
                   <ChevronRight
@@ -313,7 +313,7 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
                 Publish
               </Button>
               <div
-                className="hidden h-8 w-8 items-center justify-center rounded-full bg-accent text-[11px] font-semibold text-white sm:flex"
+                className="hidden h-8 w-8 items-center justify-center rounded-full bg-accent text-[11px] font-semibold text-primary-foreground sm:flex"
                 aria-label="Account"
               >
                 FI
@@ -360,7 +360,7 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
                 {messages.length === 0 && !building && (
                   <div className="flex h-full min-h-[200px] flex-col items-center justify-center px-4 text-center">
                     <BrandLogo className="mb-3 h-9 w-9 text-accent" />
-                    <p className="text-sm font-semibold text-white">Start building</p>
+                    <p className="text-sm font-semibold text-foreground">Start building</p>
                     <p className="mt-1 max-w-[240px] text-xs leading-relaxed text-fg-subtle">
                       Describe an app or a change. MrOS will update the live preview as you chat.
                     </p>
@@ -370,7 +370,7 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
                 {messages.map((msg) => (
                   <article key={msg.id}>
                     {msg.role === "user" ? (
-                      <div className="ml-2 rounded-2xl rounded-br-md bg-bg-elevated px-3.5 py-2.5 text-sm leading-relaxed text-white shadow-[var(--shadow-soft)] ring-1 ring-border sm:ml-6">
+                      <div className="ml-2 rounded-2xl rounded-br-md bg-bg-elevated px-3.5 py-2.5 text-sm leading-relaxed text-foreground shadow-[var(--shadow-soft)] ring-1 ring-border sm:ml-6">
                         {msg.content}
                       </div>
                     ) : (
@@ -379,7 +379,7 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
                           <BrandLogo className="h-5 w-5 text-accent" />
                           <span className="text-xs font-semibold text-fg-subtle">MrOS</span>
                         </div>
-                        <p className="text-sm leading-relaxed text-white">{msg.content}</p>
+                        <p className="text-sm leading-relaxed text-foreground">{msg.content}</p>
                         {msg.files && msg.files.length > 0 && (
                           <ul className="flex flex-wrap gap-1.5">
                             {msg.files.map((file) => (
@@ -525,7 +525,7 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
                       type="button"
                       variant="ghost"
                       size="sm"
-                      className="hidden h-7 gap-1 px-2 text-fg-muted hover:bg-icon-hover hover:text-white sm:inline-flex"
+                      className="hidden h-7 gap-1 px-2 text-fg-muted hover:bg-icon-hover hover:text-foreground sm:inline-flex"
                       onClick={() =>
                         toast.message("Select element", {
                           description: "Element picker comes next.",

@@ -139,7 +139,7 @@ export function ChatHome() {
             )}
             <div className="min-w-0 flex-1" />
             <div
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-accent text-[11px] font-semibold text-white"
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-accent text-[11px] font-semibold text-primary-foreground"
               aria-label="Account"
             >
               FI
@@ -147,18 +147,12 @@ export function ChatHome() {
           </header>
 
           <main className="relative flex min-h-0 flex-1 flex-col items-center justify-center overflow-y-auto px-4 py-8 sm:px-6">
-            <div
-              className="pointer-events-none absolute inset-0 opacity-80"
-              style={{
-                background:
-                  "radial-gradient(ellipse 70% 50% at 50% 20%, rgba(255,107,74,0.12) 0%, transparent 55%)",
-              }}
-            />
+            <div className="accent-wash pointer-events-none absolute inset-0" />
 
             <div className="relative w-full max-w-xl">
               <div className="mb-6 flex flex-col items-center text-center">
                 <BrandLogo className="mb-3 h-9 w-9 text-accent" />
-                <h1 className="text-xl font-semibold tracking-tight text-white sm:text-2xl">
+                <h1 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
                   What should we build?
                 </h1>
                 <p className="mt-1.5 max-w-sm text-sm text-fg-subtle">
@@ -211,7 +205,7 @@ export function ChatHome() {
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="h-7 gap-1.5 rounded-lg border-border bg-bg-elevated/80 px-2.5 text-[11px] font-medium text-fg-muted hover:bg-bg-muted hover:text-white"
+                    className="h-7 gap-1.5 rounded-lg border-border bg-bg-elevated/80 px-2.5 text-[11px] font-medium text-fg-muted hover:bg-bg-muted hover:text-foreground"
                     onClick={() =>
                       toast.message(label, {
                         description: "Import wiring comes next — describe it in chat for now.",
@@ -224,7 +218,7 @@ export function ChatHome() {
                 ))}
               </div>
 
-              <p className="mt-4 text-center text-[11px] text-fg-subtle">
+              <p className="mt-4 text-center text-[11px] text-fg-faint">
                 Enter to send · Shift+Enter for new line
               </p>
             </div>

@@ -11,7 +11,7 @@ export function Toaster() {
         classNames: {
           toast:
             "group toast border-border bg-bg-elevated text-foreground shadow-[var(--shadow-soft)]",
-          description: "text-muted-foreground",
+          description: "text-fg-subtle",
           actionButton: "bg-primary text-primary-foreground",
           cancelButton: "bg-muted text-muted-foreground",
         },

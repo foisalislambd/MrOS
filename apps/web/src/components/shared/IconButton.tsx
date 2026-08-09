@@ -33,7 +33,7 @@ export function IconButton({
       size={size}
       aria-label={label}
       className={cn(
-        "text-white/90 transition-colors duration-200 hover:bg-icon-hover hover:text-white active:bg-icon-hover/80 active:text-white [&_svg]:size-[1.05rem] [&_svg]:stroke-[1.55]",
+        "text-icon transition-colors duration-200 hover:bg-icon-hover hover:text-icon-active active:bg-icon-hover/80 active:text-icon-active [&_svg]:size-[1.05rem] [&_svg]:stroke-[1.55]",
         size === "icon-sm" && "[&_svg]:size-[0.9rem]",
         size === "icon-xs" && "[&_svg]:size-[0.85rem]",
         className,

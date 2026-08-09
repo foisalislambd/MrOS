@@ -162,9 +162,9 @@ export function HistorySidebar({
           type="button"
           variant="ghost"
           onClick={onNewChat}
-          className="h-10 w-full justify-start gap-2.5 rounded-lg px-2.5 text-[14px] font-normal text-white hover:bg-icon-hover hover:text-white"
+          className="h-10 w-full justify-start gap-2.5 rounded-lg px-2.5 text-[14px] font-normal text-foreground hover:bg-icon-hover hover:text-foreground"
         >
-          <SquarePen className="size-4 text-white/90" strokeWidth={1.6} />
+          <SquarePen className="size-4 text-icon" strokeWidth={1.6} />
           New chat
         </Button>
 
@@ -172,7 +172,7 @@ export function HistorySidebar({
           type="button"
           variant="ghost"
           onClick={() => comingSoon("Library")}
-          className="h-10 w-full justify-start gap-2.5 rounded-lg px-2.5 text-[14px] font-normal text-fg-muted hover:bg-icon-hover hover:text-white"
+          className="h-10 w-full justify-start gap-2.5 rounded-lg px-2.5 text-[14px] font-normal text-fg-muted hover:bg-icon-hover hover:text-foreground"
         >
           <Library className="size-4" strokeWidth={1.6} />
           Library
@@ -182,7 +182,7 @@ export function HistorySidebar({
           type="button"
           variant="ghost"
           onClick={() => comingSoon("Projects")}
-          className="h-10 w-full justify-start gap-2.5 rounded-lg px-2.5 text-[14px] font-normal text-fg-muted hover:bg-icon-hover hover:text-white"
+          className="h-10 w-full justify-start gap-2.5 rounded-lg px-2.5 text-[14px] font-normal text-fg-muted hover:bg-icon-hover hover:text-foreground"
         >
           <Folder className="size-4" strokeWidth={1.6} />
           Projects
@@ -208,13 +208,13 @@ export function HistorySidebar({
 
         {recentsOpen &&
           (filtered.length === 0 ? (
-            <p className="px-2.5 py-4 text-center text-xs text-fg-subtle">No chats found</p>
+            <p className="px-2.5 py-4 text-center text-xs text-fg-faint">No chats found</p>
           ) : (
             <div className="space-y-3">
               {grouped.map((group) => (
                 <div key={group.key}>
                   {!q && (
-                    <p className="mb-1 px-2.5 text-[11px] font-medium tracking-wide text-fg-subtle">
+                    <p className="mb-1 px-2.5 text-[11px] font-medium tracking-wide text-fg-faint">
                       {group.label}
                     </p>
                   )}
@@ -230,8 +230,8 @@ export function HistorySidebar({
                             className={cn(
                               "flex w-full items-center rounded-lg px-3 py-2 text-left text-[13.5px] leading-snug",
                               active
-                                ? "bg-bg-elevated font-medium text-white ring-1 ring-border"
-                                : "text-fg-muted hover:bg-icon-hover hover:text-white",
+                                ? "bg-bg-elevated font-medium text-foreground ring-1 ring-border"
+                                : "text-fg-muted hover:bg-icon-hover hover:text-foreground",
                             )}
                           >
                             <span className="truncate pr-7">{thread.title}</span>
@@ -261,13 +261,13 @@ export function HistorySidebar({
       <div className="shrink-0 border-t border-border p-2">
         <div className="flex items-center gap-2.5 rounded-xl px-1.5 py-1.5 hover:bg-icon-hover">
           <div
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent text-[11px] font-semibold text-white"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent text-[11px] font-semibold text-primary-foreground"
             aria-hidden
           >
             FI
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium text-white">Foisal Islam</p>
+            <p className="truncate text-sm font-medium text-foreground">Foisal Islam</p>
             <p className="truncate text-[11px] text-fg-subtle">Free</p>
           </div>
           <Button
@@ -275,7 +275,7 @@ export function HistorySidebar({
             variant="outline"
             size="sm"
             onClick={() => comingSoon("Upgrade")}
-            className="h-7 shrink-0 rounded-lg border-border bg-bg-elevated px-3 text-[12px] font-medium text-white hover:bg-bg-muted hover:text-white"
+            className="h-7 shrink-0 rounded-lg border-border bg-bg-elevated px-3 text-[12px] font-medium text-foreground hover:bg-bg-muted hover:text-foreground"
           >
             Upgrade
           </Button>
@@ -296,7 +296,7 @@ export function HistorySidebar({
         <button
           type="button"
           className={cn(
-            "absolute inset-0 bg-black/60 transition-opacity duration-200",
+            "absolute inset-0 bg-overlay transition-opacity duration-200",
             open ? "opacity-100" : "opacity-0",
           )}
           aria-label="Close sidebar overlay"

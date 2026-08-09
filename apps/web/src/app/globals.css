@@ -2,32 +2,51 @@
 @import "tw-animate-css";
 
 :root {
+  /* Surfaces */
   --bg: #0c0c0d;
   --bg-elevated: #161618;
   --bg-muted: #1e1e21;
   --bg-chat: #111113;
   --bg-sidebar: #0a0a0b;
+  --preview-chrome: #0e0e10;
+  --preview-canvas: #121214;
+  --code-panel: #0c0c0e;
+  --code-tabbar: #101012;
+
+  /* Foreground ladder: primary → muted → subtle → faint */
   --fg: #ffffff;
   --fg-muted: #c8c8c5;
   --fg-subtle: #9a9a96;
+  --fg-faint: #6e6e6a;
+  --code-fg: #e8e4de;
+
+  /* Borders & overlays */
   --border: #2a2a2e;
   --border-strong: #3a3a40;
+  --overlay: rgba(0, 0, 0, 0.6);
+  --surface-tint: rgba(255, 255, 255, 0.04);
+  --surface-tint-strong: rgba(255, 255, 255, 0.08);
+
+  /* Accent */
   --accent: #ff6b4a;
   --accent-hover: #ff8266;
+  --accent-bright: #ff9a7a;
   --accent-soft: rgba(255, 107, 74, 0.14);
   --accent-ring: rgba(255, 107, 74, 0.32);
+  --accent-glow: rgba(255, 107, 74, 0.12);
+  --accent-glow-strong: rgba(255, 107, 74, 0.22);
+
   --success: #3ecf8e;
-  --preview-chrome: #0e0e10;
   --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.35), 0 12px 32px rgba(0, 0, 0, 0.28);
   --radius-panel: 14px;
   --radius-control: 10px;
 
-  /* Smoother icon palette */
+  /* Icons */
   --icon: #e8e8e6;
   --icon-active: #ffffff;
-  --icon-hover-bg: rgba(255, 255, 255, 0.08);
+  --icon-hover-bg: var(--surface-tint-strong);
 
-  /* shadcn semantic tokens mapped to MrOS theme */
+  /* shadcn semantic tokens */
   --background: var(--bg);
   --foreground: var(--fg);
   --card: var(--bg-elevated);
@@ -53,16 +72,31 @@
   --color-bg-muted: var(--bg-muted);
   --color-bg-chat: var(--bg-chat);
   --color-bg-sidebar: var(--bg-sidebar);
+  --color-preview-chrome: var(--preview-chrome);
+  --color-preview-canvas: var(--preview-canvas);
+  --color-code-panel: var(--code-panel);
+  --color-code-tabbar: var(--code-tabbar);
+
   --color-fg: var(--fg);
   --color-fg-muted: var(--fg-muted);
   --color-fg-subtle: var(--fg-subtle);
+  --color-fg-faint: var(--fg-faint);
+  --color-code-fg: var(--code-fg);
+
   --color-border: var(--border);
   --color-border-strong: var(--border-strong);
+  --color-overlay: var(--overlay);
+  --color-surface-tint: var(--surface-tint);
+  --color-surface-tint-strong: var(--surface-tint-strong);
+
   --color-accent: var(--accent);
   --color-accent-hover: var(--accent-hover);
+  --color-accent-bright: var(--accent-bright);
   --color-accent-soft: var(--accent-soft);
+  --color-accent-glow: var(--accent-glow);
+  --color-accent-glow-strong: var(--accent-glow-strong);
   --color-success: var(--success);
-  --color-preview-chrome: var(--preview-chrome);
+
   --color-icon: var(--icon);
   --color-icon-active: var(--icon-active);
   --color-icon-hover: var(--icon-hover-bg);
@@ -162,6 +196,28 @@ body {
 
 .composer:focus-within {
   border-color: var(--border-strong);
+}
+
+.accent-wash {
+  background: radial-gradient(
+    ellipse 70% 50% at 50% 20%,
+    var(--accent-glow) 0%,
+    transparent 55%
+  );
+}
+
+.accent-wash-strong {
+  background:
+    radial-gradient(
+      ellipse 80% 70% at 10% -20%,
+      var(--accent-glow-strong) 0%,
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse 60% 50% at 100% 0%,
+      rgba(255, 150, 80, 0.12) 0%,
+      transparent 45%
+    );
 }
 
 .scrollbar-thin {

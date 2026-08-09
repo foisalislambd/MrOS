@@ -166,13 +166,13 @@ function FileTreeItem({
         <button
           type="button"
           onClick={() => onToggleFolder(node.path)}
-          className="flex w-full items-center gap-1.5 py-1 pr-2 text-left text-[12px] text-white/80 hover:bg-white/[0.05] hover:text-white"
+          className="flex w-full items-center gap-1.5 py-1 pr-2 text-left text-[12px] text-fg-muted hover:bg-surface-tint hover:text-foreground"
           style={{ paddingLeft: pad }}
         >
           {isOpen ? (
-            <ChevronDown className="size-3.5 shrink-0 text-white/50" strokeWidth={1.6} />
+            <ChevronDown className="size-3.5 shrink-0 text-fg-subtle" strokeWidth={1.6} />
           ) : (
-            <ChevronRight className="size-3.5 shrink-0 text-white/50" strokeWidth={1.6} />
+            <ChevronRight className="size-3.5 shrink-0 text-fg-subtle" strokeWidth={1.6} />
           )}
           {isOpen ? (
             <FolderOpen className="size-3.5 shrink-0 text-accent" strokeWidth={1.6} />
@@ -202,12 +202,14 @@ function FileTreeItem({
       type="button"
       onClick={() => onSelectFile(node.path)}
       className={cn(
-        "flex w-full items-center gap-1.5 py-1 pr-2 text-left text-[12px] hover:bg-white/[0.05]",
-        isActive ? "bg-white/[0.08] text-white" : "text-white/75 hover:text-white",
+        "flex w-full items-center gap-1.5 py-1 pr-2 text-left text-[12px] hover:bg-surface-tint",
+        isActive
+          ? "bg-surface-tint-strong text-foreground"
+          : "text-fg-muted hover:text-foreground",
       )}
       style={{ paddingLeft: pad + 16 }}
     >
-      <FileCode2 className="size-3.5 shrink-0 text-white/55" strokeWidth={1.6} />
+      <FileCode2 className="size-3.5 shrink-0 text-fg-subtle" strokeWidth={1.6} />
       <span className="truncate">{node.name}</span>
     </button>
   );
@@ -255,18 +257,18 @@ export function CodeExplorer() {
       {/* File explorer */}
       <aside
         className={cn(
-          "flex shrink-0 flex-col border-r border-border bg-[#0c0c0e] transition-[width] duration-200",
+          "flex shrink-0 flex-col border-r border-border bg-code-panel transition-[width] duration-200",
           explorerOpen ? "w-[200px] sm:w-[220px]" : "w-0 overflow-hidden border-r-0",
         )}
       >
         <div className="flex h-9 shrink-0 items-center justify-between border-b border-border px-3">
-          <span className="text-[10px] font-semibold tracking-wider text-white/50 uppercase">
+          <span className="text-[10px] font-semibold tracking-wider text-fg-subtle uppercase">
             Explorer
           </span>
-          <span className="text-[10px] text-white/35">flux</span>
+          <span className="text-[10px] text-fg-faint">flux</span>
         </div>
         <div className="scrollbar-thin min-h-0 flex-1 overflow-y-auto py-1">
-          <p className="px-3 py-1.5 text-[10px] font-semibold tracking-wide text-white/40 uppercase">
+          <p className="px-3 py-1.5 text-[10px] font-semibold tracking-wide text-fg-faint uppercase">
             Files
           </p>
           {FILE_TREE.map((node) => (
@@ -285,11 +287,11 @@ export function CodeExplorer() {
 
       {/* Editor pane */}
       <div className="flex min-w-0 flex-1 flex-col">
-        <div className="flex h-9 shrink-0 items-center border-b border-border bg-[#101012]">
+        <div className="flex h-9 shrink-0 items-center border-b border-border bg-code-tabbar">
           <button
             type="button"
             onClick={() => setExplorerOpen((v) => !v)}
-            className="flex h-full items-center border-r border-border px-2.5 text-white/70 hover:bg-white/[0.05] hover:text-white"
+            className="flex h-full items-center border-r border-border px-2.5 text-fg-muted hover:bg-surface-tint hover:text-foreground"
             aria-label="Toggle explorer"
             title="Toggle explorer"
           >
@@ -306,8 +308,8 @@ export function CodeExplorer() {
                   className={cn(
                     "group flex h-9 shrink-0 items-stretch border-r border-border text-[12px]",
                     active
-                      ? "bg-preview-chrome text-white"
-                      : "bg-transparent text-white/55 hover:bg-white/[0.04] hover:text-white/85",
+                      ? "bg-preview-chrome text-foreground"
+                      : "bg-transparent text-fg-subtle hover:bg-surface-tint hover:text-fg-muted",
                   )}
                 >
                   <button
@@ -316,14 +318,14 @@ export function CodeExplorer() {
                     className="flex items-center gap-2 px-3"
                     aria-current={active ? "page" : undefined}
                   >
-                    <FileCode2 className="size-3 shrink-0 text-white/50" strokeWidth={1.6} />
+                    <FileCode2 className="size-3 shrink-0 text-fg-subtle" strokeWidth={1.6} />
                     <span>{name}</span>
                   </button>
                   <button
                     type="button"
                     onClick={(e) => closeTab(path, e)}
                     className={cn(
-                      "mr-1.5 self-center rounded px-1 text-[11px] text-white/40 hover:bg-white/10 hover:text-white",
+                      "mr-1.5 self-center rounded px-1 text-[11px] text-fg-faint hover:bg-surface-tint-strong hover:text-foreground",
                       active ? "opacity-70" : "opacity-0 group-hover:opacity-70 focus-visible:opacity-70",
                     )}
                     aria-label={`Close ${name}`}
@@ -335,7 +337,7 @@ export function CodeExplorer() {
             })}
           </div>
 
-          <div className="hidden shrink-0 items-center gap-2 px-3 text-[11px] text-white/40 sm:flex">
+          <div className="hidden shrink-0 items-center gap-2 px-3 text-[11px] text-fg-faint sm:flex">
             <span className="truncate">{fileName}</span>
           </div>
         </div>
@@ -344,19 +346,19 @@ export function CodeExplorer() {
           <div className="flex min-w-full font-mono text-[12px] leading-6 sm:text-[12.5px]">
             <div
               aria-hidden
-              className="sticky left-0 select-none border-r border-border/60 bg-preview-chrome py-3 pr-3 pl-3 text-right text-white/30"
+              className="sticky left-0 select-none border-r border-border/60 bg-preview-chrome py-3 pr-3 pl-3 text-right text-fg-faint"
             >
               {lines.map((_, i) => (
                 <div key={i}>{i + 1}</div>
               ))}
             </div>
-            <pre className="flex-1 whitespace-pre py-3 pr-4 pl-4 text-[#e8e4de]">
+            <pre className="flex-1 whitespace-pre py-3 pr-4 pl-4 text-code-fg">
               {content}
             </pre>
           </div>
         </div>
 
-        <div className="flex h-7 shrink-0 items-center justify-between border-t border-border bg-[#0c0c0e] px-3 text-[10px] text-white/40">
+        <div className="flex h-7 shrink-0 items-center justify-between border-t border-border bg-code-panel px-3 text-[10px] text-fg-faint">
           <span>{activePath}</span>
           <span>UTF-8 · TypeScript React</span>
         </div>

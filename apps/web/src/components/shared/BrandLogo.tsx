@@ -9,7 +9,7 @@ export function BrandLogo({ className }: { className?: string }) {
       <rect x="3" y="3" width="18" height="18" rx="5" fill="currentColor" />
       <path
         d="M8 15.5V8.5L12 13l4-4.5v7"
-        stroke="white"
+        stroke="var(--primary-foreground)"
         strokeOpacity="0.92"
         strokeWidth="1.8"
         strokeLinecap="round"
