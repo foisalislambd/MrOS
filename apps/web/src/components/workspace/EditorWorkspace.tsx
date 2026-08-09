@@ -381,7 +381,7 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
             )}
 
             <div className="flex min-w-0 flex-1 items-center gap-2.5">
-              <BrandLogo className="hidden h-5 w-5 shrink-0 text-accent sm:block" />
+              <BrandLogo className="hidden h-7 w-7 shrink-0 sm:block" />
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
                   <span className="truncate text-[14px] font-semibold tracking-[-0.02em] text-white">
@@ -513,7 +513,7 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
                 >
                   {messages.length === 0 && !building && (
                     <div className="flex h-full min-h-[220px] flex-col items-center justify-center px-4 text-center">
-                      <BrandLogo className="mb-3 h-8 w-8 text-accent" />
+                      <BrandLogo className="mb-3 h-12 w-12" />
                       <p className="text-[16px] font-semibold tracking-[-0.02em] text-white">
                         Ask anything
                       </p>
@@ -540,7 +540,7 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
                       ) : (
                         <div className="space-y-3">
                           <div className="flex items-center gap-2">
-                            <BrandLogo className="h-4 w-4 text-accent" />
+                            <BrandLogo className="h-5 w-5" />
                             <span className="text-[12px] font-semibold tracking-[-0.01em] text-white/80">
                               MrOS
                             </span>
@@ -567,7 +567,7 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
                   {building && (
                     <div className="space-y-2" aria-live="polite">
                       <div className="flex items-center gap-2">
-                        <BrandLogo className="h-4 w-4 text-accent" />
+                        <BrandLogo className="h-5 w-5" />
                         <span className="text-[12px] font-semibold text-white/80">MrOS</span>
                       </div>
                       <div className="flex items-center gap-2 text-[14px] text-white/80">

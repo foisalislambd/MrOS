@@ -1,20 +1,18 @@
-export function BrandLogo({ className }: { className?: string }) {
+import { cn } from "@/lib/utils";
+
+type BrandLogoProps = {
+  className?: string;
+  alt?: string;
+};
+
+export function BrandLogo({ className, alt = "MrOS" }: BrandLogoProps) {
   return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      aria-hidden="true"
-    >
-      <rect x="3" y="3" width="18" height="18" rx="5" fill="currentColor" />
-      <path
-        d="M8 15.5V8.5L12 13l4-4.5v7"
-        stroke="var(--primary-foreground)"
-        strokeOpacity="0.92"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
+    // eslint-disable-next-line @next/next/no-img-element -- brand mark is a static public asset
+    <img
+      src="/logo.png"
+      alt={alt}
+      className={cn("object-contain", className)}
+      draggable={false}
+    />
   );
 }

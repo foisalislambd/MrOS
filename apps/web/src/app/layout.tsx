@@ -25,6 +25,10 @@ const jetbrains = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "MrOS — AI workspace",
   description: "Chat, build, and preview products in one professional workspace.",
+  icons: {
+    icon: [{ url: "/logo.png", type: "image/png" }],
+    apple: [{ url: "/logo.png", type: "image/png" }],
+  },
 };
 
 export default function RootLayout({

@@ -1,5 +1,9 @@
 # @mros/telegram-bot
 
+<p align="center">
+  <img src="../../assets/logo.png" alt="MrOS" width="96" />
+</p>
+
 Telegram control channel for MrOS — human-friendly demo UI on Bot API Rich Messages.
 
 ## What it feels like

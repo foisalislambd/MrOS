@@ -116,7 +116,7 @@ export function HistorySidebar({
   const panel = (
     <div className="app-shell-sidebar flex h-full w-[min(100vw,280px)] flex-col lg:w-[260px]">
       <div className="flex h-12 shrink-0 items-center gap-2 border-b border-border px-3">
-        <BrandLogo className="h-5 w-5 shrink-0 text-accent" />
+        <BrandLogo className="h-7 w-7 shrink-0" />
         <span className="truncate text-[14px] font-semibold tracking-[-0.02em] text-white">
           MrOS
         </span>

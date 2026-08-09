@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 
 import { HistorySidebar } from "@/components/layout/HistorySidebar";
+import { BrandLogo } from "@/components/shared/BrandLogo";
 import { IconButton } from "@/components/shared/IconButton";
 import { toast } from "@/components/shared/Toast";
 import { Button } from "@/components/ui/button";
@@ -140,6 +141,7 @@ export function ChatHome() {
 
             <div className="relative w-full max-w-[640px] -translate-y-6">
               <div className="mb-8 flex flex-col items-center text-center">
+                <BrandLogo className="mb-4 h-16 w-16 sm:h-[4.5rem] sm:w-[4.5rem]" />
                 <h1 className="text-[1.9rem] font-semibold tracking-[-0.03em] text-white sm:text-[2.15rem]">
                   What can I help with?
                 </h1>
