@@ -10,17 +10,12 @@ import {
   SquarePen,
 } from "lucide-react";
 
-import { IconButton } from "./IconButton";
-import { IconLogo } from "./icons";
+import { IconButton } from "@/components/shared/IconButton";
+import { BrandLogo } from "@/components/shared/BrandLogo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import type { ChatThread } from "@/lib/chat";
 import { cn } from "@/lib/utils";
-
-export type ChatThread = {
-  id: string;
-  title: string;
-  group: "today" | "yesterday" | "week" | "older";
-};
 
 type HistorySidebarProps = {
   open: boolean;
@@ -56,7 +51,7 @@ export function HistorySidebar({
       {/* Header: logo left, search right */}
       <div className="flex h-12 shrink-0 items-center gap-1 px-2">
         <div className="flex h-8 w-8 items-center justify-center">
-          <IconLogo className="h-6 w-6 text-accent" />
+          <BrandLogo className="h-6 w-6 text-accent" />
         </div>
         <div className="ml-auto flex items-center gap-0.5">
           <IconButton

@@ -1,5 +1,5 @@
-import { EditorWorkspace } from "@/components/editor/EditorWorkspace";
+import { ChatHome } from "@/components/chat/ChatHome";
 
 export default function Home() {
-  return <EditorWorkspace />;
+  return <ChatHome />;
 }

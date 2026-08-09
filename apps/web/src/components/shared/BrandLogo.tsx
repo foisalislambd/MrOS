@@ -1,4 +1,4 @@
-export function IconLogo({ className }: { className?: string }) {
+export function BrandLogo({ className }: { className?: string }) {
   return (
     <svg
       className={className}

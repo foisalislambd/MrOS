@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
+import { useRouter } from "next/navigation";
 import {
   ChevronRight,
   Code2,
@@ -16,179 +17,146 @@ import {
   Tablet,
 } from "lucide-react";
 
-import { HistorySidebar, type ChatThread } from "./HistorySidebar";
-import { IconButton } from "./IconButton";
-import { IconLogo } from "./icons";
-import { CodeExplorer } from "./CodeExplorer";
-import { MockPreviewApp } from "./MockPreviewApp";
-import { toast } from "./Toast";
+import { HistorySidebar } from "@/components/layout/HistorySidebar";
+import { BrandLogo } from "@/components/shared/BrandLogo";
+import { IconButton } from "@/components/shared/IconButton";
+import { toast } from "@/components/shared/Toast";
+import { CodeExplorer } from "@/components/workspace/CodeExplorer";
+import { MockPreviewApp } from "@/components/workspace/MockPreviewApp";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { useIsDesktop } from "@/hooks/use-is-desktop";
+import {
+  consumePendingAgent,
+  INITIAL_THREADS,
+  THREAD_MESSAGES,
+  titleFromPrompt,
+  type ChatThread,
+  type Message,
+} from "@/lib/chat";
 import { cn } from "@/lib/utils";
 
 type Device = "desktop" | "tablet" | "mobile";
-type Role = "user" | "assistant";
 type MobilePane = "chat" | "preview";
 
-type Message = {
-  id: string;
-  role: Role;
-  content: string;
-  files?: string[];
-};
+function seedFromAgentId(agentId: string): {
+  threads: ChatThread[];
+  chatMap: Record<string, Message[]>;
+  bootstrapPrompt: string | null;
+} {
+  const known = THREAD_MESSAGES[agentId];
+  if (known) {
+    return {
+      threads: INITIAL_THREADS,
+      chatMap: { ...THREAD_MESSAGES },
+      bootstrapPrompt: null,
+    };
+  }
 
-const FLUX_MESSAGES: Message[] = [
-  {
-    id: "1",
-    role: "user",
-    content:
-      "Build a clean personal finance dashboard called Flux. Soft light UI, weekly spend chart, recent transactions, and a quick-add expense button.",
-  },
-  {
-    id: "2",
-    role: "assistant",
-    content:
-      "Got it — scaffolding Flux with a calm layout: balance header, weekly spend bars, and a transaction list. Preview is updating now.",
-    files: ["src/App.tsx", "src/components/SpendChart.tsx", "src/components/Transactions.tsx"],
-  },
-  {
-    id: "3",
-    role: "user",
-    content: "Make the accent coral and tighten the spacing on mobile.",
-  },
-  {
-    id: "4",
-    role: "assistant",
-    content:
-      "Updated the accent to coral and tightened mobile padding. Chart labels now wrap cleaner under 420px.",
-    files: ["src/index.css", "src/components/SpendChart.tsx"],
-  },
-];
+  const pending = consumePendingAgent(agentId);
+  if (pending) {
+    const thread: ChatThread = {
+      id: agentId,
+      title: titleFromPrompt(pending.prompt),
+      group: "today",
+    };
+    return {
+      threads: [thread, ...INITIAL_THREADS],
+      chatMap: {
+        ...THREAD_MESSAGES,
+        [agentId]: [
+          {
+            id: crypto.randomUUID(),
+            role: "user",
+            content: pending.prompt,
+          },
+        ],
+      },
+      bootstrapPrompt: pending.prompt,
+    };
+  }
 
-const INITIAL_THREADS: ChatThread[] = [
-  { id: "flux", title: "Flux finance dashboard", group: "today" },
-  { id: "landing", title: "SaaS landing page redesign", group: "today" },
-  { id: "auth", title: "Auth flow with magic link", group: "yesterday" },
-  { id: "portfolio", title: "Portfolio site for photographer", group: "yesterday" },
-  { id: "crm", title: "Minimal CRM kanban board", group: "week" },
-  { id: "docs", title: "Docs site with search", group: "week" },
-  { id: "booking", title: "Appointment booking UI", group: "older" },
-];
-
-const THREAD_MESSAGES: Record<string, Message[]> = {
-  flux: FLUX_MESSAGES,
-  landing: [
-    {
-      id: "l1",
-      role: "user",
-      content: "Redesign my SaaS landing — bold headline, one CTA, full-bleed product shot.",
-    },
-    {
-      id: "l2",
-      role: "assistant",
-      content: "Laid out a hero-first landing with a strong brand mark and a single primary CTA. Preview is ready.",
-      files: ["src/pages/Home.tsx", "src/components/Hero.tsx"],
-    },
-  ],
-  auth: [
-    {
-      id: "a1",
-      role: "user",
-      content: "Build a magic-link auth flow with email input and a waiting state.",
-    },
-    {
-      id: "a2",
-      role: "assistant",
-      content: "Auth screens are in. Added email form, sent-state, and a calm waiting animation.",
-      files: ["src/pages/Login.tsx"],
-    },
-  ],
-  portfolio: [
-    {
-      id: "p1",
-      role: "user",
-      content: "Photographer portfolio — large images, minimal chrome, grid that feels editorial.",
-    },
-  ],
-  crm: [
-    {
-      id: "c1",
-      role: "user",
-      content: "Minimal CRM with kanban columns: Lead, Active, Closed.",
-    },
-  ],
-  docs: [
-    {
-      id: "d1",
-      role: "user",
-      content: "Docs site with sidebar nav and a search bar at the top.",
-    },
-  ],
-  booking: [
-    {
-      id: "b1",
-      role: "user",
-      content: "Appointment booking UI with calendar and time slots.",
-    },
-  ],
-};
-
-function useIsDesktop() {
-  const [isDesktop, setIsDesktop] = useState(false);
-
-  useEffect(() => {
-    const mq = window.matchMedia("(min-width: 1024px)");
-    const update = () => setIsDesktop(mq.matches);
-    update();
-    mq.addEventListener("change", update);
-    return () => mq.removeEventListener("change", update);
-  }, []);
-
-  return isDesktop;
+  const thread: ChatThread = {
+    id: agentId,
+    title: "New chat",
+    group: "today",
+  };
+  return {
+    threads: [thread, ...INITIAL_THREADS],
+    chatMap: { ...THREAD_MESSAGES, [agentId]: [] },
+    bootstrapPrompt: null,
+  };
 }
 
-export function EditorWorkspace() {
+export function EditorWorkspace({ agentId }: { agentId: string }) {
+  const router = useRouter();
   const isDesktop = useIsDesktop();
+  const seeded = useRef<ReturnType<typeof seedFromAgentId> | null>(null);
+  if (!seeded.current) {
+    seeded.current = seedFromAgentId(agentId);
+  }
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mobilePane, setMobilePane] = useState<MobilePane>("chat");
-  const [threads, setThreads] = useState<ChatThread[]>(INITIAL_THREADS);
-  const [chatMap, setChatMap] = useState<Record<string, Message[]>>(THREAD_MESSAGES);
-  const [activeId, setActiveId] = useState("flux");
+  const [threads, setThreads] = useState<ChatThread[]>(seeded.current.threads);
+  const [chatMap, setChatMap] = useState<Record<string, Message[]>>(seeded.current.chatMap);
   const [search, setSearch] = useState("");
   const [device, setDevice] = useState<Device>("desktop");
   const [tab, setTab] = useState<"preview" | "code">("preview");
   const [draft, setDraft] = useState("");
-  const [building, setBuilding] = useState(false);
+  const [building, setBuilding] = useState(Boolean(seeded.current.bootstrapPrompt));
   const [refreshKey, setRefreshKey] = useState(0);
   const endRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const hydrated = useRef(false);
+  const bootstrapped = useRef(false);
 
-  const messages = chatMap[activeId] ?? [];
-  const activeThread = threads.find((t) => t.id === activeId);
+  const messages = chatMap[agentId] ?? [];
+  const activeThread = threads.find((t) => t.id === agentId);
   const projectTitle = activeThread?.title ?? "New chat";
 
   useEffect(() => {
     if (!hydrated.current) {
       hydrated.current = true;
-      const desktop = window.matchMedia("(min-width: 1024px)").matches;
-      setSidebarOpen(desktop);
+      setSidebarOpen(window.matchMedia("(min-width: 1024px)").matches);
       return;
     }
-    if (isDesktop) {
-      setMobilePane("chat");
-    } else {
-      setSidebarOpen(false);
-    }
+    if (isDesktop) setMobilePane("chat");
+    else setSidebarOpen(false);
   }, [isDesktop]);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, building, activeId]);
+  }, [messages, building, agentId]);
+
+  useEffect(() => {
+    if (bootstrapped.current) return;
+    if (!seeded.current?.bootstrapPrompt) return;
+    bootstrapped.current = true;
+
+    const threadId = agentId;
+    window.setTimeout(() => {
+      setChatMap((prev) => ({
+        ...prev,
+        [threadId]: [
+          ...(prev[threadId] ?? []),
+          {
+            id: crypto.randomUUID(),
+            role: "assistant",
+            content:
+              "Got it — scaffolding your project now. Preview is live; keep chatting to iterate.",
+            files: ["src/App.tsx"],
+          },
+        ],
+      }));
+      setBuilding(false);
+      setRefreshKey((k) => k + 1);
+    }, 1600);
+  }, [agentId]);
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -197,50 +165,24 @@ export function EditorWorkspace() {
         if (isDesktop) setSidebarOpen((v) => !v);
         else setMobilePane((v) => (v === "chat" ? "preview" : "chat"));
       }
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "\\") {
+      if ((e.metaKey || e.ctrlKey) && e.key === "\\") {
         e.preventDefault();
         setSidebarOpen((v) => !v);
       }
       if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === "o") {
         e.preventDefault();
-        createNewChat();
+        router.push("/");
       }
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isDesktop]);
-
-  function createNewChat() {
-    const id = crypto.randomUUID();
-    const thread: ChatThread = {
-      id,
-      title: "New chat",
-      group: "today",
-    };
-    setThreads((prev) => [thread, ...prev]);
-    setChatMap((prev) => ({ ...prev, [id]: [] }));
-    setActiveId(id);
-    setDraft("");
-    setBuilding(false);
-    setMobilePane("chat");
-    if (!isDesktop) setSidebarOpen(false);
-    window.setTimeout(() => inputRef.current?.focus(), 50);
-  }
-
-  function selectChat(id: string) {
-    setActiveId(id);
-    setDraft("");
-    setBuilding(false);
-    setMobilePane("chat");
-    if (!isDesktop) setSidebarOpen(false);
-  }
+  }, [isDesktop, router]);
 
   function sendMessage() {
     const text = draft.trim();
     if (!text || building) return;
 
-    const threadId = activeId;
+    const threadId = agentId;
     const userMsg: Message = {
       id: crypto.randomUUID(),
       role: "user",
@@ -255,7 +197,7 @@ export function EditorWorkspace() {
     setThreads((prev) =>
       prev.map((t) =>
         t.id === threadId && t.title === "New chat"
-          ? { ...t, title: text.slice(0, 42) + (text.length > 42 ? "…" : "") }
+          ? { ...t, title: titleFromPrompt(text) }
           : t,
       ),
     );
@@ -301,11 +243,17 @@ export function EditorWorkspace() {
         <HistorySidebar
           open={sidebarOpen}
           threads={threads}
-          activeId={activeId}
+          activeId={agentId}
           search={search}
           onSearchChange={setSearch}
-          onSelect={selectChat}
-          onNewChat={createNewChat}
+          onSelect={(id) => {
+            if (!isDesktop) setSidebarOpen(false);
+            router.push(`/agent/${id}`);
+          }}
+          onNewChat={() => {
+            if (!isDesktop) setSidebarOpen(false);
+            router.push("/");
+          }}
           onToggle={() => setSidebarOpen(false)}
         />
 
@@ -321,7 +269,7 @@ export function EditorWorkspace() {
             <IconButton
               label="New chat"
               tooltip="New chat"
-              onClick={createNewChat}
+              onClick={() => router.push("/")}
               className="lg:hidden"
             >
               <SquarePen />
@@ -331,7 +279,7 @@ export function EditorWorkspace() {
               <IconButton
                 label="New chat"
                 tooltip="New chat"
-                onClick={createNewChat}
+                onClick={() => router.push("/")}
                 className="hidden lg:inline-flex"
               >
                 <SquarePen />
@@ -341,13 +289,16 @@ export function EditorWorkspace() {
             <Separator orientation="vertical" className="mx-0.5 hidden sm:block lg:mx-1" />
 
             <div className="flex min-w-0 flex-1 items-center gap-2">
-              <IconLogo className="hidden h-6 w-6 shrink-0 text-accent sm:block" />
+              <BrandLogo className="hidden h-6 w-6 shrink-0 text-accent sm:block" />
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
                   <span className="truncate text-sm font-semibold tracking-tight text-white">
                     {projectTitle}
                   </span>
-                  <ChevronRight className="hidden size-3.5 shrink-0 text-white/80 sm:block" strokeWidth={1.6} />
+                  <ChevronRight
+                    className="hidden size-3.5 shrink-0 text-white/80 sm:block"
+                    strokeWidth={1.6}
+                  />
                 </div>
                 <p className="hidden truncate text-[11px] text-white/50 sm:block">
                   MrOS workspace
@@ -360,12 +311,16 @@ export function EditorWorkspace() {
                 type="button"
                 size="sm"
                 className="px-2.5 sm:px-3.5"
-                onClick={() => toast.success("Ready to publish", { description: "Connect a project to go live." })}
+                onClick={() =>
+                  toast.success("Ready to publish", {
+                    description: "Connect a project to go live.",
+                  })
+                }
               >
                 Publish
               </Button>
               <div className="hidden h-8 w-8 items-center justify-center rounded-full bg-accent text-[11px] font-semibold text-white sm:flex">
-                IF
+                FI
               </div>
             </div>
           </header>
@@ -407,7 +362,7 @@ export function EditorWorkspace() {
               <div className="scrollbar-thin flex-1 space-y-4 overflow-y-auto overscroll-contain px-3 py-4 sm:px-4">
                 {messages.length === 0 && !building && (
                   <div className="flex h-full min-h-[200px] flex-col items-center justify-center px-4 text-center">
-                    <IconLogo className="mb-3 h-9 w-9 text-accent" />
+                    <BrandLogo className="mb-3 h-9 w-9 text-accent" />
                     <p className="text-sm font-semibold text-white">Start building</p>
                     <p className="mt-1 max-w-[240px] text-xs leading-relaxed text-white/60">
                       Describe an app or a change. MrOS will update the live preview as you chat.
@@ -424,7 +379,7 @@ export function EditorWorkspace() {
                     ) : (
                       <div className="space-y-2.5">
                         <div className="flex items-center gap-2">
-                          <IconLogo className="h-5 w-5 text-accent" />
+                          <BrandLogo className="h-5 w-5 text-accent" />
                           <span className="text-xs font-semibold text-white/70">MrOS</span>
                         </div>
                         <p className="text-sm leading-relaxed text-white">{msg.content}</p>
@@ -449,7 +404,7 @@ export function EditorWorkspace() {
                 {building && (
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
-                      <IconLogo className="h-5 w-5 text-accent" />
+                      <BrandLogo className="h-5 w-5 text-accent" />
                       <span className="text-xs font-semibold text-white/70">MrOS</span>
                     </div>
                     <div className="flex items-center gap-2 text-sm text-white/65">

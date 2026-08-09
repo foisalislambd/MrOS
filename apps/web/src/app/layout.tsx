@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { JetBrains_Mono, Outfit } from "next/font/google";
-import { Toaster } from "@/components/editor/Toast";
+import { Toaster } from "@/components/shared/Toast";
 import "./globals.css";
 
 const outfit = Outfit({
@@ -20,7 +20,11 @@ export const metadata: Metadata = {
   description: "Build apps by chatting. Preview live as you go.",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
     <html
       lang="en"
