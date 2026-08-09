@@ -381,17 +381,17 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
               <BrandLogo className="hidden h-5 w-5 shrink-0 text-accent sm:block" />
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <span className="truncate text-[13px] font-semibold tracking-[-0.02em] text-foreground">
+                  <span className="truncate text-[15px] font-semibold tracking-[-0.02em] text-white">
                     {projectTitle}
                   </span>
                   {previewReady && (
                     <ChevronRight
-                      className="hidden size-3.5 shrink-0 text-fg-faint sm:block"
-                      strokeWidth={1.6}
+                      className="hidden size-4 shrink-0 text-white/70 sm:block"
+                      strokeWidth={1.85}
                     />
                   )}
                 </div>
-                <p className="hidden truncate text-[11px] text-fg-faint sm:block">
+                <p className="hidden truncate text-[12px] text-white/70 sm:block">
                   {previewReady ? "Workspace" : "Conversation"}
                 </p>
               </div>
@@ -423,7 +423,7 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
                 </Button>
               )}
               <div
-                className="hidden h-8 w-8 items-center justify-center rounded-full bg-bg-muted text-[11px] font-semibold text-fg-muted ring-1 ring-border sm:flex"
+                className="hidden h-8 w-8 items-center justify-center rounded-full bg-bg-muted text-[12px] font-semibold text-white ring-1 ring-border sm:flex"
                 aria-label="Account"
               >
                 FI
@@ -454,7 +454,7 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
 
           {previewReady && !panelOpen && (
             <div className="flex shrink-0 items-center justify-between gap-2 border-b border-border bg-bg-chat px-3 py-2 sm:hidden">
-              <span className="text-[12px] text-fg-subtle">Preview ready</span>
+              <span className="text-[13px] text-white/80">Preview ready</span>
               <Button type="button" variant="outline" size="sm" className="h-7" onClick={openPreview}>
                 Open preview
               </Button>
@@ -483,7 +483,7 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
                     chatOnly && "mx-auto max-w-3xl px-4 sm:px-6",
                   )}
                 >
-                  <span className="text-[11px] font-medium tracking-[0.04em] text-fg-faint uppercase">
+                  <span className="text-[12px] font-medium tracking-[0.04em] text-white/70 uppercase">
                     Chat
                   </span>
                   <div className="flex items-center gap-1.5">
@@ -518,10 +518,10 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
                   {messages.length === 0 && !building && (
                     <div className="flex h-full min-h-[220px] flex-col items-center justify-center px-4 text-center">
                       <BrandLogo className="mb-3 h-8 w-8 text-accent" />
-                      <p className="text-[15px] font-semibold tracking-[-0.02em] text-foreground">
+                      <p className="text-[16px] font-semibold tracking-[-0.02em] text-white">
                         Ask anything
                       </p>
-                      <p className="mt-1.5 max-w-[300px] text-[13px] leading-relaxed text-fg-subtle">
+                      <p className="mt-1.5 max-w-[320px] text-[14px] leading-relaxed text-white/75">
                         Stay in chat for answers. When you build a site or UI, preview opens here — open
                         or close it anytime.
                       </p>
@@ -533,7 +533,7 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
                       {msg.role === "user" ? (
                         <div
                           className={cn(
-                            "rounded-[var(--radius-panel)] bg-bg-muted px-3.5 py-2.5 text-[14px] leading-relaxed text-foreground ring-1 ring-border",
+                            "rounded-[var(--radius-panel)] bg-bg-muted px-3.5 py-2.5 text-[15px] leading-relaxed text-white ring-1 ring-border",
                             chatOnly
                               ? "ml-auto w-fit max-w-[min(42%,20rem)]"
                               : "ml-2 w-fit max-w-[85%] sm:ml-8",
@@ -545,17 +545,17 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
                         <div className="space-y-2.5">
                           <div className="flex items-center gap-2">
                             <BrandLogo className="h-4 w-4 text-accent" />
-                            <span className="text-[11px] font-semibold tracking-[-0.01em] text-fg-subtle">
+                            <span className="text-[12px] font-semibold tracking-[-0.01em] text-white/80">
                               MrOS
                             </span>
                           </div>
-                          <p className="text-[14px] leading-relaxed text-foreground">{msg.content}</p>
+                          <p className="text-[15px] leading-relaxed text-white">{msg.content}</p>
                           {msg.files && msg.files.length > 0 && (
                             <ul className="flex flex-wrap gap-1.5">
                               {msg.files.map((file) => (
                                 <li
                                   key={file}
-                                  className="inline-flex max-w-full items-center gap-1.5 rounded-[6px] bg-bg-muted px-2 py-1 font-mono text-[11px] text-fg-muted ring-1 ring-border"
+                                  className="inline-flex max-w-full items-center gap-1.5 rounded-[6px] bg-bg-muted px-2 py-1 font-mono text-[12px] text-white/85 ring-1 ring-border"
                                 >
                                   <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-success" />
                                   <span className="truncate">{file}</span>
@@ -572,9 +572,9 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
                     <div className="space-y-2" aria-live="polite">
                       <div className="flex items-center gap-2">
                         <BrandLogo className="h-4 w-4 text-accent" />
-                        <span className="text-[11px] font-semibold text-fg-subtle">MrOS</span>
+                        <span className="text-[12px] font-semibold text-white/80">MrOS</span>
                       </div>
-                      <div className="flex items-center gap-2 text-[13px] text-fg-muted">
+                      <div className="flex items-center gap-2 text-[14px] text-white/80">
                         <span className="flex gap-1" aria-hidden>
                           <span className="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-accent" />
                           <span
@@ -611,7 +611,7 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
                           ? "Ask MrOS to change anything…"
                           : "Ask anything, or describe an app to build…"
                       }
-                      className="min-h-[44px] max-h-24 px-2 py-1.5 text-[13px] sm:min-h-[48px]"
+                      className="min-h-[48px] max-h-28 px-2 py-1.5 text-[15px] text-white sm:min-h-[52px]"
                       aria-label="Message MrOS"
                     />
                     <div className="flex items-center justify-between px-0.5">
@@ -632,10 +632,10 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
                         size="sm"
                         onClick={sendMessage}
                         disabled={!draft.trim() || building}
-                        className="h-7 gap-1 px-2.5 text-[11px]"
+                        className="h-8 gap-1.5 px-3 text-[13px]"
                       >
                         {building ? "Working…" : "Send"}
-                        <SendHorizontal className="size-3" strokeWidth={1.7} />
+                        <SendHorizontal className="size-3.5 text-white" strokeWidth={1.85} />
                       </Button>
                     </div>
                   </div>
@@ -656,8 +656,8 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
                     aria-label="Preview or code"
                   >
                     <ToggleGroupItem value="preview">Preview</ToggleGroupItem>
-                    <ToggleGroupItem value="code" className="gap-1">
-                      <Code2 className="size-3.5" strokeWidth={1.6} />
+                    <ToggleGroupItem value="code" className="gap-1.5">
+                      <Code2 className="size-4 text-white" strokeWidth={1.85} />
                       Code
                     </ToggleGroupItem>
                   </ToggleGroup>
@@ -676,13 +676,13 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
                         aria-label="Device size"
                       >
                         <ToggleGroupItem value="desktop" aria-label="Desktop">
-                          <Monitor className="size-3.5" strokeWidth={1.6} />
+                          <Monitor className="size-4 text-white" strokeWidth={1.85} />
                         </ToggleGroupItem>
                         <ToggleGroupItem value="tablet" aria-label="Tablet">
-                          <Tablet className="size-3.5" strokeWidth={1.6} />
+                          <Tablet className="size-4 text-white" strokeWidth={1.85} />
                         </ToggleGroupItem>
                         <ToggleGroupItem value="mobile" aria-label="Mobile">
-                          <Smartphone className="size-3.5" strokeWidth={1.6} />
+                          <Smartphone className="size-4 text-white" strokeWidth={1.85} />
                         </ToggleGroupItem>
                       </ToggleGroup>
                       <IconButton
@@ -697,21 +697,21 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
                         type="button"
                         variant="ghost"
                         size="sm"
-                        className="hidden h-7 gap-1 px-2 text-fg-muted hover:bg-icon-hover hover:text-foreground sm:inline-flex"
+                        className="hidden h-8 gap-1.5 px-2.5 text-[13px] text-white hover:bg-icon-hover hover:text-white sm:inline-flex"
                         onClick={() =>
                           toast.message("Select element", {
                             description: "Element picker comes next.",
                           })
                         }
                       >
-                        <Frame className="size-3.5" strokeWidth={1.6} />
+                        <Frame className="size-4 text-white" strokeWidth={1.85} />
                         <span className="hidden md:inline">Select</span>
                       </Button>
                     </>
                   )}
 
                   <div className="ml-auto flex shrink-0 items-center gap-1">
-                    <span className="mr-1 hidden items-center gap-1.5 text-[11px] text-fg-subtle md:inline-flex">
+                    <span className="mr-1 hidden items-center gap-1.5 text-[12px] text-white/75 md:inline-flex">
                       <span className="h-1.5 w-1.5 rounded-full bg-success" />
                       Live
                     </span>

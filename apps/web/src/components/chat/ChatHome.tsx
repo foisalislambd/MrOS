@@ -139,7 +139,7 @@ export function ChatHome() {
             )}
             <div className="min-w-0 flex-1" />
             <div
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-bg-muted text-[11px] font-semibold text-fg-muted ring-1 ring-border"
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-bg-muted text-[12px] font-semibold text-white ring-1 ring-border"
               aria-label="Account"
             >
               FI
@@ -152,13 +152,13 @@ export function ChatHome() {
             <div className="relative w-full max-w-[640px]">
               <div className="mb-8 flex flex-col items-center text-center">
                 <BrandLogo className="mb-4 h-10 w-10 text-accent" />
-                <p className="text-[13px] font-semibold tracking-[-0.02em] text-foreground">
+                <p className="text-[14px] font-semibold tracking-[-0.02em] text-white">
                   MrOS
                 </p>
-                <h1 className="mt-3 text-[1.75rem] font-semibold tracking-[-0.03em] text-foreground sm:text-[2rem]">
+                <h1 className="mt-3 text-[1.9rem] font-semibold tracking-[-0.03em] text-white sm:text-[2.15rem]">
                   What can I help with?
                 </h1>
-                <p className="mt-2 max-w-md text-[14px] leading-relaxed text-fg-subtle">
+                <p className="mt-2 max-w-md text-[15px] leading-relaxed text-white/75">
                   Ask a question or describe a product to build. Preview appears only when there’s a
                   UI to show.
                 </p>
@@ -172,7 +172,7 @@ export function ChatHome() {
                   onKeyDown={onKeyDown}
                   rows={2}
                   placeholder="Ask anything, or describe an app to build…"
-                  className="min-h-[60px] max-h-36 px-2.5 text-[15px] sm:min-h-[72px]"
+                  className="min-h-[64px] max-h-36 px-2.5 text-[15px] text-white sm:min-h-[72px]"
                   aria-label="Message MrOS"
                 />
                 <div className="flex items-center justify-between gap-2 px-0.5 pt-1">
@@ -193,10 +193,10 @@ export function ChatHome() {
                     size="sm"
                     onClick={() => startAgent(draft)}
                     disabled={!draft.trim() || sending}
-                    className="h-8 gap-1.5 px-3"
+                    className="h-8 gap-1.5 px-3 text-[13px]"
                   >
                     {sending ? "Starting…" : "Send"}
-                    <SendHorizontal className="size-3.5" strokeWidth={1.7} />
+                    <SendHorizontal className="size-3.5 text-white" strokeWidth={1.85} />
                   </Button>
                 </div>
               </div>
@@ -208,20 +208,20 @@ export function ChatHome() {
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="h-8 gap-1.5 border-border bg-transparent px-3 text-[12px] font-medium text-fg-muted hover:bg-bg-muted hover:text-foreground"
+                    className="h-8 gap-1.5 border-border bg-transparent px-3 text-[13px] font-medium text-white hover:bg-bg-muted hover:text-white"
                     onClick={() =>
                       toast.message(label, {
                         description: "Import wiring comes next — describe it in chat for now.",
                       })
                     }
                   >
-                    <Icon className="size-3.5" strokeWidth={1.6} />
+                    <Icon className="size-4 text-white" strokeWidth={1.85} />
                     {label}
                   </Button>
                 ))}
               </div>
 
-              <p className="mt-6 text-center text-[12px] text-fg-faint">
+              <p className="mt-6 text-center text-[13px] text-white/60">
                 Enter to send · Shift+Enter for new line
               </p>
             </div>

@@ -120,7 +120,7 @@ export function HistorySidebar({
     >
       <div className="flex h-12 shrink-0 items-center gap-2 border-b border-border px-3">
         <BrandLogo className="h-5 w-5 shrink-0 text-accent" />
-        <span className="truncate text-[13px] font-semibold tracking-[-0.02em] text-foreground">
+        <span className="truncate text-[14px] font-semibold tracking-[-0.02em] text-white">
           MrOS
         </span>
         <div className="ml-auto flex items-center gap-0.5">
@@ -147,13 +147,13 @@ export function HistorySidebar({
       {searchOpen && (
         <div className="border-b border-border px-3 py-2">
           <label className="flex items-center gap-2 rounded-[var(--radius-control)] bg-bg-muted px-2.5 py-1.5 ring-1 ring-border">
-            <Search className="size-3.5 shrink-0 text-fg-subtle" strokeWidth={1.6} />
+            <Search className="size-4 shrink-0 text-white" strokeWidth={1.85} />
             <Input
               ref={searchInputRef}
               value={search}
               onChange={(e) => onSearchChange(e.target.value)}
               placeholder="Search chats"
-              className="h-7 px-0 text-[13px]"
+              className="h-7 px-0 text-[14px] text-white"
               aria-label="Search chats"
             />
           </label>
@@ -165,9 +165,9 @@ export function HistorySidebar({
           type="button"
           variant="ghost"
           onClick={onNewChat}
-          className="h-9 w-full justify-start gap-2.5 rounded-[var(--radius-control)] px-2.5 text-[13px] font-medium text-foreground hover:bg-icon-hover hover:text-foreground"
+          className="h-10 w-full justify-start gap-2.5 rounded-[var(--radius-control)] px-2.5 text-[14px] font-medium text-white hover:bg-icon-hover hover:text-white"
         >
-          <SquarePen className="size-4 text-icon" strokeWidth={1.6} />
+          <SquarePen className="size-[1.15rem] text-white" strokeWidth={1.85} />
           New chat
         </Button>
 
@@ -175,9 +175,9 @@ export function HistorySidebar({
           type="button"
           variant="ghost"
           onClick={() => comingSoon("Library")}
-          className="h-9 w-full justify-start gap-2.5 rounded-[var(--radius-control)] px-2.5 text-[13px] font-normal text-fg-muted hover:bg-icon-hover hover:text-foreground"
+          className="h-10 w-full justify-start gap-2.5 rounded-[var(--radius-control)] px-2.5 text-[14px] font-normal text-white/90 hover:bg-icon-hover hover:text-white"
         >
-          <Library className="size-4" strokeWidth={1.6} />
+          <Library className="size-[1.15rem] text-white" strokeWidth={1.85} />
           Library
         </Button>
 
@@ -185,9 +185,9 @@ export function HistorySidebar({
           type="button"
           variant="ghost"
           onClick={() => comingSoon("Projects")}
-          className="h-9 w-full justify-start gap-2.5 rounded-[var(--radius-control)] px-2.5 text-[13px] font-normal text-fg-muted hover:bg-icon-hover hover:text-foreground"
+          className="h-10 w-full justify-start gap-2.5 rounded-[var(--radius-control)] px-2.5 text-[14px] font-normal text-white/90 hover:bg-icon-hover hover:text-white"
         >
-          <Folder className="size-4" strokeWidth={1.6} />
+          <Folder className="size-[1.15rem] text-white" strokeWidth={1.85} />
           Projects
         </Button>
       </div>
@@ -197,27 +197,27 @@ export function HistorySidebar({
           type="button"
           onClick={() => setRecentsOpen((v) => !v)}
           aria-expanded={recentsOpen}
-          className="mb-1 flex w-full items-center gap-1 rounded-[var(--radius-control)] px-2.5 py-1 text-[11px] font-medium tracking-[0.04em] text-fg-faint uppercase hover:text-fg-subtle"
+          className="mb-1 flex w-full items-center gap-1 rounded-[var(--radius-control)] px-2.5 py-1.5 text-[12px] font-medium tracking-[0.04em] text-white/65 uppercase hover:text-white"
         >
           Recents
           <ChevronDown
             className={cn(
-              "size-3.5 transition-transform duration-200",
+              "size-4 text-white transition-transform duration-200",
               !recentsOpen && "-rotate-90",
             )}
-            strokeWidth={1.6}
+            strokeWidth={1.85}
           />
         </button>
 
         {recentsOpen &&
           (filtered.length === 0 ? (
-            <p className="px-2.5 py-6 text-center text-[12px] text-fg-faint">No chats found</p>
+            <p className="px-2.5 py-6 text-center text-[13px] text-white/55">No chats found</p>
           ) : (
             <div className="space-y-3">
               {grouped.map((group) => (
                 <div key={group.key}>
                   {!q && (
-                    <p className="mb-1 px-2.5 text-[11px] font-medium text-fg-faint">
+                    <p className="mb-1 px-2.5 text-[12px] font-medium text-white/55">
                       {group.label}
                     </p>
                   )}
@@ -231,10 +231,10 @@ export function HistorySidebar({
                             onClick={() => onSelect(thread.id)}
                             aria-current={active ? "page" : undefined}
                             className={cn(
-                              "flex w-full items-center rounded-[var(--radius-control)] px-2.5 py-2 text-left text-[13px] leading-snug transition-colors",
+                              "flex w-full items-center rounded-[var(--radius-control)] px-2.5 py-2.5 text-left text-[14px] leading-snug transition-colors",
                               active
-                                ? "bg-bg-muted font-medium text-foreground"
-                                : "text-fg-muted hover:bg-icon-hover hover:text-foreground",
+                                ? "bg-bg-muted font-medium text-white"
+                                : "text-white/85 hover:bg-icon-hover hover:text-white",
                             )}
                           >
                             <span className="truncate pr-7">{thread.title}</span>
@@ -264,21 +264,21 @@ export function HistorySidebar({
       <div className="shrink-0 border-t border-border p-2.5">
         <div className="flex items-center gap-2.5 rounded-[var(--radius-control)] px-1.5 py-1.5 hover:bg-icon-hover">
           <div
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-bg-muted text-[11px] font-semibold text-fg-muted ring-1 ring-border"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-bg-muted text-[12px] font-semibold text-white ring-1 ring-border"
             aria-hidden
           >
             FI
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-[13px] font-medium text-foreground">Foisal Islam</p>
-            <p className="truncate text-[11px] text-fg-subtle">Business plan</p>
+            <p className="truncate text-[14px] font-medium text-white">Foisal Islam</p>
+            <p className="truncate text-[12px] text-white/70">Business plan</p>
           </div>
           <Button
             type="button"
             variant="outline"
             size="sm"
             onClick={() => comingSoon("Upgrade")}
-            className="h-7 shrink-0 px-2.5 text-[11px] font-medium"
+            className="h-8 shrink-0 px-2.5 text-[12px] font-medium text-white"
           >
             Manage
           </Button>

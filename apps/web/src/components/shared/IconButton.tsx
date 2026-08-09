@@ -33,9 +33,9 @@ export function IconButton({
       size={size}
       aria-label={label}
       className={cn(
-        "text-icon transition-colors duration-200 hover:bg-icon-hover hover:text-icon-active active:bg-icon-hover/80 active:text-icon-active [&_svg]:size-[1.05rem] [&_svg]:stroke-[1.55]",
-        size === "icon-sm" && "[&_svg]:size-[0.9rem]",
-        size === "icon-xs" && "[&_svg]:size-[0.85rem]",
+        "text-white transition-colors duration-150 hover:bg-icon-hover hover:text-white active:bg-icon-hover/80 active:text-white [&_svg]:size-[1.2rem] [&_svg]:stroke-[1.85] [&_svg]:text-white",
+        size === "icon-sm" && "[&_svg]:size-[1.05rem]",
+        size === "icon-xs" && "[&_svg]:size-[0.95rem]",
         className,
       )}
       {...props}
@@ -49,7 +49,7 @@ export function IconButton({
   return (
     <Tooltip>
       <TooltipTrigger asChild>{button}</TooltipTrigger>
-      <TooltipContent>{tooltip}</TooltipContent>
+      <TooltipContent className="text-[13px]">{tooltip}</TooltipContent>
     </Tooltip>
   );
 }

@@ -13,12 +13,12 @@
   --code-panel: #0f1012;
   --code-tabbar: #151619;
 
-  /* Foreground ladder */
-  --fg: #f5f5f4;
-  --fg-muted: #c4c4c0;
-  --fg-subtle: #8f8f8a;
-  --fg-faint: #6a6a66;
-  --code-fg: #e6e4e0;
+  /* Foreground ladder — brighter for readability */
+  --fg: #ffffff;
+  --fg-muted: #ececea;
+  --fg-subtle: #d0d0cc;
+  --fg-faint: #a8a8a4;
+  --code-fg: #f2f0ec;
 
   /* Borders & overlays */
   --border: #2a2b30;
@@ -42,9 +42,9 @@
   --radius-panel: 10px;
   --radius-control: 8px;
 
-  /* Icons */
-  --icon: #d4d4d0;
-  --icon-active: #f5f5f4;
+  /* Icons — pure white for clear recognition */
+  --icon: #ffffff;
+  --icon-active: #ffffff;
   --icon-hover-bg: var(--surface-tint-strong);
 
   /* shadcn semantic tokens */
@@ -145,6 +145,7 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-outfit), sans-serif;
+  font-size: 15px;
   font-feature-settings: "ss01" on, "cv11" on;
   letter-spacing: -0.011em;
   overflow: hidden;
