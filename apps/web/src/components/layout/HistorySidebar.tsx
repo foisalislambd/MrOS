@@ -258,27 +258,26 @@ export function HistorySidebar({
           ))}
       </div>
 
-      <div className="shrink-0 border-t border-border p-2.5">
+      <div className="shrink-0 p-2.5">
         <div className="flex items-center gap-2.5 rounded-[var(--radius-control)] px-1.5 py-1.5 hover:bg-icon-hover">
           <div
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-bg-muted text-[12px] font-semibold text-white ring-1 ring-border"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent text-[12px] font-semibold text-primary-foreground"
             aria-hidden
           >
             FI
           </div>
           <div className="min-w-0 flex-1">
             <p className="truncate text-[14px] font-medium text-white">Foisal Islam</p>
-            <p className="truncate text-[12px] text-white/70">Business plan</p>
           </div>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => comingSoon("Upgrade")}
-            className="h-8 shrink-0 px-2.5 text-[12px] font-medium text-white"
+          <IconButton
+            label="Account options"
+            tooltip="Options"
+            size="icon-xs"
+            className="shrink-0 hover:bg-icon-hover"
+            onClick={() => comingSoon("Account options")}
           >
-            Manage
-          </Button>
+            <MoreHorizontal />
+          </IconButton>
         </div>
       </div>
     </div>

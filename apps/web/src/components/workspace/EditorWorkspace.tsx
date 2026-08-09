@@ -426,7 +426,7 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
                 </Button>
               )}
               <div
-                className="hidden h-8 w-8 items-center justify-center rounded-full bg-bg-muted text-[12px] font-semibold text-white ring-1 ring-border sm:flex"
+                className="hidden h-8 w-8 items-center justify-center rounded-full bg-accent text-[12px] font-semibold text-primary-foreground sm:flex"
                 aria-label="Account"
               >
                 FI

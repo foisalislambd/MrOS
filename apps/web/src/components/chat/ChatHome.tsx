@@ -128,7 +128,7 @@ export function ChatHome() {
             )}
             <div className="min-w-0 flex-1" />
             <div
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-bg-muted text-[12px] font-semibold text-white ring-1 ring-border"
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-accent text-[12px] font-semibold text-primary-foreground"
               aria-label="Account"
             >
               FI
