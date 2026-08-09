@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useIsDesktop } from "@/hooks/use-is-desktop";
+import { useSidebarOpen } from "@/hooks/use-sidebar-open";
 import { INITIAL_THREADS, setPendingAgent } from "@/lib/chat";
 
 const IMPORT_OPTIONS = [
@@ -33,22 +34,11 @@ const IMPORT_OPTIONS = [
 export function ChatHome() {
   const router = useRouter();
   const isDesktop = useIsDesktop();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useSidebarOpen();
   const [search, setSearch] = useState("");
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const sidebarReady = useRef(false);
-
-  useEffect(() => {
-    if (isDesktop === null) return;
-    if (!sidebarReady.current) {
-      sidebarReady.current = true;
-      setSidebarOpen(isDesktop);
-      return;
-    }
-    if (!isDesktop) setSidebarOpen(false);
-  }, [isDesktop]);
 
   useEffect(() => {
     if (isDesktop) inputRef.current?.focus();

@@ -32,6 +32,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useIsDesktop } from "@/hooks/use-is-desktop";
+import { useSidebarOpen } from "@/hooks/use-sidebar-open";
 import {
   consumePendingAgent,
   INITIAL_THREADS,
@@ -117,7 +118,7 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
   const bootstrapPrompt = seeded.current.bootstrapPrompt;
   const initialHasArtifact = threadHasPreview(initialMessages);
 
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useSidebarOpen();
   const [mobilePane, setMobilePane] = useState<MobilePane>("chat");
   const [threads, setThreads] = useState<ChatThread[]>(seeded.current.threads);
   const [chatMap, setChatMap] = useState<Record<string, Message[]>>(seeded.current.chatMap);
@@ -131,24 +132,18 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
   const [previewOpen, setPreviewOpen] = useState(initialHasArtifact);
   const endRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const sidebarReady = useRef(false);
   const bootstrapped = useRef(false);
 
   const messages = chatMap[agentId] ?? [];
   const activeThread = threads.find((t) => t.id === agentId);
   const projectTitle = activeThread?.title ?? "New chat";
   const panelOpen = previewReady && previewOpen;
-  const framed = isDesktop === true && panelOpen && device !== "desktop";
+  // Prefer desktop framing until we know we're on a small viewport (avoids preview pop-in).
+  const framed = isDesktop !== false && panelOpen && device !== "desktop";
 
   useEffect(() => {
     if (isDesktop === null) return;
-    if (!sidebarReady.current) {
-      sidebarReady.current = true;
-      setSidebarOpen(isDesktop);
-      return;
-    }
     if (isDesktop) setMobilePane("chat");
-    else setSidebarOpen(false);
   }, [isDesktop]);
 
   useEffect(() => {
@@ -330,10 +325,11 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
   const deviceHeight =
     device === "mobile" ? "min(844px, 100%)" : device === "tablet" ? "min(1024px, 100%)" : "100%";
 
-  // Treat unknown (pre-hydration) as mobile so we don't flash both panes.
-  const showChat = !panelOpen || isDesktop === true || mobilePane === "chat";
-  const showPreview = panelOpen && (isDesktop === true || mobilePane === "preview");
+  // Desktop layout is CSS (`lg:`) so preview doesn't wait on matchMedia and pop in after mount.
+  // JS pane switching is only for small viewports.
   const chatOnly = !panelOpen;
+  const mobileShowChat = chatOnly || mobilePane === "chat";
+  const mobileShowPreview = panelOpen && mobilePane === "preview";
 
   return (
     <TooltipProvider>
@@ -465,10 +461,12 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
             <aside
               className={cn(
                 "min-h-0 flex-col bg-bg-chat",
-                showChat ? "flex" : "hidden",
                 chatOnly
-                  ? "w-full flex-1"
-                  : "w-full flex-1 border-r border-border lg:w-[380px] lg:flex-none xl:w-[420px]",
+                  ? "flex w-full flex-1"
+                  : cn(
+                      "w-full flex-1 border-r border-border lg:flex lg:w-[380px] lg:flex-none xl:w-[420px]",
+                      mobileShowChat ? "flex" : "hidden",
+                    ),
               )}
             >
               {!chatOnly && (
@@ -634,8 +632,13 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
               </div>
             </aside>
 
-            {showPreview && (
-              <section className="flex min-w-0 flex-1 flex-col bg-background">
+            {panelOpen && (
+              <section
+                className={cn(
+                  "min-w-0 flex-1 flex-col bg-background",
+                  mobileShowPreview ? "flex" : "hidden lg:flex",
+                )}
+              >
                 <div className="flex h-11 shrink-0 items-center gap-1 overflow-x-auto border-b border-border px-2 sm:gap-2 sm:px-3">
                   <ToggleGroup
                     type="single"
@@ -746,7 +749,7 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
                           "rounded-[var(--radius-panel)] border shadow-[var(--shadow-soft)]",
                       )}
                       style={{
-                        width: isDesktop ? deviceWidth : "100%",
+                        width: isDesktop === false ? "100%" : deviceWidth,
                         height: framed ? deviceHeight : "100%",
                         maxWidth: "100%",
                       }}

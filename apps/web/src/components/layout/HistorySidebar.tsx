@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   ChevronDown,
   Folder,
@@ -50,6 +50,8 @@ export function HistorySidebar({
 }: HistorySidebarProps) {
   const [searchOpen, setSearchOpen] = useState(() => Boolean(search.trim()));
   const [recentsOpen, setRecentsOpen] = useState(true);
+  const [desktopReady, setDesktopReady] = useState(false);
+  const [isLg, setIsLg] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -70,6 +72,15 @@ export function HistorySidebar({
       items: map.get(key) ?? [],
     })).filter((g) => g.items.length > 0);
   }, [filtered]);
+
+  useLayoutEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const sync = () => setIsLg(mq.matches);
+    sync();
+    setDesktopReady(true);
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
 
   useEffect(() => {
     if (search.trim()) setSearchOpen(true);
@@ -287,23 +298,26 @@ export function HistorySidebar({
     </div>
   );
 
+  const desktopVisible = !desktopReady || open;
+  const mobileVisible = desktopReady && !isLg && open;
+
   return (
     <>
       <div
         className={cn(
           "fixed inset-0 z-40 lg:hidden",
-          open ? "pointer-events-auto" : "pointer-events-none",
+          mobileVisible ? "pointer-events-auto" : "pointer-events-none",
         )}
-        aria-hidden={!open}
+        aria-hidden={!mobileVisible}
       >
         <button
           type="button"
           className={cn(
             "absolute inset-0 bg-overlay transition-opacity duration-200",
-            open ? "opacity-100" : "opacity-0",
+            mobileVisible ? "opacity-100" : "opacity-0",
           )}
           aria-label="Close sidebar overlay"
-          tabIndex={open ? 0 : -1}
+          tabIndex={mobileVisible ? 0 : -1}
           onClick={onToggle}
         />
         <aside
@@ -312,22 +326,23 @@ export function HistorySidebar({
           aria-label="Chat history"
           className={cn(
             "absolute inset-y-0 left-0 border-r border-border shadow-[var(--shadow-soft)] transition-transform duration-200 ease-out",
-            open ? "translate-x-0" : "-translate-x-full",
+            mobileVisible ? "translate-x-0" : "-translate-x-full",
           )}
         >
-          {panel}
+          {mobileVisible ? panel : null}
         </aside>
       </div>
 
       <aside
         className={cn(
-          "hidden h-full shrink-0 overflow-hidden border-r border-border transition-[width] duration-200 ease-out lg:block",
-          open ? "w-[260px]" : "w-0 border-r-0",
+          "hidden h-full shrink-0 overflow-hidden border-r border-border lg:block",
+          // Stay open until client is ready so refresh/navigation never animates 0→260.
+          desktopVisible ? "w-[260px]" : "w-0 border-r-0",
         )}
-        aria-hidden={!open}
+        aria-hidden={!desktopVisible}
         aria-label="Chat history"
       >
-        {open ? panel : null}
+        {!mobileVisible && desktopVisible ? panel : null}
       </aside>
     </>
   );
