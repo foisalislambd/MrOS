@@ -1,11 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import {
+  ChevronDown,
   Folder,
   Library,
   MoreHorizontal,
   Search,
-  Settings,
   SquarePen,
   PanelLeft,
 } from "lucide-react";
@@ -14,7 +15,6 @@ import { IconButton } from "./IconButton";
 import { IconLogo } from "./icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 
 export type ChatThread = {
@@ -34,15 +34,6 @@ type HistorySidebarProps = {
   onToggle: () => void;
 };
 
-const GROUP_LABEL: Record<ChatThread["group"], string> = {
-  today: "Today",
-  yesterday: "Yesterday",
-  week: "Previous 7 days",
-  older: "Older",
-};
-
-const GROUP_ORDER: ChatThread["group"][] = ["today", "yesterday", "week", "older"];
-
 export function HistorySidebar({
   open,
   threads,
@@ -53,142 +44,156 @@ export function HistorySidebar({
   onNewChat,
   onToggle,
 }: HistorySidebarProps) {
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [recentsOpen, setRecentsOpen] = useState(true);
+
   const q = search.trim().toLowerCase();
   const filtered = q
     ? threads.filter((t) => t.title.toLowerCase().includes(q))
     : threads;
 
-  const grouped = GROUP_ORDER.map((group) => ({
-    group,
-    items: filtered.filter((t) => t.group === group),
-  })).filter((g) => g.items.length > 0);
-
   const panel = (
-    <div className="flex h-full w-[min(100vw,280px)] flex-col bg-bg-sidebar lg:w-[260px]">
-      <div className="flex h-12 shrink-0 items-center gap-1 px-2.5">
-        <IconButton
-          label="Close sidebar"
-          tooltip="Close sidebar"
-          onClick={onToggle}
-          className="hover:bg-icon-hover"
-        >
-          <PanelLeft />
-        </IconButton>
-        <div className="ml-0.5 flex min-w-0 items-center gap-2">
-          <IconLogo className="h-5 w-5 shrink-0 text-accent" />
-          <span className="truncate text-sm font-semibold tracking-tight text-white">MrOS</span>
+    <div className="flex h-full w-[min(100vw,280px)] flex-col bg-black lg:w-[260px]">
+      {/* Header: logo left, search + toggle right */}
+      <div className="flex h-12 shrink-0 items-center gap-1 px-2">
+        <div className="flex h-8 w-8 items-center justify-center">
+          <IconLogo className="h-6 w-6 text-accent" />
         </div>
-        <IconButton
-          label="New chat"
-          tooltip="New chat"
-          onClick={onNewChat}
-          className="ml-auto hover:bg-icon-hover"
-        >
-          <SquarePen />
-        </IconButton>
+        <div className="ml-auto flex items-center gap-0.5">
+          <IconButton
+            label="Search chats"
+            tooltip="Search"
+            onClick={() => setSearchOpen((v) => !v)}
+          >
+            <Search />
+          </IconButton>
+          <IconButton
+            label="Close sidebar"
+            tooltip="Close sidebar"
+            onClick={onToggle}
+          >
+            <PanelLeft />
+          </IconButton>
+        </div>
       </div>
 
-      <div className="px-2.5 pb-2">
-        <Button
-          type="button"
-          variant="soft"
-          onClick={onNewChat}
-          className="h-auto w-full justify-start gap-2.5 rounded-xl px-3 py-2.5 text-sm font-medium text-white"
-        >
-          <SquarePen className="size-4 text-accent" strokeWidth={1.6} />
-          New chat
-        </Button>
-      </div>
+      {searchOpen && (
+        <div className="px-2 pb-1">
+          <label className="flex items-center gap-2 rounded-full bg-white/[0.06] px-3 py-1.5">
+            <Search className="size-3.5 shrink-0 text-white/50" strokeWidth={1.6} />
+            <Input
+              autoFocus
+              value={search}
+              onChange={(e) => onSearchChange(e.target.value)}
+              placeholder="Search chats"
+              className="h-7 px-0"
+            />
+          </label>
+        </div>
+      )}
 
-      <div className="px-2.5 pb-2">
-        <label className="flex items-center gap-2 rounded-xl bg-white/[0.04] px-2.5 py-1.5 ring-1 ring-transparent transition focus-within:bg-bg-elevated focus-within:ring-border">
-          <Search className="size-3.5 shrink-0 text-white/75" strokeWidth={1.6} />
-          <Input
-            value={search}
-            onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Search chats"
-            className="h-7 px-0"
-          />
-        </label>
-      </div>
-
-      <nav className="px-2.5 pb-2">
+      {/* Primary actions */}
+      <div className="px-2 pt-1">
         <Button
           type="button"
           variant="ghost"
-          className="h-auto w-full justify-start gap-2.5 rounded-lg px-2.5 py-2 text-sm text-white/90 hover:bg-icon-hover hover:text-white"
+          onClick={onNewChat}
+          className="h-10 w-full justify-start gap-2.5 rounded-lg px-2.5 text-[14px] font-normal text-white hover:bg-white/[0.06] hover:text-white"
+        >
+          <SquarePen className="size-4 text-white/90" strokeWidth={1.6} />
+          New chat
+        </Button>
+
+        <Button
+          type="button"
+          variant="ghost"
+          className="h-10 w-full justify-start gap-2.5 rounded-lg px-2.5 text-[14px] font-normal text-white/90 hover:bg-white/[0.06] hover:text-white"
         >
           <Library className="size-4" strokeWidth={1.6} />
           Library
         </Button>
+
         <Button
           type="button"
           variant="ghost"
-          className="h-auto w-full justify-start gap-2.5 rounded-lg px-2.5 py-2 text-sm text-white/90 hover:bg-icon-hover hover:text-white"
+          className="h-10 w-full justify-start gap-2.5 rounded-lg px-2.5 text-[14px] font-normal text-white/90 hover:bg-white/[0.06] hover:text-white"
         >
           <Folder className="size-4" strokeWidth={1.6} />
           Projects
         </Button>
-      </nav>
-
-      <div className="scrollbar-thin min-h-0 flex-1 overflow-y-auto px-2 pb-3">
-        {grouped.length === 0 ? (
-          <p className="px-2.5 py-4 text-center text-xs text-fg-subtle">No chats found</p>
-        ) : (
-          grouped.map(({ group, items }) => (
-            <div key={group} className="mb-3">
-              <p className="px-2.5 pb-1.5 pt-1 text-[11px] font-semibold tracking-wide text-white/40 uppercase">
-                {GROUP_LABEL[group]}
-              </p>
-              <ul className="space-y-0.5">
-                {items.map((thread) => {
-                  const active = thread.id === activeId;
-                  return (
-                    <li key={thread.id} className="group relative">
-                      <button
-                        type="button"
-                        onClick={() => onSelect(thread.id)}
-                        className={cn(
-                          "flex w-full items-center rounded-lg px-2.5 py-2 text-left text-[13px] leading-snug transition-colors duration-200",
-                          active
-                            ? "bg-bg-elevated font-medium text-white ring-1 ring-border"
-                            : "text-white/85 hover:bg-icon-hover hover:text-white",
-                        )}
-                      >
-                        <span className="truncate pr-6">{thread.title}</span>
-                      </button>
-                      <IconButton
-                        label="Chat options"
-                        size="icon-xs"
-                        className="absolute top-1/2 right-1.5 hidden -translate-y-1/2 opacity-0 transition group-hover:inline-flex group-hover:opacity-100 hover:bg-icon-hover"
-                      >
-                        <MoreHorizontal />
-                      </IconButton>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          ))
-        )}
       </div>
 
-      <Separator className="opacity-80" />
-      <div className="shrink-0 p-2.5">
-        <Button
+      {/* Recents */}
+      <div className="scrollbar-thin mt-2 min-h-0 flex-1 overflow-y-auto px-2 pb-2">
+        <button
           type="button"
-          variant="ghost"
-          className="h-auto w-full justify-start gap-2.5 rounded-xl px-2 py-2 text-left hover:bg-icon-hover"
+          onClick={() => setRecentsOpen((v) => !v)}
+          className="mb-1 flex w-full items-center gap-1 rounded-lg px-2.5 py-1.5 text-[12px] text-white/45 hover:text-white/70"
         >
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent text-[11px] font-semibold text-white">
-            IF
+          Recents
+          <ChevronDown
+            className={cn(
+              "size-3.5 transition-transform duration-200",
+              !recentsOpen && "-rotate-90",
+            )}
+            strokeWidth={1.6}
+          />
+        </button>
+
+        {recentsOpen &&
+          (filtered.length === 0 ? (
+            <p className="px-2.5 py-4 text-center text-xs text-white/35">No chats found</p>
+          ) : (
+            <ul className="space-y-0.5">
+              {filtered.map((thread) => {
+                const active = thread.id === activeId;
+                return (
+                  <li key={thread.id} className="group relative">
+                    <button
+                      type="button"
+                      onClick={() => onSelect(thread.id)}
+                      className={cn(
+                        "flex w-full items-center rounded-full px-3 py-2 text-left text-[13.5px] leading-snug",
+                        active
+                          ? "bg-[#212121] font-medium text-white"
+                          : "text-white/85 hover:bg-white/[0.06] hover:text-white",
+                      )}
+                    >
+                      <span className="truncate pr-6">{thread.title}</span>
+                    </button>
+                    <IconButton
+                      label="Chat options"
+                      size="icon-xs"
+                      className="absolute top-1/2 right-1.5 hidden -translate-y-1/2 opacity-0 group-hover:inline-flex group-hover:opacity-100 hover:bg-white/10"
+                    >
+                      <MoreHorizontal />
+                    </IconButton>
+                  </li>
+                );
+              })}
+            </ul>
+          ))}
+      </div>
+
+      {/* Footer: profile + Upgrade */}
+      <div className="shrink-0 p-2">
+        <div className="flex items-center gap-2.5 rounded-xl px-1.5 py-1.5 hover:bg-white/[0.04]">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent text-[11px] font-semibold text-white">
+            FI
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium text-white">Ifois</p>
-            <p className="truncate text-[11px] text-white/50">Free plan</p>
+            <p className="truncate text-sm font-medium text-white">Foisal Islam</p>
+            <p className="truncate text-[11px] text-white/45">Free</p>
           </div>
-          <Settings className="size-4 shrink-0 text-white/85" strokeWidth={1.6} />
-        </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-7 shrink-0 rounded-full border-white/15 bg-transparent px-3 text-[12px] font-medium text-white hover:bg-white/[0.06] hover:text-white"
+          >
+            Upgrade
+          </Button>
+        </div>
       </div>
     </div>
   );
