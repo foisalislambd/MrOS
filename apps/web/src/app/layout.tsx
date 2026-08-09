@@ -1,11 +1,18 @@
 import type { Metadata } from "next";
-import { JetBrains_Mono, Outfit } from "next/font/google";
+import { Inter, JetBrains_Mono, Noto_Sans_Bengali } from "next/font/google";
 import { Toaster } from "@/components/shared/Toast";
 import "./globals.css";
 
-const outfit = Outfit({
-  variable: "--font-outfit",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
+  display: "swap",
+});
+
+const notoBengali = Noto_Sans_Bengali({
+  variable: "--font-bengali",
+  subsets: ["bengali"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
@@ -28,7 +35,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`dark ${outfit.variable} ${jetbrains.variable} h-full antialiased`}
+      className={`dark ${inter.variable} ${notoBengali.variable} ${jetbrains.variable} h-full antialiased`}
     >
       <body className="min-h-full font-sans">
         {children}

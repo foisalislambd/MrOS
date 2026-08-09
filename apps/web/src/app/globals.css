@@ -119,7 +119,7 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
-  --font-sans: var(--font-outfit);
+  --font-sans: var(--font-inter), var(--font-bengali);
   --font-mono: var(--font-jetbrains);
   --radius-sm: calc(var(--radius) - 2px);
   --radius-md: var(--radius);
@@ -144,9 +144,9 @@ body {
   margin: 0;
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-outfit), sans-serif;
+  font-family: var(--font-inter), var(--font-bengali), system-ui, sans-serif;
   font-size: 15px;
-  font-feature-settings: "ss01" on, "cv11" on;
+  line-height: 1.55;
   letter-spacing: -0.011em;
   overflow: hidden;
   -webkit-font-smoothing: antialiased;

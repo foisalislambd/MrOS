@@ -381,7 +381,7 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
               <BrandLogo className="hidden h-5 w-5 shrink-0 text-accent sm:block" />
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <span className="truncate text-[15px] font-semibold tracking-[-0.02em] text-white">
+                  <span className="truncate text-[14px] font-semibold tracking-[-0.02em] text-white">
                     {projectTitle}
                   </span>
                   {previewReady && (
@@ -521,7 +521,7 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
                       <p className="text-[16px] font-semibold tracking-[-0.02em] text-white">
                         Ask anything
                       </p>
-                      <p className="mt-1.5 max-w-[320px] text-[14px] leading-relaxed text-white/75">
+                      <p className="mt-1.5 max-w-[320px] text-[14px] leading-[1.55] text-white/75">
                         Stay in chat for answers. When you build a site or UI, preview opens here — open
                         or close it anytime.
                       </p>
@@ -533,7 +533,7 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
                       {msg.role === "user" ? (
                         <div
                           className={cn(
-                            "rounded-[var(--radius-panel)] bg-bg-muted px-3.5 py-2.5 text-[15px] leading-relaxed text-white ring-1 ring-border",
+                            "rounded-[22px] bg-[#2f2f2f] px-4 py-2.5 text-[15px] leading-[1.55] text-white",
                             chatOnly
                               ? "ml-auto w-fit max-w-[min(42%,20rem)]"
                               : "ml-2 w-fit max-w-[85%] sm:ml-8",
@@ -542,14 +542,14 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
                           {msg.content}
                         </div>
                       ) : (
-                        <div className="space-y-2.5">
+                        <div className="space-y-3">
                           <div className="flex items-center gap-2">
                             <BrandLogo className="h-4 w-4 text-accent" />
                             <span className="text-[12px] font-semibold tracking-[-0.01em] text-white/80">
                               MrOS
                             </span>
                           </div>
-                          <p className="text-[15px] leading-relaxed text-white">{msg.content}</p>
+                          <p className="text-[15px] leading-[1.6] text-white">{msg.content}</p>
                           {msg.files && msg.files.length > 0 && (
                             <ul className="flex flex-wrap gap-1.5">
                               {msg.files.map((file) => (
@@ -611,7 +611,7 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
                           ? "Ask MrOS to change anything…"
                           : "Ask anything, or describe an app to build…"
                       }
-                      className="min-h-[48px] max-h-28 px-2 py-1.5 text-[15px] text-white sm:min-h-[52px]"
+                      className="min-h-[44px] max-h-28 px-2 py-1.5 text-[15px] leading-[1.5] text-white sm:min-h-[48px]"
                       aria-label="Message MrOS"
                     />
                     <div className="flex items-center justify-between px-0.5">

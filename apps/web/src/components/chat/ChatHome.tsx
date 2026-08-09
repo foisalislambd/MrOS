@@ -158,7 +158,7 @@ export function ChatHome() {
                 <h1 className="mt-3 text-[1.9rem] font-semibold tracking-[-0.03em] text-white sm:text-[2.15rem]">
                   What can I help with?
                 </h1>
-                <p className="mt-2 max-w-md text-[15px] leading-relaxed text-white/75">
+                <p className="mt-2 max-w-md text-[15px] leading-[1.55] text-white/75">
                   Ask a question or describe a product to build. Preview appears only when there’s a
                   UI to show.
                 </p>
@@ -172,7 +172,7 @@ export function ChatHome() {
                   onKeyDown={onKeyDown}
                   rows={2}
                   placeholder="Ask anything, or describe an app to build…"
-                  className="min-h-[64px] max-h-36 px-2.5 text-[15px] text-white sm:min-h-[72px]"
+                  className="min-h-[60px] max-h-36 px-2.5 text-[15px] text-white sm:min-h-[68px]"
                   aria-label="Message MrOS"
                 />
                 <div className="flex items-center justify-between gap-2 px-0.5 pt-1">
