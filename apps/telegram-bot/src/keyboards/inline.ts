@@ -8,6 +8,19 @@ const GROUP_LABEL: Record<DemoSession["group"], string> = {
   older: "Older",
 };
 
+type Btn = { text: string; data: string };
+
+/** Add buttons 2 per row; leftover single button gets its own row. */
+function addPairs(kb: InlineKeyboard, buttons: Btn[]) {
+  for (let i = 0; i < buttons.length; i += 2) {
+    const a = buttons[i]!;
+    const b = buttons[i + 1];
+    if (b) kb.text(a.text, a.data).text(b.text, b.data).row();
+    else kb.text(a.text, a.data).row();
+  }
+  return kb;
+}
+
 export function sessionsInlineKeyboard(
   sessions: DemoSession[],
   opts?: { page?: number; pageSize?: number },
@@ -18,84 +31,96 @@ export function sessionsInlineKeyboard(
   const slice = sessions.slice(start, start + pageSize);
   const kb = new InlineKeyboard();
 
-  for (const s of slice) {
-    const mark = s.projectId ? "◆" : "○";
-    kb.text(`${mark} ${truncate(s.title, 28)}`, `session:${s.id}`).row();
-  }
+  addPairs(
+    kb,
+    slice.map((s) => ({
+      text: `${s.projectId ? "◆" : "○"} ${truncate(s.title, 18)}`,
+      data: `session:${s.id}`,
+    })),
+  );
 
-  const nav: { text: string; data: string }[] = [];
+  const nav: Btn[] = [];
   if (page > 0) nav.push({ text: "‹ Prev", data: `sessions:page:${page - 1}` });
   if (start + pageSize < sessions.length) {
     nav.push({ text: "Next ›", data: `sessions:page:${page + 1}` });
   }
-  if (nav.length === 1) kb.text(nav[0]!.text, nav[0]!.data).row();
-  else if (nav.length === 2) {
-    kb.text(nav[0]!.text, nav[0]!.data).text(nav[1]!.text, nav[1]!.data).row();
-  }
+  addPairs(kb, nav);
 
-  kb.text("🆕 New Project", "project:create")
-    .text("✨ Demo AI", "demo:agent")
-    .row()
-    .text("📁 Projects", "projects:list")
-    .text("🏠 Home", "home");
+  addPairs(kb, [
+    { text: "🆕 New Project", data: "project:create" },
+    { text: "✨ Demo AI", data: "demo:agent" },
+    { text: "📁 Projects", data: "projects:list" },
+    { text: "🏠 Home", data: "home" },
+  ]);
 
   return kb;
 }
 
 export function sessionActionsKeyboard(session: DemoSession) {
-  const kb = new InlineKeyboard()
-    .text("✨ Continue chat", `session:chat:${session.id}`)
-    .text("✨ Demo reply", `demo:agent:${session.id}`)
-    .row()
-    .text("💬 All sessions", "sessions:page:0")
-    .text("🏠 Home", "home");
+  const kb = new InlineKeyboard();
+  const buttons: Btn[] = [
+    { text: "✨ Continue", data: `session:chat:${session.id}` },
+    { text: "✨ Demo reply", data: `demo:agent:${session.id}` },
+    { text: "💬 Sessions", data: "sessions:page:0" },
+    { text: "🏠 Home", data: "home" },
+  ];
 
   if (session.projectId) {
-    kb.row().text("📁 Open project", `project:open:${session.projectId}`);
+    buttons.push({ text: "📁 Open project", data: `project:open:${session.projectId}` });
   } else {
-    kb.row().text("🆕 Attach as project", `project:from_session:${session.id}`);
+    buttons.push({
+      text: "🆕 Attach project",
+      data: `project:from_session:${session.id}`,
+    });
   }
 
-  return kb;
+  return addPairs(kb, buttons);
 }
 
 export function projectsInlineKeyboard(projects: DemoProject[]) {
   const kb = new InlineKeyboard();
-  for (const p of projects.slice(0, 8)) {
-    kb.text(`${statusEmoji(p.status)} ${truncate(p.name, 26)}`, `project:open:${p.id}`).row();
-  }
-  kb.text("🆕 Create project", "project:create")
-    .row()
-    .text("💬 Sessions", "sessions:page:0")
-    .text("🏠 Home", "home");
+
+  addPairs(
+    kb,
+    projects.slice(0, 8).map((p) => ({
+      text: `${statusEmoji(p.status)} ${truncate(p.name, 16)}`,
+      data: `project:open:${p.id}`,
+    })),
+  );
+
+  addPairs(kb, [
+    { text: "🆕 Create", data: "project:create" },
+    { text: "💬 Sessions", data: "sessions:page:0" },
+    { text: "🏠 Home", data: "home" },
+  ]);
+
   return kb;
 }
 
 export function projectActionsKeyboard(project: DemoProject) {
-  return new InlineKeyboard()
-    .text("💬 Open session", `project:session:${project.id}`)
-    .text("✨ Demo build", `demo:agent:project:${project.id}`)
-    .row()
-    .text("📁 All projects", "projects:list")
-    .text("🏠 Home", "home");
+  return addPairs(new InlineKeyboard(), [
+    { text: "💬 Open session", data: `project:session:${project.id}` },
+    { text: "✨ Demo build", data: `demo:agent:project:${project.id}` },
+    { text: "📁 Projects", data: "projects:list" },
+    { text: "🏠 Home", data: "home" },
+  ]);
 }
 
 export function createProjectConfirmKeyboard() {
-  return new InlineKeyboard()
-    .text("⚡ Instant create (UUID)", "project:create:instant")
-    .row()
-    .text("✏️ Name it first", "project:create:named")
-    .row()
-    .text("« Cancel", "home");
+  return addPairs(new InlineKeyboard(), [
+    { text: "⚡ Instant (UUID)", data: "project:create:instant" },
+    { text: "✏️ Name first", data: "project:create:named" },
+    { text: "« Cancel", data: "home" },
+  ]);
 }
 
 export function homeInlineKeyboard() {
-  return new InlineKeyboard()
-    .text("💬 Sessions", "sessions:page:0")
-    .text("📁 Projects", "projects:list")
-    .row()
-    .text("🆕 New Project", "project:create")
-    .text("✨ Demo AI Reply", "demo:agent");
+  return addPairs(new InlineKeyboard(), [
+    { text: "💬 Sessions", data: "sessions:page:0" },
+    { text: "📁 Projects", data: "projects:list" },
+    { text: "🆕 New Project", data: "project:create" },
+    { text: "✨ Demo AI", data: "demo:agent" },
+  ]);
 }
 
 export function groupHeading(group: DemoSession["group"]) {
