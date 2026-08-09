@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { useRouter } from "next/navigation";
 import {
   ChevronRight,
@@ -46,6 +46,8 @@ import { cn } from "@/lib/utils";
 type Device = "desktop" | "tablet" | "mobile";
 type MobilePane = "chat" | "preview";
 
+const EMPTY_MESSAGES: Message[] = [];
+
 function threadHasPreview(messages: Message[]) {
   return messages.some((m) => (m.files?.length ?? 0) > 0);
 }
@@ -71,36 +73,12 @@ function seedFromAgentId(agentId: string): {
     };
   }
 
-  const pending = consumePendingAgent(agentId);
-  if (pending) {
-    const thread: ChatThread = {
-      id: agentId,
-      title: titleFromPrompt(pending.prompt),
-      group: "today",
-    };
-    return {
-      threads: [thread, ...INITIAL_THREADS],
-      chatMap: {
-        ...THREAD_MESSAGES,
-        [agentId]: [
-          {
-            id: crypto.randomUUID(),
-            role: "user",
-            content: pending.prompt,
-          },
-        ],
-      },
-      bootstrapPrompt: pending.prompt,
-    };
-  }
-
-  const thread: ChatThread = {
-    id: agentId,
-    title: "New chat",
-    group: "today",
-  };
+  // sessionStorage is client-only — pending prompts are applied in useLayoutEffect.
   return {
-    threads: [thread, ...INITIAL_THREADS],
+    threads: [
+      { id: agentId, title: "New chat", group: "today" },
+      ...INITIAL_THREADS,
+    ],
     chatMap: { ...THREAD_MESSAGES, [agentId]: [] },
     bootstrapPrompt: null,
   };
@@ -109,19 +87,18 @@ function seedFromAgentId(agentId: string): {
 export function EditorWorkspace({ agentId }: { agentId: string }) {
   const router = useRouter();
   const isDesktop = useIsDesktop();
-  const seeded = useRef<ReturnType<typeof seedFromAgentId> | null>(null);
-  if (!seeded.current) {
-    seeded.current = seedFromAgentId(agentId);
-  }
-
-  const initialMessages = seeded.current.chatMap[agentId] ?? [];
-  const bootstrapPrompt = seeded.current.bootstrapPrompt;
-  const initialHasArtifact = threadHasPreview(initialMessages);
+  const [seed] = useState(() => seedFromAgentId(agentId));
+  const [bootstrapPrompt, setBootstrapPrompt] = useState<string | null>(
+    seed.bootstrapPrompt,
+  );
+  const initialHasArtifact = threadHasPreview(
+    seed.chatMap[agentId] ?? EMPTY_MESSAGES,
+  );
 
   const [sidebarOpen, setSidebarOpen] = useSidebarOpen();
   const [mobilePane, setMobilePane] = useState<MobilePane>("chat");
-  const [threads, setThreads] = useState<ChatThread[]>(seeded.current.threads);
-  const [chatMap, setChatMap] = useState<Record<string, Message[]>>(seeded.current.chatMap);
+  const [threads, setThreads] = useState<ChatThread[]>(seed.threads);
+  const [chatMap, setChatMap] = useState<Record<string, Message[]>>(seed.chatMap);
   const [search, setSearch] = useState("");
   const [device, setDevice] = useState<Device>("desktop");
   const [tab, setTab] = useState<"preview" | "code">("preview");
@@ -133,31 +110,59 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
   const endRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const bootstrapped = useRef(false);
+  const pendingApplied = useRef(false);
 
-  const messages = chatMap[agentId] ?? [];
+  const messages = chatMap[agentId] ?? EMPTY_MESSAGES;
   const activeThread = threads.find((t) => t.id === agentId);
   const projectTitle = activeThread?.title ?? "New chat";
   const panelOpen = previewReady && previewOpen;
-  // Prefer desktop framing until we know we're on a small viewport (avoids preview pop-in).
-  const framed = isDesktop !== false && panelOpen && device !== "desktop";
+  const framed = isDesktop && panelOpen && device !== "desktop";
+  // Desktop layout uses CSS (`lg:`); mobile pane state only applies on small viewports.
+  const effectiveMobilePane: MobilePane = isDesktop ? "chat" : mobilePane;
 
-  useEffect(() => {
-    if (isDesktop === null) return;
-    if (isDesktop) setMobilePane("chat");
-  }, [isDesktop]);
+  // Apply sessionStorage pending prompt before paint (SSR cannot read it).
+  useLayoutEffect(() => {
+    if (pendingApplied.current) return;
+    pendingApplied.current = true;
+    if (THREAD_MESSAGES[agentId]) return;
+
+    const pending = consumePendingAgent(agentId);
+    if (!pending) return;
+
+    // External store sync: sessionStorage is unavailable during SSR.
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- hydrate pending agent once on client
+    setThreads([
+      {
+        id: agentId,
+        title: titleFromPrompt(pending.prompt),
+        group: "today",
+      },
+      ...INITIAL_THREADS,
+    ]);
+    setChatMap((prev) => ({
+      ...prev,
+      [agentId]: [
+        {
+          id: crypto.randomUUID(),
+          role: "user",
+          content: pending.prompt,
+        },
+      ],
+    }));
+    setBootstrapPrompt(pending.prompt);
+    setBuilding(true);
+  }, [agentId]);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, building, agentId]);
 
   useEffect(() => {
-    if (bootstrapped.current) return;
-    if (!seeded.current?.bootstrapPrompt) return;
+    if (bootstrapped.current || !bootstrapPrompt) return;
     bootstrapped.current = true;
 
     const threadId = agentId;
-    const prompt = seeded.current.bootstrapPrompt;
-    const shouldPreview = promptLooksLikeBuild(prompt);
+    const shouldPreview = promptLooksLikeBuild(bootstrapPrompt);
 
     const timer = window.setTimeout(() => {
       setChatMap((prev) => ({
@@ -185,7 +190,9 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
         setPreviewReady(true);
         setPreviewOpen(true);
         setRefreshKey((k) => k + 1);
-        if (isDesktop === false) setMobilePane("preview");
+        if (!window.matchMedia("(min-width: 1024px)").matches) {
+          setMobilePane("preview");
+        }
       } else {
         setPreviewReady(false);
         setPreviewOpen(false);
@@ -193,11 +200,11 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
     }, 1600);
 
     return () => window.clearTimeout(timer);
-  }, [agentId, isDesktop]);
+  }, [agentId, bootstrapPrompt]);
 
   function openPreview() {
     setPreviewOpen(true);
-    if (isDesktop === false) setMobilePane("preview");
+    if (!isDesktop) setMobilePane("preview");
   }
 
   function closePreview() {
@@ -227,14 +234,14 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
         setPreviewOpen((open) => {
           const next = !open;
           if (!next) setMobilePane("chat");
-          else if (isDesktop === false) setMobilePane("preview");
+          else if (!isDesktop) setMobilePane("preview");
           return next;
         });
       }
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [router, previewReady, isDesktop]);
+  }, [router, previewReady, isDesktop, setSidebarOpen]);
 
   function sendMessage() {
     const text = draft.trim();
@@ -307,7 +314,7 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
       // Only auto-open the first time preview appears — respect manual close after that.
       if (!alreadyHadPreview) {
         setPreviewOpen(true);
-        if (isDesktop === false) setMobilePane("preview");
+        if (!isDesktop) setMobilePane("preview");
       }
       setRefreshKey((k) => k + 1);
     }, 1600);
@@ -328,8 +335,8 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
   // Desktop layout is CSS (`lg:`) so preview doesn't wait on matchMedia and pop in after mount.
   // JS pane switching is only for small viewports.
   const chatOnly = !panelOpen;
-  const mobileShowChat = chatOnly || mobilePane === "chat";
-  const mobileShowPreview = panelOpen && mobilePane === "preview";
+  const mobileShowChat = chatOnly || effectiveMobilePane === "chat";
+  const mobileShowPreview = panelOpen && effectiveMobilePane === "preview";
 
   return (
     <TooltipProvider>
@@ -341,11 +348,11 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
           search={search}
           onSearchChange={setSearch}
           onSelect={(id) => {
-            if (isDesktop === false) setSidebarOpen(false);
+            if (!isDesktop) setSidebarOpen(false);
             router.push(`/agent/${id}`);
           }}
           onNewChat={() => {
-            if (isDesktop === false) setSidebarOpen(false);
+            if (!isDesktop) setSidebarOpen(false);
             router.push("/");
           }}
           onToggle={() => setSidebarOpen(false)}
@@ -431,7 +438,7 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
             <div className="flex shrink-0 border-b border-border bg-bg-chat px-2 py-1.5 lg:hidden">
               <ToggleGroup
                 type="single"
-                value={mobilePane}
+                value={effectiveMobilePane}
                 onValueChange={(value) => {
                   if (value) setMobilePane(value as MobilePane);
                 }}
@@ -483,7 +490,7 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
                       ) : (
                         <Badge variant="soft">Chat only</Badge>
                       )}
-                      {previewReady && isDesktop === false && (
+                      {previewReady && !isDesktop && (
                         <IconButton
                           label={previewOpen ? "Close preview" : "Open preview"}
                           size="icon-sm"
@@ -749,7 +756,7 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
                           "rounded-[var(--radius-panel)] border shadow-[var(--shadow-soft)]",
                       )}
                       style={{
-                        width: isDesktop === false ? "100%" : deviceWidth,
+                        width: !isDesktop ? "100%" : deviceWidth,
                         height: framed ? deviceHeight : "100%",
                         maxWidth: "100%",
                       }}

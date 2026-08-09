@@ -57,7 +57,7 @@ export function ChatHome() {
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  }, [setSidebarOpen]);
 
   function startAgent(prompt: string) {
     const text = prompt.trim();
@@ -92,13 +92,13 @@ export function ChatHome() {
           search={search}
           onSearchChange={setSearch}
           onSelect={(id) => {
-            if (isDesktop === false) setSidebarOpen(false);
+            if (!isDesktop) setSidebarOpen(false);
             router.push(`/agent/${id}`);
           }}
           onNewChat={() => {
             setDraft("");
             inputRef.current?.focus();
-            if (isDesktop === false) setSidebarOpen(false);
+            if (!isDesktop) setSidebarOpen(false);
           }}
           onToggle={() => setSidebarOpen(false)}
         />

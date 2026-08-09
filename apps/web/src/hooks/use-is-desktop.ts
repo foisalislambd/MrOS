@@ -1,18 +1,24 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useSyncExternalStore } from "react";
 
-/** `null` until mounted — avoids treating SSR/mobile as desktop before matchMedia runs. */
-export function useIsDesktop(breakpoint = 1024): boolean | null {
-  const [isDesktop, setIsDesktop] = useState<boolean | null>(null);
+function subscribe(breakpoint: number, onStoreChange: () => void) {
+  const mq = window.matchMedia(`(min-width: ${breakpoint}px)`);
+  mq.addEventListener("change", onStoreChange);
+  return () => mq.removeEventListener("change", onStoreChange);
+}
 
-  useEffect(() => {
-    const mq = window.matchMedia(`(min-width: ${breakpoint}px)`);
-    const update = () => setIsDesktop(mq.matches);
-    update();
-    mq.addEventListener("change", update);
-    return () => mq.removeEventListener("change", update);
-  }, [breakpoint]);
-
-  return isDesktop;
+/**
+ * Subscribe to the desktop breakpoint. SSR assumes desktop so the sidebar
+ * rail does not flash closed→open on first paint.
+ */
+export function useIsDesktop(breakpoint = 1024): boolean {
+  return useSyncExternalStore(
+    useCallback(
+      (onStoreChange) => subscribe(breakpoint, onStoreChange),
+      [breakpoint],
+    ),
+    () => window.matchMedia(`(min-width: ${breakpoint}px)`).matches,
+    () => true,
+  );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ChevronDown,
   Folder,
@@ -16,6 +16,8 @@ import { BrandLogo } from "@/components/shared/BrandLogo";
 import { toast } from "@/components/shared/Toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useHasMounted } from "@/hooks/use-has-mounted";
+import { useIsDesktop } from "@/hooks/use-is-desktop";
 import type { ChatThread } from "@/lib/chat";
 import { cn } from "@/lib/utils";
 
@@ -48,13 +50,13 @@ export function HistorySidebar({
   onNewChat,
   onToggle,
 }: HistorySidebarProps) {
-  const [searchOpen, setSearchOpen] = useState(() => Boolean(search.trim()));
+  const isDesktop = useIsDesktop();
+  const hasMounted = useHasMounted();
+  const [searchOpen, setSearchOpen] = useState(false);
   const [recentsOpen, setRecentsOpen] = useState(true);
-  const [desktopReady, setDesktopReady] = useState(false);
-  const [isLg, setIsLg] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
 
+  const showSearch = searchOpen || Boolean(search.trim());
   const q = search.trim().toLowerCase();
   const filtered = q
     ? threads.filter((t) => t.title.toLowerCase().includes(q))
@@ -73,25 +75,12 @@ export function HistorySidebar({
     })).filter((g) => g.items.length > 0);
   }, [filtered]);
 
-  useLayoutEffect(() => {
-    const mq = window.matchMedia("(min-width: 1024px)");
-    const sync = () => setIsLg(mq.matches);
-    sync();
-    setDesktopReady(true);
-    mq.addEventListener("change", sync);
-    return () => mq.removeEventListener("change", sync);
-  }, []);
-
-  useEffect(() => {
-    if (search.trim()) setSearchOpen(true);
-  }, [search]);
-
   useEffect(() => {
     if (!open) return;
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") {
         e.preventDefault();
-        if (searchOpen) {
+        if (showSearch) {
           setSearchOpen(false);
           onSearchChange("");
           return;
@@ -101,16 +90,16 @@ export function HistorySidebar({
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open, searchOpen, onToggle, onSearchChange]);
+  }, [open, showSearch, onToggle, onSearchChange]);
 
   useEffect(() => {
-    if (open && searchOpen) {
+    if (open && showSearch) {
       searchInputRef.current?.focus();
     }
-  }, [open, searchOpen]);
+  }, [open, showSearch]);
 
   function toggleSearch() {
-    if (searchOpen) {
+    if (showSearch) {
       setSearchOpen(false);
       onSearchChange("");
       return;
@@ -125,10 +114,7 @@ export function HistorySidebar({
   }
 
   const panel = (
-    <div
-      ref={panelRef}
-      className="app-shell-sidebar flex h-full w-[min(100vw,280px)] flex-col lg:w-[260px]"
-    >
+    <div className="app-shell-sidebar flex h-full w-[min(100vw,280px)] flex-col lg:w-[260px]">
       <div className="flex h-12 shrink-0 items-center gap-2 border-b border-border px-3">
         <BrandLogo className="h-5 w-5 shrink-0 text-accent" />
         <span className="truncate text-[14px] font-semibold tracking-[-0.02em] text-white">
@@ -136,11 +122,11 @@ export function HistorySidebar({
         </span>
         <div className="ml-auto flex items-center gap-0.5">
           <IconButton
-            label={searchOpen ? "Close search" : "Search chats"}
+            label={showSearch ? "Close search" : "Search chats"}
             tooltip="Search"
             size="icon-sm"
             onClick={toggleSearch}
-            aria-pressed={searchOpen}
+            aria-pressed={showSearch}
           >
             <Search />
           </IconButton>
@@ -155,7 +141,7 @@ export function HistorySidebar({
         </div>
       </div>
 
-      {searchOpen && (
+      {showSearch && (
         <div className="border-b border-border px-3 py-2">
           <label className="flex items-center gap-2 rounded-[var(--radius-control)] bg-bg-muted px-2.5 py-1.5 ring-1 ring-border">
             <Search className="size-4 shrink-0 text-white" strokeWidth={1.85} />
@@ -298,8 +284,7 @@ export function HistorySidebar({
     </div>
   );
 
-  const desktopVisible = !desktopReady || open;
-  const mobileVisible = desktopReady && !isLg && open;
+  const mobileVisible = hasMounted && !isDesktop && open;
 
   return (
     <>
@@ -336,13 +321,12 @@ export function HistorySidebar({
       <aside
         className={cn(
           "hidden h-full shrink-0 overflow-hidden border-r border-border lg:block",
-          // Stay open until client is ready so refresh/navigation never animates 0→260.
-          desktopVisible ? "w-[260px]" : "w-0 border-r-0",
+          open ? "w-[260px]" : "w-0 border-r-0",
         )}
-        aria-hidden={!desktopVisible}
+        aria-hidden={!open}
         aria-label="Chat history"
       >
-        {!mobileVisible && desktopVisible ? panel : null}
+        {!mobileVisible && open ? panel : null}
       </aside>
     </>
   );
