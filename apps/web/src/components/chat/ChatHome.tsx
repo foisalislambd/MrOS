@@ -22,7 +22,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useIsDesktop } from "@/hooks/use-is-desktop";
 import { INITIAL_THREADS, setPendingAgent } from "@/lib/chat";
-import { cn } from "@/lib/utils";
 
 const IMPORT_OPTIONS = [
   { id: "figma", label: "Import Figma", icon: LayoutTemplate },
@@ -102,24 +101,27 @@ export function ChatHome() {
 
         <div className="flex min-w-0 flex-1 flex-col">
           <header className="flex h-12 shrink-0 items-center gap-1.5 border-b border-border bg-bg-elevated px-2 sm:gap-2 sm:px-3">
-            <IconButton
-              label={sidebarOpen ? "Close sidebar" : "Open sidebar"}
-              tooltip={sidebarOpen ? "Close sidebar" : "Open sidebar"}
-              onClick={() => setSidebarOpen((v) => !v)}
-            >
-              <PanelLeft />
-            </IconButton>
-            <IconButton
-              label="New chat"
-              tooltip="New chat"
-              onClick={() => {
-                setDraft("");
-                inputRef.current?.focus();
-              }}
-              className={cn(!sidebarOpen ? "inline-flex" : "lg:hidden")}
-            >
-              <SquarePen />
-            </IconButton>
+            {!sidebarOpen && (
+              <>
+                <IconButton
+                  label="Open sidebar"
+                  tooltip="Open sidebar"
+                  onClick={() => setSidebarOpen(true)}
+                >
+                  <PanelLeft />
+                </IconButton>
+                <IconButton
+                  label="New chat"
+                  tooltip="New chat"
+                  onClick={() => {
+                    setDraft("");
+                    inputRef.current?.focus();
+                  }}
+                >
+                  <SquarePen />
+                </IconButton>
+              </>
+            )}
             <div className="min-w-0 flex-1" />
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent text-[11px] font-semibold text-white">
               FI

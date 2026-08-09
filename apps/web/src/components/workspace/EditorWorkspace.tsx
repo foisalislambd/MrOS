@@ -259,34 +259,25 @@ export function EditorWorkspace({ agentId }: { agentId: string }) {
 
         <div className="flex min-w-0 flex-1 flex-col">
           <header className="flex h-12 shrink-0 items-center gap-1.5 border-b border-border bg-bg-elevated px-2 sm:gap-2 sm:px-3">
-            <IconButton
-              label={sidebarOpen ? "Close sidebar" : "Open sidebar"}
-              tooltip={sidebarOpen ? "Close sidebar" : "Open sidebar"}
-              onClick={() => setSidebarOpen((v) => !v)}
-            >
-              <PanelLeft />
-            </IconButton>
-            <IconButton
-              label="New chat"
-              tooltip="New chat"
-              onClick={() => router.push("/")}
-              className="lg:hidden"
-            >
-              <SquarePen />
-            </IconButton>
-
             {!sidebarOpen && (
-              <IconButton
-                label="New chat"
-                tooltip="New chat"
-                onClick={() => router.push("/")}
-                className="hidden lg:inline-flex"
-              >
-                <SquarePen />
-              </IconButton>
+              <>
+                <IconButton
+                  label="Open sidebar"
+                  tooltip="Open sidebar"
+                  onClick={() => setSidebarOpen(true)}
+                >
+                  <PanelLeft />
+                </IconButton>
+                <IconButton
+                  label="New chat"
+                  tooltip="New chat"
+                  onClick={() => router.push("/")}
+                >
+                  <SquarePen />
+                </IconButton>
+                <Separator orientation="vertical" className="mx-0.5 hidden sm:block lg:mx-1" />
+              </>
             )}
-
-            <Separator orientation="vertical" className="mx-0.5 hidden sm:block lg:mx-1" />
 
             <div className="flex min-w-0 flex-1 items-center gap-2">
               <BrandLogo className="hidden h-6 w-6 shrink-0 text-accent sm:block" />
