@@ -1,0 +1,7 @@
+* text=auto eol=lf
+
+*.{cmd,bat,ps1} text eol=crlf
+
+*.{png,jpg,jpeg,gif,webp,ico,woff,woff2} binary
+
+bun.lock linguist-generated=true

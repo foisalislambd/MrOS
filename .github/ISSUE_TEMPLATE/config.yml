@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/foisalislambd/MrOS/security/policy
+    about: Please report security issues privately via SECURITY.md
+  - name: Questions & discussion
+    url: https://github.com/foisalislambd/MrOS/discussions
+    about: Ask questions or share ideas (if Discussions are enabled)

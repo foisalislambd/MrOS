@@ -1,0 +1,23 @@
+{
+  "name": "@mros/telegram-bot",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun --hot src/index.ts",
+    "build": "bun build ./src/index.ts --outdir ./dist --target=bun",
+    "start": "bun dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "lint": "echo \"lint:telegram-bot skipped\"",
+    "clean": "bun -e \"import { rmSync } from 'fs'; for (const p of ['dist','.turbo']) rmSync(p,{recursive:true,force:true})\""
+  },
+  "dependencies": {
+    "@mros/shared": "workspace:*",
+    "grammy": "^1.36.1"
+  },
+  "devDependencies": {
+    "@mros/typescript-config": "workspace:*",
+    "@types/bun": "latest",
+    "typescript": "^5.8.3"
+  }
+}

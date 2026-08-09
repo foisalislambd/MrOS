@@ -1,14 +1,17 @@
 {
-  "name": "web",
+  "name": "@mros/web",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --port 3000",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "clean": "bun -e \"import { rmSync } from 'fs'; for (const p of ['.next','.turbo']) rmSync(p,{recursive:true,force:true})\""
   },
   "dependencies": {
+    "@mros/shared": "workspace:*",
     "@radix-ui/react-scroll-area": "^1.2.18",
     "@radix-ui/react-separator": "^1.1.15",
     "@radix-ui/react-slot": "^1.3.3",
@@ -25,6 +28,7 @@
     "tailwind-merge": "^3.6.0"
   },
   "devDependencies": {
+    "@mros/typescript-config": "workspace:*",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -34,8 +38,5 @@
     "tailwindcss": "^4",
     "tw-animate-css": "^1.4.0",
     "typescript": "^5"
-  },
-  "allowScripts": {
-    "unrs-resolver@1.12.2": true
   }
 }

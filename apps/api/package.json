@@ -1,0 +1,24 @@
+{
+  "name": "@mros/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun --hot src/index.ts",
+    "build": "bun build ./src/index.ts --outdir ./dist --target=bun",
+    "start": "bun dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "lint": "echo \"lint:api skipped\"",
+    "clean": "bun -e \"import { rmSync } from 'fs'; for (const p of ['dist','.turbo']) rmSync(p,{recursive:true,force:true})\""
+  },
+  "dependencies": {
+    "@mros/db": "workspace:*",
+    "@mros/shared": "workspace:*",
+    "hono": "^4.7.11"
+  },
+  "devDependencies": {
+    "@mros/typescript-config": "workspace:*",
+    "@types/bun": "latest",
+    "typescript": "^5.8.3"
+  }
+}
