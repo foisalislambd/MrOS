@@ -14,7 +14,6 @@ import {
 } from "lucide-react";
 
 import { HistorySidebar } from "@/components/layout/HistorySidebar";
-import { BrandLogo } from "@/components/shared/BrandLogo";
 import { IconButton } from "@/components/shared/IconButton";
 import { toast } from "@/components/shared/Toast";
 import { Button } from "@/components/ui/button";
@@ -141,17 +140,9 @@ export function ChatHome() {
 
             <div className="relative w-full max-w-[640px]">
               <div className="mb-8 flex flex-col items-center text-center">
-                <BrandLogo className="mb-4 h-10 w-10 text-accent" />
-                <p className="text-[14px] font-semibold tracking-[-0.02em] text-white">
-                  MrOS
-                </p>
-                <h1 className="mt-3 text-[1.9rem] font-semibold tracking-[-0.03em] text-white sm:text-[2.15rem]">
+                <h1 className="text-[1.9rem] font-semibold tracking-[-0.03em] text-white sm:text-[2.15rem]">
                   What can I help with?
                 </h1>
-                <p className="mt-2 max-w-md text-[15px] leading-[1.55] text-white/75">
-                  Ask a question or describe a product to build. Preview appears only when there’s a
-                  UI to show.
-                </p>
               </div>
 
               <div className="composer rounded-[var(--radius-panel)] border border-border bg-bg-elevated p-2.5 shadow-[var(--shadow-soft)]">
@@ -211,9 +202,6 @@ export function ChatHome() {
                 ))}
               </div>
 
-              <p className="mt-6 text-center text-[13px] text-white/60">
-                Enter to send · Shift+Enter for new line
-              </p>
             </div>
           </main>
         </div>
